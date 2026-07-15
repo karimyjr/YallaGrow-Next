@@ -7,7 +7,7 @@ export default function CTABlock() {
         <h2 className="section-title" style={{marginBottom:'16px'}}>Ready to Build Something<br/>People Remember?</h2>
         <p className="section-sub" style={{margin:'0 auto 32px'}}>Let&apos;s build a marketing system that actually moves your business forward.</p>
         <div style={{display:'flex',justifyContent:'center',gap:'12px',flexWrap:'wrap'}}>
-          <a href={process.env.NEXT_PUBLIC_BOOKING_URL} target="_blank" rel="noopener" className="btn-primary">Book a Free Call</a>
+          <a href="#" className="btn-primary">Book a Free Call</a>
           <a href="https://wa.me/447376441603" target="_blank" rel="noopener" className="btn-secondary">WhatsApp Us</a>
         </div>
       </div>

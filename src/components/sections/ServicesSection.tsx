@@ -2,12 +2,12 @@
 import Link from 'next/link'
 
 const SERVICES=[
-  {icon:'🎯',title:'Marketing Strategy',desc:'Deep-dive analysis of your market, competitors, and customers.',href:'/services/strategy'},
-  {icon:'📱',title:'Social Media',desc:'Consistent, strategic content that builds your brand.',href:'/services/social'},
-  {icon:'💰',title:'Paid Advertising',desc:'Meta and Google campaigns that turn budget into results.',href:'/services/ads'},
-  {icon:'🎨',title:'Branding & Identity',desc:'A brand system that makes you instantly recognizable.',href:'/services/branding'},
-  {icon:'🎬',title:'Content Creation',desc:'Reels, posts, and carousels that stop the scroll.',href:'/services/content'},
-  {icon:'🌐',title:'Website Development',desc:'Fast, mobile-first websites designed to convert.',href:'/services/web'},
+  {icon:'🎯',title:'Marketing Strategy',desc:'Deep-dive analysis of your market, competitors, and customers.',href:'/services'},
+  {icon:'📱',title:'Social Media',desc:'Consistent, strategic content that builds your brand.',href:'/services'},
+  {icon:'💰',title:'Paid Advertising',desc:'Meta and Google campaigns that turn budget into results.',href:'/services'},
+  {icon:'🎨',title:'Branding & Identity',desc:'A brand system that makes you instantly recognizable.',href:'/services'},
+  {icon:'🎬',title:'Content Creation',desc:'Reels, posts, and carousels that stop the scroll.',href:'/services'},
+  {icon:'🌐',title:'Website Development',desc:'Fast, mobile-first websites designed to convert.',href:'/services'},
 ]
 
 export default function ServicesSection() {

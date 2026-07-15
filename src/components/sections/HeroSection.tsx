@@ -17,7 +17,7 @@ export default function HeroSection() {
           Strategy, social media, paid ads, and content — built for startups and small businesses ready to grow.
         </p>
         <div style={{display:'flex',gap:'12px',flexWrap:'wrap'}}>
-          <a href={process.env.NEXT_PUBLIC_BOOKING_URL} target="_blank" rel="noopener" className="btn-primary" style={{fontSize:'0.95rem',padding:'14px 32px'}}>Book a Free Strategy Call</a>
+          <a href="#" className="btn-primary" style={{fontSize:'0.95rem',padding:'14px 32px'}}>Book a Free Strategy Call</a>
           <Link href="/packages" className="btn-secondary" style={{fontSize:'0.95rem',padding:'14px 32px'}}>See Packages</Link>
         </div>
         <div style={{display:'flex',gap:'40px',marginTop:'48px',flexWrap:'wrap'}}>

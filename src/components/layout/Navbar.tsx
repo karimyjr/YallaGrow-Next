@@ -15,16 +15,18 @@ const NAV_LINKS = [
 ]
 
 const SERVICES = [
-  { href: '/services/strategy', label: 'Marketing Strategy', desc: 'Research, positioning & roadmap', icon: '🎯' },
-  { href: '/services/social', label: 'Social Media', desc: 'Full account management', icon: '📱' },
-  { href: '/services/ads', label: 'Paid Advertising', desc: 'Meta & Google campaigns', icon: '💰' },
-  { href: '/services/branding', label: 'Branding', desc: 'Identity & visual design', icon: '🎨' },
-  { href: '/services/content', label: 'Content Creation', desc: 'Reels, posts & carousels', icon: '🎬' },
-  { href: '/services/copy', label: 'Copywriting', desc: 'Captions, ads & landing pages', icon: '✍️' },
-  { href: '/services/web', label: 'Website Development', desc: 'Fast, conversion-focused sites', icon: '🌐' },
-  { href: '/services/analytics', label: 'Analytics & Reporting', desc: 'Performance & insights', icon: '📊' },
-  { href: '/services/consulting', label: 'Consulting', desc: '1-on-1 strategy sessions', icon: '🧠' },
+  { href: '/services', label: 'Marketing Strategy', desc: 'Research, positioning & roadmap', icon: '🎯' },
+  { href: '/services', label: 'Social Media', desc: 'Full account management', icon: '📱' },
+  { href: '/services', label: 'Paid Advertising', desc: 'Meta & Google campaigns', icon: '💰' },
+  { href: '/services', label: 'Branding', desc: 'Identity & visual design', icon: '🎨' },
+  { href: '/services', label: 'Content Creation', desc: 'Reels, posts & carousels', icon: '🎬' },
+  { href: '/services', label: 'Copywriting', desc: 'Captions, ads & landing pages', icon: '✍️' },
+  { href: '/services', label: 'Website Development', desc: 'Fast, conversion-focused sites', icon: '🌐' },
+  { href: '/services', label: 'Analytics & Reporting', desc: 'Performance & insights', icon: '📊' },
+  { href: '/services', label: 'Consulting', desc: '1-on-1 strategy sessions', icon: '🧠' },
 ]
+
+const SERVICES_WITH_KEYS = SERVICES.map((s, i) => ({ ...s, key: `service-${i}` }))
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
@@ -82,8 +84,8 @@ export default function Navbar() {
                   display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '4px',
                   width: '560px', backdropFilter: 'blur(24px)', zIndex: 600,
                 }}>
-                  {SERVICES.map(s => (
-                    <Link key={s.href} href={s.href} style={{
+                  {SERVICES_WITH_KEYS.map(s => (
+                    <Link key={s.key} href={s.href} style={{
                       display: 'flex', alignItems: 'center', gap: '10px',
                       padding: '10px 12px', borderRadius: '10px', textDecoration: 'none',
                       transition: 'background 0.2s',
