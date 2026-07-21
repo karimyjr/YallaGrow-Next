@@ -439,7 +439,7 @@ export default function AffiliateDashboard() {
                 <p style={{ marginBottom: '10px' }}>Minimum payout threshold is <strong style={{ color: 'var(--white)' }}>$50</strong>. Below that, balances roll over to the following month.</p>
                 <p>Payouts are sent via WhatsApp coordination — get in touch when you&apos;re ready to withdraw.</p>
               </div>
-              <a href="https://wa.me/447376441603" target="_blank" rel="noopener" className="btn-primary" style={{ marginTop: '20px' }}>💬 Request Payout</a>
+              <a href="https://api.whatsapp.com/send/?phone=447376441603&text=%E2%80%8E+Request+Payout&type=phone_number&app_absent=0" target="_blank" rel="noopener" className="btn-primary" style={{ marginTop: '20px' }}>💬 Request Payout</a>
             </div>
           </>
         )}
@@ -474,7 +474,7 @@ export default function AffiliateDashboard() {
             <div style={{ marginTop: '20px', background: 'linear-gradient(135deg,rgba(1,32,76,0.4),rgba(106,70,217,0.08))', border: '1px solid rgba(16,161,219,0.2)', borderRadius: '14px', padding: '24px' }}>
               <div style={{ fontFamily: 'Syne,sans-serif', fontWeight: 700, fontSize: '0.95rem', color: 'var(--white)', marginBottom: '8px' }}>Need something specific?</div>
               <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '16px', lineHeight: 1.6 }}>Ask us for custom promotional content — we can create tailored graphics or copy for your audience.</div>
-              <a href="https://wa.me/447376441603" target="_blank" rel="noopener" className="btn-secondary">💬 Request Custom Assets</a>
+              <a href="https://wa.me/447376441603?text=%20Request%20Custom%20Assets" target="_blank" rel="noopener" className="btn-secondary">💬 Request Custom Assets</a>
             </div>
           </>
         )}
@@ -516,7 +516,7 @@ export default function AffiliateDashboard() {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }} className="aff-support-grid">
               {[
                 { icon: '💬', title: 'WhatsApp', desc: 'Fastest response — typically within an hour.', href: 'https://wa.me/447376441603', cta: 'Open WhatsApp →' },
-                { icon: '📧', title: 'Email', desc: 'Send us a detailed inquiry, we\'ll respond within 24h.', href: 'mailto:hello@yallagrow.net', cta: 'Send Email →' },
+                { icon: '📧', title: 'Email', desc: 'Send us a detailed inquiry, we\'ll respond within 24h.', href: 'mailto:info@yallagrow.net', cta: 'Send Email →' },
               ].map(s => (
                 <a key={s.title} href={s.href} target="_blank" rel="noopener" style={{ background: 'rgba(249,253,254,0.02)', border: '1px solid var(--glass-border)', borderRadius: '14px', padding: '24px', textDecoration: 'none', transition: 'all 0.2s', display: 'block' }}
                   onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(16,161,219,0.25)'; e.currentTarget.style.transform = 'translateY(-2px)' }}
