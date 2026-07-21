@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
+import PackageBuilder from './PackageBuilder'
 
 interface Pkg {
   tier: string
@@ -14,52 +15,16 @@ interface Pkg {
 
 const DEFAULT_PKGS: Pkg[] = [
   {
-    tier: 'Launch',
-    subtitle: 'Build your foundation.',
-    for: 'For businesses that need a professional online presence.',
-    price: 149,
-    feats: [
-      'Marketing strategy & brand direction',
-      '8 static posts/month',
-      '2 short-form videos (Reels/TikToks)',
-      'Caption writing & hashtag research',
-      'Content scheduling',
-      'Monthly performance report',
-      '1 revision per design',
-    ],
+    tier: 'Launch', subtitle: 'Build your foundation.', for: 'For businesses that need a professional online presence.', price: 149,
+    feats: ['Marketing strategy & brand direction','8 static posts/month','2 short-form videos (Reels/TikToks)','Caption writing & hashtag research','Content scheduling','Monthly performance report','1 revision per design'],
   },
   {
-    tier: 'Grow',
-    subtitle: 'Build momentum.',
-    for: 'For businesses ready for real engagement and growth.',
-    price: 299,
-    featured: true,
-    feats: [
-      'Everything in Launch, plus:',
-      '12 static posts/month',
-      '4 short-form videos',
-      'Story content',
-      'Basic community management',
-      'Competitor analysis',
-      'Monthly strategy call',
-      'Meta Ads management (ad spend excluded)',
-    ],
+    tier: 'Grow', subtitle: 'Build momentum.', for: 'For businesses ready for real engagement and growth.', price: 299, featured: true,
+    feats: ['Everything in Launch, plus:','12 static posts/month','4 short-form videos','Story content','Basic community management','Competitor analysis','Monthly strategy call','Meta Ads management (ad spend excluded)'],
   },
   {
-    tier: 'Dominate',
-    subtitle: 'Accelerate your growth.',
-    for: 'For serious brands ready to scale.',
-    price: 499,
-    feats: [
-      'Everything in Grow, plus:',
-      '16 static posts/month',
-      '8 short-form videos',
-      'Advanced growth strategy',
-      'Complete Meta Ads management',
-      'Conversion optimization',
-      'Performance dashboard',
-      'Priority support',
-    ],
+    tier: 'Dominate', subtitle: 'Accelerate your growth.', for: 'For serious brands ready to scale.', price: 499,
+    feats: ['Everything in Grow, plus:','16 static posts/month','8 short-form videos','Advanced growth strategy','Complete Meta Ads management','Conversion optimization','Performance dashboard','Priority support'],
   },
 ]
 
@@ -103,24 +68,19 @@ export default function PackagesPage() {
   const [pkgs, setPkgs] = useState<Pkg[]>(DEFAULT_PKGS)
 
   useEffect(() => {
-    supabase
-      .from('site_config')
-      .select('value')
-      .eq('key', 'packages')
-      .single()
-      .then(({ data }) => {
-        if (data?.value) {
-          try {
-            const parsed = JSON.parse(data.value)
-            if (Array.isArray(parsed) && parsed.length > 0) {
-              setPkgs(parsed)
-            }
-          } catch {}
-        }
-      })
+    supabase.from('site_config').select('value').eq('key', 'packages').single().then(({ data }) => {
+      if (data?.value) {
+        try {
+          const parsed = JSON.parse(data.value)
+          if (Array.isArray(parsed) && parsed.length > 0) setPkgs(parsed)
+        } catch {}
+      }
+    })
   }, [])
 
   const cellStyle = { padding: '14px 16px', borderBottom: '1px solid var(--glass-border)', textAlign: 'center' as const, color: 'rgba(249,253,254,0.7)', fontSize: '0.82rem' }
+
+  const scrollToBuilder = () => document.getElementById('builderSection')?.scrollIntoView({ behavior: 'smooth' })
 
   return (
     <div style={{ paddingTop: '80px' }}>
@@ -145,16 +105,13 @@ export default function PackagesPage() {
       <section style={{ padding: '0 6% 100px' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', alignItems: 'stretch', maxWidth: '1200px', margin: '0 auto' }} className="pkg-grid">
           {pkgs.map((p, i) => (
-            <div
-              key={i}
-              style={{
-                background: p.featured ? 'linear-gradient(135deg, rgba(1,32,76,0.6), rgba(16,161,219,0.08))' : 'rgba(249,253,254,0.02)',
-                border: p.featured ? '1px solid rgba(16,161,219,0.35)' : '1px solid var(--glass-border)',
-                borderRadius: '20px', padding: '36px 28px', display: 'flex', flexDirection: 'column', transition: 'all 0.3s',
-              }}
+            <div key={i} style={{
+              background: p.featured ? 'linear-gradient(135deg, rgba(1,32,76,0.6), rgba(16,161,219,0.08))' : 'rgba(249,253,254,0.02)',
+              border: p.featured ? '1px solid rgba(16,161,219,0.35)' : '1px solid var(--glass-border)',
+              borderRadius: '20px', padding: '36px 28px', display: 'flex', flexDirection: 'column', transition: 'all 0.3s',
+            }}
               onMouseEnter={e => { if (!p.featured) e.currentTarget.style.borderColor = 'rgba(16,161,219,0.2)'; e.currentTarget.style.transform = 'translateY(-4px)' }}
-              onMouseLeave={e => { if (!p.featured) e.currentTarget.style.borderColor = 'var(--glass-border)'; e.currentTarget.style.transform = 'none' }}
-            >
+              onMouseLeave={e => { if (!p.featured) e.currentTarget.style.borderColor = 'var(--glass-border)'; e.currentTarget.style.transform = 'none' }}>
               {p.featured && (
                 <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: 'linear-gradient(135deg, var(--sky), var(--purple))', color: '#fff', fontSize: '0.62rem', fontWeight: 800, letterSpacing: '1px', textTransform: 'uppercase', padding: '4px 12px', borderRadius: '100px', marginBottom: '16px', width: 'fit-content' }}>⭐ Most Popular</div>
               )}
@@ -212,20 +169,14 @@ export default function PackagesPage() {
             <thead>
               <tr style={{ background: 'rgba(16,161,219,0.04)' }}>
                 <th style={{ padding: '18px 16px', textAlign: 'left', fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '1px', textTransform: 'uppercase' }}>Feature</th>
-                <th style={{ padding: '18px 16px', textAlign: 'center', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'var(--white)' }}>
-                  Launch<br /><span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--sky)' }}>$149/mo</span>
-                </th>
-                <th style={{ padding: '18px 16px', textAlign: 'center', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'var(--white)', background: 'rgba(16,161,219,0.08)', position: 'relative' }}>
-                  Grow<br /><span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--sky)' }}>$299/mo</span>
-                </th>
-                <th style={{ padding: '18px 16px', textAlign: 'center', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'var(--white)' }}>
-                  Dominate<br /><span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--sky)' }}>$499/mo</span>
-                </th>
+                <th style={{ padding: '18px 16px', textAlign: 'center', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'var(--white)' }}>Launch<br /><span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--sky)' }}>$149/mo</span></th>
+                <th style={{ padding: '18px 16px', textAlign: 'center', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'var(--white)', background: 'rgba(16,161,219,0.08)' }}>Grow<br /><span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--sky)' }}>$299/mo</span></th>
+                <th style={{ padding: '18px 16px', textAlign: 'center', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'var(--white)' }}>Dominate<br /><span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--sky)' }}>$499/mo</span></th>
               </tr>
             </thead>
             <tbody>
               {COMPARISON_ROWS.map((row, i) => (
-                <tr key={i} style={{ transition: 'background 0.2s' }}>
+                <tr key={i}>
                   <td style={{ padding: '14px 16px', borderBottom: '1px solid var(--glass-border)', color: 'rgba(249,253,254,0.8)', fontSize: '0.82rem', fontWeight: 500 }}>{row[0]}</td>
                   <td style={cellStyle}>{row[1]}</td>
                   <td style={{ ...cellStyle, background: 'rgba(16,161,219,0.04)' }}>{row[2]}</td>
@@ -257,17 +208,11 @@ export default function PackagesPage() {
           <p className="section-sub" style={{ margin: '12px auto 40px', maxWidth: '500px' }}>Every business is unique. Build a custom package by selecting only the services you actually need.</p>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: 'center', marginBottom: '36px' }}>
             {ADD_ON_CHIPS.map(chip => (
-              <div key={chip} style={{ background: 'var(--glass)', border: '1px solid var(--glass-border)', borderRadius: '100px', padding: '10px 18px', fontSize: '0.82rem', color: 'rgba(249,253,254,0.75)', transition: 'all 0.2s', cursor: 'default' }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(16,161,219,0.3)'; e.currentTarget.style.color = 'var(--white)' }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--glass-border)'; e.currentTarget.style.color = 'rgba(249,253,254,0.75)' }}>
-                {chip}
-              </div>
+              <div key={chip} style={{ background: 'var(--glass)', border: '1px solid var(--glass-border)', borderRadius: '100px', padding: '10px 18px', fontSize: '0.82rem', color: 'rgba(249,253,254,0.75)' }}>{chip}</div>
             ))}
           </div>
-          <a href={process.env.NEXT_PUBLIC_BOOKING_URL} target="_blank" rel="noopener" className="btn-primary" style={{ fontSize: '1rem', padding: '16px 40px' }}>
-            Build My Package →
-          </a>
-          <p style={{ fontSize: '0.72rem', color: 'var(--text-dim)', marginTop: '10px' }}>Book a call and we&apos;ll build a custom estimate together.</p>
+          <button onClick={scrollToBuilder} className="btn-primary" style={{ fontSize: '1rem', padding: '16px 40px' }}>Build My Package →</button>
+          <p style={{ fontSize: '0.72rem', color: 'var(--text-dim)', marginTop: '10px' }}>You&apos;ll get a live price estimate instantly. No commitment required.</p>
         </div>
       </section>
 
@@ -288,11 +233,12 @@ export default function PackagesPage() {
               </div>
             ))}
           </div>
-          <a href={process.env.NEXT_PUBLIC_BOOKING_URL} target="_blank" rel="noopener" className="btn-primary" style={{ marginTop: '32px' }}>
-            Book a Free Strategy Call →
-          </a>
+          <a href={process.env.NEXT_PUBLIC_BOOKING_URL} target="_blank" rel="noopener" className="btn-primary" style={{ marginTop: '32px' }}>Book a Free Strategy Call →</a>
         </div>
       </section>
+
+      {/* PACKAGE BUILDER */}
+      <PackageBuilder />
 
       <style>{`
         @media(max-width:900px){
