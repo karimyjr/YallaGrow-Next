@@ -33,6 +33,8 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [servicesOpen, setServicesOpen] = useState(false)
   const pathname = usePathname()
+  const hideNavbar = pathname.startsWith('/admin') || pathname.startsWith('/affiliate/dashboard')
+if (hideNavbar) return null
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20)
