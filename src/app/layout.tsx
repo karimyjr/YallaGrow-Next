@@ -8,9 +8,14 @@ export const metadata: Metadata = {
   title: 'YallaGrow — We Build Growth',
   description: "Lebanon's premium growth marketing agency. Strategy, social media, paid ads, branding, content creation, and website development tailored for your business.",
   icons: {
-    icon: '/favicon.png',
+    icon: [
+      { url: '/favicon.ico' },
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/favicon-96x96.png', sizes: '96x96', type: 'image/png' },
+    ],
     apple: '/apple-touch-icon.png',
   },
+  manifest: '/site.webmanifest',
   openGraph: {
     title: 'YallaGrow — We Build Growth',
     description: "Lebanon's premium growth marketing agency.",
@@ -24,6 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <head>
         <meta name="google-site-verification" content="VKjEKzcMxf43uDoLCiOJwNVekJzz3vxD7nC0xnyXQLk" />
+        <meta name="apple-mobile-web-app-title" content="YallaGrow" />
       </head>
       <body>
         <MaintenanceGate>
