@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 import PackageBuilder from './PackageBuilder'
+import PerformancePartnership from './PerformancePartnership'
 
 interface Pkg {
   tier: string
@@ -239,6 +240,7 @@ export default function PackagesPage() {
 
       {/* PACKAGE BUILDER */}
       <PackageBuilder />
+      <PerformancePartnership />
 
       <style>{`
         @media(max-width:900px){

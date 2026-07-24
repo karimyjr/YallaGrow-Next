@@ -51,12 +51,6 @@ const PROCESS = [
   { location: 'Analytics Room', num: '04', title: 'Optimize', desc: 'We analyze performance and improve continuously — what gets measured gets better.' },
 ]
 
-const TESTIMONIALS = [
-  { text: "YallaGrow didn't just manage our social media — they completely changed how we think about our marketing. Revenue is up 40% since we started.", av: 'SR', name: 'Sarah R.', role: 'CEO, Retail Brand · Lebanon' },
-  { text: "The strategy they built for us was unlike anything we'd seen. No templates, no generic advice — just a clear, data-backed plan that actually worked.", av: 'MK', name: 'Marc K.', role: 'Founder, Tech Startup · Beirut' },
-  { text: 'From day one, they understood our market better than agencies we\'d worked with for years. Fast, professional, and genuinely invested in our growth.', av: 'LA', name: 'Lina A.', role: 'Marketing Director · Insurance Firm' },
-]
-
 export default function HomePage() {
   return (
     <div>
@@ -171,29 +165,6 @@ export default function HomePage() {
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
           <Link href="/quiz" className="btn-primary" style={{ fontSize: '1rem', padding: '16px 40px' }}>Find My Growth Plan →</Link>
           <Link href="/packages" className="btn-secondary" style={{ fontSize: '0.82rem' }}>Or browse all packages</Link>
-        </div>
-      </section>
-
-      {/* TESTIMONIALS */}
-      <section style={{ padding: '100px 6%', background: 'rgba(0,0,0,0.15)' }}>
-        <div style={{ textAlign: 'center', marginBottom: '60px' }}>
-          <span className="eyebrow" style={{ marginBottom: '12px' }}>What Clients Say</span>
-          <h2 className="section-title" style={{ margin: '12px auto' }}>Results Speak Louder</h2>
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', maxWidth: '1200px', margin: '0 auto' }} className="testi-grid">
-          {TESTIMONIALS.map(t => (
-            <div key={t.name} style={{ background: 'var(--glass)', border: '1px solid var(--glass-border)', borderRadius: '18px', padding: '32px' }}>
-              <div style={{ color: '#ffc107', fontSize: '1rem', marginBottom: '16px' }}>★★★★★</div>
-              <p style={{ fontSize: '0.9rem', color: 'rgba(249,253,254,0.75)', lineHeight: 1.7, fontWeight: 300, marginBottom: '24px', fontStyle: 'italic' }}>&quot;{t.text}&quot;</p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--sky), var(--purple))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: '0.85rem', color: '#fff' }}>{t.av}</div>
-                <div>
-                  <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--white)' }}>{t.name}</div>
-                  <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{t.role}</div>
-                </div>
-              </div>
-            </div>
-          ))}
         </div>
       </section>
 
