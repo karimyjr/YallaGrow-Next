@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
+import { useToast } from '@/components/ui/Toast'
 
 interface Rates {
   staticPost: number
@@ -104,6 +105,7 @@ function getWebTier(budget: number) {
 }
 
 export default function PackageBuilder() {
+  const { showToast } = useToast()
   const [rates, setRates] = useState<Rates>(DEFAULT_RATES)
   const [step, setStep] = useState(1)
   const [s, setS] = useState<BuilderState>(INITIAL_STATE)
@@ -134,7 +136,7 @@ export default function PackageBuilder() {
   const showCustomWebBudget = s.web === 'yes' && s.webBudget > 600
 
   const submit = async () => {
-    if (!form.name || !form.email) { alert('Please enter your name and email.'); return }
+    if (!form.name || !form.email) { showToast('Please enter your name and email.', 'error'); return }
     try {
       await fetch('/', {
         method: 'POST',

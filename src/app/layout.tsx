@@ -3,6 +3,8 @@ import './globals.css'
 import Navbar from '@/components/layout/Navbar'
 import CookieBanner from '@/components/ui/CookieBanner'
 import MaintenanceGate from '@/components/MaintenanceGate'
+import SupportBot from '@/components/ui/SupportBot'
+import { ToastProvider } from '@/components/ui/Toast'
 
 export const metadata: Metadata = {
   title: 'YallaGrow — We Build Growth',
@@ -32,11 +34,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="apple-mobile-web-app-title" content="YallaGrow" />
       </head>
       <body>
-        <MaintenanceGate>
-          <Navbar />
-          <main>{children}</main>
-          <CookieBanner />
-        </MaintenanceGate>
+        <ToastProvider>
+          <MaintenanceGate>
+            <Navbar />
+            <main>{children}</main>
+            <CookieBanner />
+            <SupportBot />
+          </MaintenanceGate>
+        </ToastProvider>
       </body>
     </html>
   )

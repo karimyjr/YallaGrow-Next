@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 import PackageBuilder from './PackageBuilder'
-import PerformancePartnership from './PerformancePartnership'
 
 interface Pkg {
   tier: string
@@ -240,7 +239,26 @@ export default function PackagesPage() {
 
       {/* PACKAGE BUILDER */}
       <PackageBuilder />
-      <PerformancePartnership />
+      {/* Performance Partnership Teaser */}
+      <section style={{ padding: '60px 6% 100px' }}>
+        <div style={{ maxWidth: '900px', margin: '0 auto', background: 'linear-gradient(135deg, rgba(1,32,76,0.5), rgba(106,70,217,0.15))', border: '1px solid rgba(16,161,219,0.25)', borderRadius: '24px', padding: '48px 40px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
+          <div style={{ position: 'absolute', top: '-50%', right: '-10%', width: '400px', height: '400px', background: 'radial-gradient(circle, rgba(16,161,219,0.2), transparent 60%)', pointerEvents: 'none' }} />
+          <div style={{ position: 'relative', zIndex: 1 }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'linear-gradient(135deg, var(--sky), var(--purple))', color: '#fff', fontSize: '0.62rem', fontWeight: 800, letterSpacing: '1.5px', padding: '5px 14px', borderRadius: '100px', textTransform: 'uppercase', marginBottom: '20px' }}>
+              🔒 Invite-Only
+            </span>
+            <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 'clamp(1.6rem, 4vw, 2.4rem)', color: 'var(--white)', letterSpacing: '-1px', marginBottom: '16px', lineHeight: 1.15 }}>
+              Ready for Something Bigger?<br />Meet Our <span className="grad">Performance Partnership</span>
+            </h2>
+            <p style={{ fontSize: '0.95rem', color: 'rgba(249,253,254,0.7)', lineHeight: 1.7, fontWeight: 300, maxWidth: '580px', margin: '0 auto 28px' }}>
+              For select businesses ready to grow with a partner who&apos;s just as invested as they are. Skip the retainer — we win when you win.
+            </p>
+            <Link href="/partnership" className="btn-primary" style={{ fontSize: '0.9rem', padding: '12px 24px' }}>
+              Explore Performance Partnership →
+            </Link>
+          </div>
+        </div>
+      </section>
 
       <style>{`
         @media(max-width:900px){

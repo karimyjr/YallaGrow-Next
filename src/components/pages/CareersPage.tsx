@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
+import { useToast } from '@/components/ui/Toast'
 
 const CULTURE = [
   { icon: '🚀', title: 'Move fast', desc: "No bureaucracy. You'll ship real work for real clients from day one." },
@@ -115,6 +116,7 @@ const JOBS: Job[] = [
 ]
 
 export default function CareersPage() {
+  const { showToast } = useToast()
   const [form, setForm] = useState({ name: '', email: '', phone: '', role: '', portfolio: '', linkedin: '', message: '' })
   const [sent, setSent] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -122,7 +124,7 @@ export default function CareersPage() {
   const scrollToApply = () => document.getElementById('applySection')?.scrollIntoView({ behavior: 'smooth' })
 
   const submit = async () => {
-    if (!form.name || !form.email || !form.role) { alert('Please fill in name, email, and role.'); return }
+    if (!form.name || !form.email || !form.role) { showToast('Please fill in name, email, and role.', 'error'); return }
     setLoading(true)
     try {
       await fetch('/', {

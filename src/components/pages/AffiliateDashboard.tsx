@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import { useToast } from '@/components/ui/Toast'
 
 interface Affiliate {
   id: string
@@ -44,6 +45,7 @@ const NAV_ITEMS = [
 ]
 
 export default function AffiliateDashboard() {
+  const { showToast } = useToast()
   const [session, setSession] = useState<Affiliate | null>(null)
   const [referrals, setReferrals] = useState<Referral[]>([])
   const [resources, setResources] = useState<Resource[]>([])
@@ -103,7 +105,7 @@ export default function AffiliateDashboard() {
   const link = session ? session.ref_code : ''
 
   const copyLink = () => {
-    navigator.clipboard.writeText(link).then(() => alert('Referral code copied to clipboard!'))
+    navigator.clipboard.writeText(link).then(() => showToast('Referral code copied to clipboard!', 'success'))
   }
 
   const statusColor: Record<string, string> = { pending: '#ffc107', approved: '#16db64', paid: '#10a1db', rejected: '#ff4d4d' }
