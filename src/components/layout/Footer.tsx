@@ -111,7 +111,7 @@ export default function Footer() {
             WhatsApp
           </a>
           <a
-            href="mailto:hello@yallagrow.net"
+            href="mailto:info@yallagrow.net"
             style={{
               display: 'block', fontSize: '0.78rem', color: 'var(--text-muted)',
               textDecoration: 'none', marginBottom: '8px', transition: 'color 0.2s',
@@ -119,7 +119,7 @@ export default function Footer() {
             onMouseEnter={e => e.currentTarget.style.color = 'var(--white)'}
             onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}
           >
-            hello@yallagrow.net
+            info@yallagrow.net
           </a>
           <Link
             href="/contact"

@@ -10,7 +10,7 @@ export default function PrivacyPage() {
         {title:'Cookies',body:'We use cookies to enhance your experience on our website, analyze traffic patterns, and personalize content. You can control cookie settings through your browser preferences.'},
         {title:'Data Security',body:'We implement appropriate security measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction.'},
         {title:'Your Rights',body:'You have the right to access, correct, or delete your personal information. You may also opt out of marketing communications at any time by contacting us.'},
-        {title:'Contact Us',body:'If you have questions about this Privacy Policy, please contact us at hello@yallagrow.net'},
+        {title:'Contact Us',body:'If you have questions about this Privacy Policy, please contact us at info@yallagrow.net'},
       ].map(s=>(
         <div key={s.title} style={{marginBottom:'40px'}}>
           <h2 style={{fontFamily:'Syne,sans-serif',fontWeight:700,fontSize:'1.1rem',color:'var(--white)',marginBottom:'12px'}}>{s.title}</h2>
