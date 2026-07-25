@@ -1,10 +1,12 @@
 'use client'
 import Link from 'next/link'
+import NewsletterForm from '@/components/ui/NewsletterForm'
+import NewsletterForm from '@/components/ui/NewsletterForm'
 
 export default function Footer() {
   return (
     <footer style={{ background: 'rgba(0,0,0,0.3)', borderTop: '1px solid var(--glass-border)', padding: '60px 6% 32px' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: '48px', marginBottom: '48px' }} className="footer-grid">
+      <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1fr 1.4fr', gap: '40px', marginBottom: '48px' }} className="footer-grid">
         {/* Brand column */}
         <div>
           <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: '1.3rem', marginBottom: '12px' }}>
@@ -13,7 +15,7 @@ export default function Footer() {
           <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 1.7, maxWidth: '260px' }}>
             We don&apos;t sell marketing. We build growth.
           </p>
-          <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+          <div style={{ display: 'flex', gap: '10px', marginTop: '20px', marginBottom: '24px' }}>
             {[
               { href: 'https://www.linkedin.com/company/yallagroww/', label: 'in' },
               { href: 'https://www.instagram.com/yallagrow_/', label: '◉' },
@@ -37,6 +39,17 @@ export default function Footer() {
                 {s.label}
               </a>
             ))}
+          </div>
+          
+          {/* Newsletter signup */}
+          <div style={{ maxWidth: '320px' }}>
+            <div style={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase', color: 'var(--sky)', marginBottom: '10px' }}>
+              📬 Newsletter
+            </div>
+            <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: 1.5, marginBottom: '12px' }}>
+              Monthly marketing tips + real case studies. No spam.
+            </p>
+            <NewsletterForm source="footer" />
           </div>
         </div>
 
@@ -128,6 +141,15 @@ export default function Footer() {
             Contact Form →
           </Link>
         </div>
+
+        {/* Newsletter column */}
+        <div>
+          <h4 style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase', color: 'var(--sky)', marginBottom: '16px' }}>Newsletter</h4>
+          <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: 1.6, marginBottom: '14px', fontWeight: 300 }}>
+            Monthly growth tips for Lebanese businesses. No fluff, no spam.
+          </p>
+          <NewsletterForm source="footer" />
+        </div>
       </div>
 
       {/* Bottom bar */}
@@ -145,10 +167,13 @@ export default function Footer() {
       </div>
 
       <style>{`
-        @media(max-width:900px){
+        @media(max-width:1100px){
+          .footer-grid{grid-template-columns:1fr 1fr 1fr!important;gap:32px!important}
+        }
+        @media(max-width:768px){
           .footer-grid{grid-template-columns:1fr 1fr!important}
         }
-        @media(max-width:600px){
+        @media(max-width:500px){
           .footer-grid{grid-template-columns:1fr!important}
         }
       `}</style>
