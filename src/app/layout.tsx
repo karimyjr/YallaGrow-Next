@@ -4,6 +4,7 @@ import Navbar from '@/components/layout/Navbar'
 import CookieBanner from '@/components/ui/CookieBanner'
 import MaintenanceGate from '@/components/MaintenanceGate'
 import SupportBot from '@/components/ui/SupportBot'
+import ScrollAnimator from '@/components/ui/ScrollAnimator'
 import { ToastProvider } from '@/components/ui/Toast'
 
 export const metadata: Metadata = {
@@ -40,6 +41,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <main>{children}</main>
             <CookieBanner />
             <SupportBot />
+            <ScrollAnimator />
           </MaintenanceGate>
         </ToastProvider>
       </body>

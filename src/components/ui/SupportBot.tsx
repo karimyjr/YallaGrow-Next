@@ -1,117 +1,108 @@
 'use client'
 import { useState, useRef, useEffect } from 'react'
 
-// Knowledge base - the bot uses pattern matching against this
-const KNOWLEDGE = [
-  // Services
-  {
-    keywords: ['service', 'offer', 'do you do', 'what do you', 'help with', 'provide'],
-    response: "We offer 9 core services:\n\n🎯 Marketing Strategy\n📱 Social Media Management\n💰 Paid Advertising (Meta & Google)\n🎨 Branding & Identity\n🎬 Content Creation (Reels, Posts)\n✍️ Copywriting\n🌐 Website Development\n📊 Analytics & Reporting\n🧠 Consulting\n\nWhich service interests you most?",
+interface Option {
+  label: string
+  emoji?: string
+  action: 'response' | 'menu' | 'external' | 'input'
+  response?: string
+  submenu?: string
+  url?: string
+}
+
+interface Menu {
+  title?: string
+  message: string
+  options: Option[]
+}
+
+// ============================================
+// KNOWLEDGE BASE — organized as guided menus
+// ============================================
+const MENUS: Record<string, Menu> = {
+  root: {
+    message: "Hey there! 👋 I'm YallaBot — YallaGrow's assistant.\n\nWhat can I help you with today?",
+    options: [
+      { label: 'View pricing', emoji: '💰', action: 'menu', submenu: 'pricing' },
+      { label: 'Explore services', emoji: '🎯', action: 'menu', submenu: 'services' },
+      { label: 'Book a strategy call', emoji: '📅', action: 'response', response: "Great! Book your free 30-minute strategy call here:\n\n👉 https://calendar.app.google/3WibM5kWvizhnHJt8\n\nNo commitment, no credit card — just a real conversation about your business." },
+      { label: 'Affiliate program', emoji: '🤝', action: 'menu', submenu: 'affiliate' },
+      { label: 'About YallaGrow', emoji: 'ℹ️', action: 'menu', submenu: 'about' },
+      { label: 'Talk to a human', emoji: '💬', action: 'external', url: 'https://api.whatsapp.com/send/?phone=447376441603&text=Hi%20YallaGrow%2C%20I%20need%20some%20help&type=phone_number&app_absent=0' },
+    ],
   },
-  // Pricing
-  {
-    keywords: ['price', 'cost', 'how much', 'pricing', 'expensive', 'cheap', 'budget', 'fee', 'rate'],
-    response: "We have 3 monthly packages:\n\n💚 **Launch** — $149/mo (starter package)\n⭐ **Grow** — $299/mo (most popular)\n🔥 **Dominate** — $499/mo (full-service)\n\nWe also have a Build Your Own package option and Performance Partnership for select clients. Want me to walk you through any of these?",
+
+  pricing: {
+    message: "We have 3 monthly packages plus a Build-Your-Own option:\n\n💚 **Launch** — $149/mo\n⭐ **Grow** — $299/mo (most popular)\n🔥 **Dominate** — $499/mo\n\nWhich one would you like to know more about?",
+    options: [
+      { label: 'Launch — $149/mo', emoji: '💚', action: 'response', response: "**Launch — $149/mo** includes:\n\n✓ 8 static posts/month\n✓ 2 short-form videos\n✓ Caption writing & hashtag research\n✓ Monthly performance report\n\nPerfect for businesses starting their marketing journey. Ready to book a call?" },
+      { label: 'Grow — $299/mo', emoji: '⭐', action: 'response', response: "**Grow — $299/mo** (most popular) includes:\n\n✓ 12 static posts/month\n✓ 4 short-form videos\n✓ Meta Ads management\n✓ Monthly strategy call\n\nBalanced content + ads for businesses ready to scale." },
+      { label: 'Dominate — $499/mo', emoji: '🔥', action: 'response', response: "**Dominate — $499/mo** includes:\n\n✓ 16 static posts/month\n✓ 8 short-form videos\n✓ Full Meta Ads management\n✓ Performance dashboard\n✓ Priority support\n\nFor serious brands ready to scale aggressively." },
+      { label: 'Build my own package', emoji: '🛠', action: 'response', response: "You can build your own custom package with our interactive builder:\n\n👉 yallagrow.net/packages\n\nMix and match posts, reels, ads, website, and add-ons to fit your exact needs. You'll see live pricing as you build." },
+      { label: 'Take the plan quiz', emoji: '🎯', action: 'response', response: "Not sure which plan is right? Take our free 2-minute quiz:\n\n👉 yallagrow.net/quiz\n\nWe'll recommend the perfect package based on your business type, goals, and budget." },
+      { label: 'Performance Partnership', emoji: '🚀', action: 'response', response: "Our **Performance Partnership** is invite-only. Instead of a monthly retainer, we combine a strategic upfront deposit with performance-based compensation. We grow together.\n\nWe offer 2 models:\n1️⃣ Net Profit Share\n2️⃣ Per-Sale Commission\n\nLearn more: yallagrow.net/partnership" },
+      { label: '← Back to main menu', action: 'menu', submenu: 'root' },
+    ],
   },
-  // Packages details
-  {
-    keywords: ['launch package', 'launch plan', 'starter'],
-    response: "**Launch — $149/mo** includes:\n\n✓ 8 static posts/month\n✓ 2 short-form videos\n✓ Caption writing & hashtag research\n✓ Monthly performance report\n\nPerfect for businesses starting their marketing journey. Ready to explore it further?",
+
+  services: {
+    message: "We offer 9 core services. Which one interests you?",
+    options: [
+      { label: 'Marketing Strategy', emoji: '🎯', action: 'response', response: "**Marketing Strategy**\n\nBefore we create anything, we understand your business, customers, competitors, and goals. Every decision has a purpose.\n\nIncludes:\n✓ Competitor & market analysis\n✓ Customer personas\n✓ Content pillars\n✓ 90-day growth roadmap\n\nLearn more: yallagrow.net/services" },
+      { label: 'Social Media', emoji: '📱', action: 'response', response: "**Social Media Management**\n\nFull account management across Instagram, Facebook, TikTok and more.\n\nIncludes:\n✓ Content calendar planning\n✓ Post scheduling\n✓ Community management\n✓ Weekly performance updates" },
+      { label: 'Paid Ads', emoji: '💰', action: 'response', response: "**Paid Advertising**\n\nMeta and TikTok ads with a $30/month management fee + your ad spend.\n\n✓ Campaign strategy & audience targeting\n✓ Ad creative (visuals + copy)\n✓ A/B testing & optimization\n✓ Weekly reports\n\nMinimum recommended budget: $50-100/month." },
+      { label: 'Branding', emoji: '🎨', action: 'response', response: "**Branding & Identity**\n\nLogo design, visual identity, brand guidelines, typography, and color systems.\n\n✓ Logo (primary + variations)\n✓ Color palette & typography\n✓ Brand guidelines document\n✓ Social media brand kit" },
+      { label: 'Content Creation', emoji: '🎬', action: 'response', response: "**Content Creation**\n\nReels, carousels, stories, and static posts designed to captivate your audience.\n\n✓ Short-form video (Reels, TikToks)\n✓ Carousel posts\n✓ Static posts & graphics\n✓ UGC-style content" },
+      { label: 'Copywriting', emoji: '✍️', action: 'response', response: "**Copywriting**\n\nWords that make people take action.\n\n✓ Social media captions\n✓ Ad copy & hooks\n✓ Landing page copy\n✓ Email sequences" },
+      { label: 'Website Development', emoji: '🌐', action: 'menu', submenu: 'website' },
+      { label: 'Analytics & Reports', emoji: '📊', action: 'response', response: "**Analytics & Reporting**\n\nMonthly performance reports with clear insights.\n\n✓ Google Analytics setup\n✓ Meta Pixel & conversion tracking\n✓ Custom dashboards\n✓ Actionable recommendations" },
+      { label: 'Consulting', emoji: '🧠', action: 'response', response: "**Consulting**\n\nOne-on-one sessions to audit your marketing and build a growth roadmap.\n\n✓ Full marketing audit\n✓ 60-min strategy session\n✓ Written report with findings\n✓ Follow-up email support (2 weeks)" },
+      { label: '← Back to main menu', action: 'menu', submenu: 'root' },
+    ],
   },
-  {
-    keywords: ['grow package', 'grow plan'],
-    response: "**Grow — $299/mo** (our most popular) includes:\n\n✓ 12 static posts/month\n✓ 4 short-form videos\n✓ Meta Ads management\n✓ Monthly strategy call\n\nBalanced content + ads for businesses ready to scale. Want to book a call to discuss?",
+
+  website: {
+    message: "We build websites in 3 tiers plus offer consultancy. What are you looking for?",
+    options: [
+      { label: 'Starter site ($150)', emoji: '🚀', action: 'response', response: "**Starter Site — $150**\n\n✓ Single-page website\n✓ Fully mobile responsive\n✓ 1-2 sections (hero + contact)\n✓ Basic contact form\n✓ Delivered in 3-5 days\n\nPerfect for freelancers or personal brands." },
+      { label: 'Business site ($151-300)', emoji: '💼', action: 'response', response: "**Business Site — $151-300**\n\n✓ Up to 5 pages\n✓ Mobile responsive\n✓ Contact form + WhatsApp integration\n✓ Basic SEO setup\n✓ Google Analytics\n✓ Delivered in 1-2 weeks\n\nGreat for small businesses and service providers." },
+      { label: 'Advanced site ($301-600)', emoji: '⚡', action: 'response', response: "**Advanced Site — $301-600**\n\n✓ Up to 10 pages\n✓ Custom animations\n✓ Blog / CMS integration\n✓ Advanced SEO\n✓ Newsletter signup\n✓ Multi-language support\n✓ Delivered in 2-3 weeks\n\nIdeal for growing brands and e-commerce." },
+      { label: 'Custom site ($600+)', emoji: '💎', action: 'response', response: "**Custom Website ($600+)**\n\nFor bigger budgets, we build fully custom sites tailored to your business. Let's talk on a strategy call to design your project together.\n\n👉 Book a call: yallagrow.net/quiz" },
+      { label: 'Website Consultancy ($139)', emoji: '🎓', action: 'response', response: "**Website Consultancy + Free Audit — $139**\n\nAlready have a website? Get a full expert review:\n\n✓ Full technical + UX audit\n✓ Conversion rate analysis\n✓ Page speed + SEO review\n✓ Mobile experience audit\n✓ 60-min strategy call\n✓ Written report" },
+      { label: '← Back to services', action: 'menu', submenu: 'services' },
+    ],
   },
-  {
-    keywords: ['dominate package', 'dominate plan', 'premium', 'full service'],
-    response: "**Dominate — $499/mo** includes:\n\n✓ 16 static posts/month\n✓ 8 short-form videos\n✓ Full Meta Ads management\n✓ Performance dashboard\n✓ Priority support\n\nFor serious brands ready to scale aggressively. Let's book a call!",
+
+  affiliate: {
+    message: "Our affiliate program pays you to refer businesses to YallaGrow.\n\nWhat would you like to know?",
+    options: [
+      { label: 'How much can I earn?', emoji: '💵', action: 'response', response: "You earn:\n\n💰 **20% commission** on invoices $179-$999\n💎 **35% commission** on invoices $1,000+\n♾️ **No cap** on how many referrals you can bring\n\nCommissions paid via WhatsApp coordination once your balance reaches $50." },
+      { label: 'How does tracking work?', emoji: '🔗', action: 'response', response: "Each affiliate gets a unique referral code. When someone signs up mentioning your code (during signup or their consultation call), it's credited to your account. Simple!" },
+      { label: 'How do I apply?', emoji: '📝', action: 'response', response: "Apply here to become an affiliate:\n\n👉 yallagrow.net/affiliate\n\nApplications are reviewed within 24-48 hours. Once approved, you'll get your unique code and access to the dashboard." },
+      { label: 'Existing affiliate login', emoji: '🔐', action: 'response', response: "Sign in to your affiliate dashboard here:\n\n👉 yallagrow.net/affiliate/dashboard\n\nUse your email + referral code to access earnings, referrals, and marketing resources." },
+      { label: '← Back to main menu', action: 'menu', submenu: 'root' },
+    ],
   },
-  // Website
-  {
-    keywords: ['website', 'web design', 'build a site', 'landing page'],
-    response: "We build websites in 3 tiers:\n\n🚀 **Starter** ($150) — Single page\n💼 **Business** ($150-300) — 5 pages, mobile-ready\n⚡ **Advanced** ($300-600) — 10 pages + custom features\n\nFor $600+ budgets, we build fully custom sites. We also offer a **Website Consultancy + Audit** for $139 if you already have a site.",
+
+  about: {
+    message: "What would you like to know about us?",
+    options: [
+      { label: 'Where are you based?', emoji: '📍', action: 'response', response: "We're based in **Lebanon** 🇱🇧 and work with clients globally — small businesses, startups, and personal brands anywhere in the world." },
+      { label: 'Who is on the team?', emoji: '👥', action: 'response', response: "We're a lean, specialized team:\n\n🎯 **Founder/CEO** — Strategy & sales\n🎨 **Designer** — Content & brand\n✍️ **Copywriter** — Words that convert\n📈 **Media Buyer** (freelance) — Paid ads\n\nEvery person touches your work directly — no agency middlemen." },
+      { label: 'How fast do you deliver?', emoji: '⚡', action: 'response', response: "Timelines by project:\n\n📱 Monthly packages: Content starts within 1 week\n🌐 Websites: 3 days (Starter) to 3 weeks (Advanced)\n🎨 Branding: 1-2 weeks\n📊 Ad campaigns: Live within 5-7 days\n\nWe move fast without cutting corners." },
+      { label: 'Do you have any guarantees?', emoji: '🤝', action: 'response', response: "Every partnership starts with a free strategy call to confirm we're the right fit.\n\nWe don't do refunds after work has started, but we're transparent and communicative — if something isn't right, we work with you to fix it. Most clients stay 6+ months." },
+      { label: 'How to contact you?', emoji: '📞', action: 'response', response: "Reach us via:\n\n💬 **WhatsApp:** +44 7376 441603 (fastest)\n📧 **Email:** info@yallagrow.net\n📞 **Book a call:** yallagrow.net/quiz" },
+      { label: 'Are you hiring?', emoji: '💼', action: 'response', response: "Yes! Currently open positions:\n\n🎨 Designer / Content Creator\n✍️ Copywriter / Content Specialist\n📈 Freelance Media Buyer\n\nApply at yallagrow.net/careers" },
+      { label: '← Back to main menu', action: 'menu', submenu: 'root' },
+    ],
   },
-  // Ads
-  {
-    keywords: ['ads', 'advertising', 'meta', 'facebook ads', 'instagram ads', 'tiktok ads', 'google ads', 'paid ads'],
-    response: "We run Meta (Facebook + Instagram) and TikTok ads with a $30/month management fee + your ad spend. We handle targeting, creatives, optimization, and reporting. Minimum recommended budget is $50-100/month for meaningful results.",
-  },
-  // Location
-  {
-    keywords: ['where', 'location', 'based', 'lebanon', 'country', 'from where'],
-    response: "We're based in Lebanon 🇱🇧 and work with clients globally. We serve small businesses, startups, and personal brands anywhere in the world remotely.",
-  },
-  // Contact
-  {
-    keywords: ['contact', 'reach', 'talk to', 'call', 'phone', 'email', 'whatsapp'],
-    response: "You can reach us via:\n\n💬 **WhatsApp:** +44 7376 441603 (fastest)\n📧 **Email:** info@yallagrow.net\n📞 **Book a call:** Free 30-min strategy session\n\nWant me to connect you now?",
-  },
-  // Booking
-  {
-    keywords: ['book', 'call', 'consultation', 'meeting', 'appointment', 'schedule'],
-    response: "Great! You can book a free 30-minute strategy call using this link:\n\n👉 https://calendar.app.google/3WibM5kWvizhnHJt8\n\nNo commitment, no credit card — just a real conversation about your business.",
-  },
-  // Affiliate
-  {
-    keywords: ['affiliate', 'referral', 'commission', 'earn money', 'partner'],
-    response: "Yes! We have an affiliate program:\n\n💰 Earn **20% commission** on invoices $179-$999\n💎 Earn **35% commission** on invoices $1,000+\n♾️ No cap on earnings\n\nApply at yallagrow.net/affiliate and start earning by sharing your unique code.",
-  },
-  // Timeline
-  {
-    keywords: ['how long', 'timeline', 'how fast', 'when start', 'delivery', 'turnaround'],
-    response: "Timelines depend on the project:\n\n📱 Monthly packages: We start delivering content within 1 week of signup\n🌐 Websites: 3 days (Starter) to 3 weeks (Advanced)\n🎨 Branding: 1-2 weeks\n📊 Ad campaigns: Live within 5-7 days\n\nWe move fast without cutting corners.",
-  },
-  // Guarantee
-  {
-    keywords: ['guarantee', 'refund', 'money back', 'satisfaction'],
-    response: "Every partnership starts with a free strategy call to confirm we're the right fit. We don't do refunds after work has started, but we're transparent and communicative — if you're unhappy, we work with you to fix it. Most clients stay 6+ months.",
-  },
-  // Performance Partnership
-  {
-    keywords: ['performance', 'partnership', 'profit share', 'commission based'],
-    response: "Our **Performance Partnership** is invite-only:\n\nInstead of a monthly retainer, we combine a strategic upfront deposit with performance-based compensation. We grow together.\n\nWe offer 2 models:\n1️⃣ Net Profit Share\n2️⃣ Per-Sale Commission\n\nLearn more at yallagrow.net/partnership",
-  },
-  // Quiz / recommendation
-  {
-    keywords: ['recommend', 'which plan', 'best for me', 'suggest', 'right plan'],
-    response: "Take our free 2-minute quiz to find your perfect plan:\n\n👉 yallagrow.net/quiz\n\nIt asks about your goals, current state, and budget — then recommends the best fit. Or I can help you decide here if you tell me about your business!",
-  },
-  // Team
-  {
-    keywords: ['team', 'who works', 'staff', 'employees', 'people'],
-    response: "We're a lean, specialized team:\n\n🎯 **Founder/CEO** — Strategy & sales\n🎨 **Designer** — Content & brand\n✍️ **Copywriter** — Words that convert\n📈 **Media Buyer** (freelance) — Paid ads\n\nEvery person on the team touches your work directly — no agency middlemen.",
-  },
-  // Careers
-  {
-    keywords: ['job', 'hire', 'career', 'work with you', 'position', 'employment', 'apply'],
-    response: "We're hiring! Currently open:\n\n🎨 Designer / Content Creator\n✍️ Copywriter / Content Specialist\n📈 Freelance Media Buyer\n\nCheck out yallagrow.net/careers to apply. We're based in Lebanon / Remote.",
-  },
-  // Greetings
-  {
-    keywords: ['hi', 'hello', 'hey', 'yo', 'sup', 'good morning', 'good evening'],
-    response: "Hey there! 👋 I'm YallaBot, YallaGrow's AI assistant. I can help you with:\n\n• Package pricing & details\n• Our services\n• Booking a strategy call\n• Affiliate program info\n• Anything else about YallaGrow\n\nWhat can I help you with?",
-  },
-  // Thanks
-  {
-    keywords: ['thanks', 'thank you', 'appreciate', 'awesome', 'great', 'cool'],
-    response: "You're welcome! 🙌 Anything else you'd like to know? If you're ready to talk to a human, I can connect you to Karim directly on WhatsApp.",
-  },
-]
+}
 
 interface Message {
   from: 'user' | 'bot'
   text: string
   time: string
-}
-
-function findResponse(input: string): string | null {
-  const lower = input.toLowerCase()
-  for (const entry of KNOWLEDGE) {
-    if (entry.keywords.some(kw => lower.includes(kw))) {
-      return entry.response
-    }
-  }
-  return null
+  options?: Option[]
 }
 
 const WHATSAPP_URL = 'https://api.whatsapp.com/send/?phone=447376441603&text=Hi%20YallaGrow%2C%20I%20need%20some%20help&type=phone_number&app_absent=0'
@@ -119,21 +110,22 @@ const WHATSAPP_URL = 'https://api.whatsapp.com/send/?phone=447376441603&text=Hi%
 export default function SupportBot() {
   const [open, setOpen] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
-  const [input, setInput] = useState('')
   const [typing, setTyping] = useState(false)
   const [notification, setNotification] = useState(true)
   const scrollRef = useRef<HTMLDivElement>(null)
 
   const getTime = () => new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
 
-  // Welcome message on first open
+  // Initialize with root menu on first open
   useEffect(() => {
     if (open && messages.length === 0) {
       setTimeout(() => {
+        const rootMenu = MENUS.root
         setMessages([{
           from: 'bot',
-          text: "Hey there! 👋 I'm YallaBot — YallaGrow's AI assistant.\n\nI can help you with:\n• Package pricing & details\n• Our services\n• Booking a strategy call\n• Anything else about YallaGrow\n\nWhat can I help you with?",
+          text: rootMenu.message,
           time: getTime(),
+          options: rootMenu.options,
         }])
       }, 400)
     }
@@ -146,47 +138,58 @@ export default function SupportBot() {
     }
   }, [messages, typing])
 
-  // Clear notification when opened
   useEffect(() => {
     if (open) setNotification(false)
   }, [open])
 
-  const send = () => {
-    if (!input.trim()) return
-    const userMsg = input.trim()
-    setMessages(prev => [...prev, { from: 'user', text: userMsg, time: getTime() }])
-    setInput('')
-    setTyping(true)
+  const handleOptionClick = (option: Option) => {
+    // Add user message
+    const userText = `${option.emoji ? option.emoji + ' ' : ''}${option.label}`
+    setMessages(prev => {
+      // Remove options from the last bot message so buttons disappear
+      const updated = prev.map((msg, i) =>
+        i === prev.length - 1 && msg.from === 'bot' ? { ...msg, options: undefined } : msg
+      )
+      return [...updated, { from: 'user', text: userText, time: getTime() }]
+    })
 
-    // Simulate thinking delay
-    setTimeout(() => {
-      const response = findResponse(userMsg)
-      if (response) {
-        setMessages(prev => [...prev, { from: 'bot', text: response, time: getTime() }])
-      } else {
+    if (option.action === 'external' && option.url) {
+      window.open(option.url, '_blank')
+      setTimeout(() => {
         setMessages(prev => [...prev, {
           from: 'bot',
-          text: "I'm not sure I have the answer to that one 🤔\n\nWould you like to chat with a real human? I can connect you to our founder Karim directly.",
+          text: "I've opened WhatsApp for you. Karim will get back to you soon! 👋\n\nAnything else I can help with?",
           time: getTime(),
+          options: [{ label: 'Back to main menu', emoji: '🏠', action: 'menu', submenu: 'root' }],
+        }])
+      }, 500)
+      return
+    }
+
+    setTyping(true)
+    setTimeout(() => {
+      if (option.action === 'response' && option.response) {
+        setMessages(prev => [...prev, {
+          from: 'bot',
+          text: option.response!,
+          time: getTime(),
+          options: [
+            { label: 'Book a strategy call', emoji: '📅', action: 'response', response: "Book your free 30-minute strategy call:\n\n👉 https://calendar.app.google/3WibM5kWvizhnHJt8" },
+            { label: 'Ask something else', emoji: '💬', action: 'menu', submenu: 'root' },
+            { label: 'Talk to human', emoji: '👋', action: 'external', url: WHATSAPP_URL },
+          ],
+        }])
+      } else if (option.action === 'menu' && option.submenu && MENUS[option.submenu]) {
+        const menu = MENUS[option.submenu]
+        setMessages(prev => [...prev, {
+          from: 'bot',
+          text: menu.message,
+          time: getTime(),
+          options: menu.options,
         }])
       }
       setTyping(false)
-    }, 800 + Math.random() * 600)
-  }
-
-  const quickReplies = ['💰 Pricing', '🎯 Services', '📅 Book a call', '💬 Talk to human']
-
-  const handleQuickReply = (reply: string) => {
-    if (reply.includes('Talk to human')) {
-      window.open(WHATSAPP_URL, '_blank')
-      return
-    }
-    const text = reply.replace(/[💰🎯📅💬]\s*/g, '').trim()
-    setInput(text)
-    setTimeout(() => {
-      const btn = document.querySelector<HTMLButtonElement>('#bot-send-btn')
-      btn?.click()
-    }, 50)
+    }, 500 + Math.random() * 400)
   }
 
   return (
@@ -230,7 +233,7 @@ export default function SupportBot() {
               borderRadius: '50%',
               background: '#ff4d4d',
               border: '2px solid var(--dark2, #060c14)',
-              animation: 'pulse 1.5s ease-in-out infinite',
+              animation: 'pulseDot 1.5s ease-in-out infinite',
             }} />
           )}
         </button>
@@ -242,9 +245,9 @@ export default function SupportBot() {
           position: 'fixed',
           bottom: '24px',
           right: '24px',
-          width: '380px',
+          width: '400px',
           maxWidth: 'calc(100vw - 32px)',
-          height: '580px',
+          height: '620px',
           maxHeight: 'calc(100vh - 48px)',
           background: 'rgba(6,12,20,0.97)',
           backdropFilter: 'blur(24px)',
@@ -259,7 +262,7 @@ export default function SupportBot() {
         }} className="bot-window">
           {/* HEADER */}
           <div style={{
-            padding: '18px 20px',
+            padding: '16px 20px',
             background: 'linear-gradient(135deg, rgba(16,161,219,0.15), rgba(106,70,217,0.1))',
             borderBottom: '1px solid var(--glass-border)',
             display: 'flex',
@@ -316,27 +319,74 @@ export default function SupportBot() {
             gap: '14px',
           }}>
             {messages.map((msg, i) => (
-              <div key={i} style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: msg.from === 'user' ? 'flex-end' : 'flex-start',
-                animation: 'msgIn 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-              }}>
+              <div key={i}>
                 <div style={{
-                  maxWidth: '85%',
-                  padding: '12px 16px',
-                  borderRadius: msg.from === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
-                  background: msg.from === 'user'
-                    ? 'linear-gradient(135deg, var(--sky), var(--purple))'
-                    : 'rgba(249,253,254,0.05)',
-                  border: msg.from === 'bot' ? '1px solid var(--glass-border)' : 'none',
-                  color: msg.from === 'user' ? '#fff' : 'var(--white)',
-                  fontSize: '0.85rem',
-                  lineHeight: 1.55,
-                  whiteSpace: 'pre-wrap',
-                  wordBreak: 'break-word',
-                }}>{msg.text}</div>
-                <div style={{ fontSize: '0.62rem', color: 'var(--text-dim)', marginTop: '4px', padding: '0 6px' }}>{msg.time}</div>
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: msg.from === 'user' ? 'flex-end' : 'flex-start',
+                  animation: 'msgIn 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                }}>
+                  <div style={{
+                    maxWidth: '85%',
+                    padding: '12px 16px',
+                    borderRadius: msg.from === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
+                    background: msg.from === 'user'
+                      ? 'linear-gradient(135deg, var(--sky), var(--purple))'
+                      : 'rgba(249,253,254,0.05)',
+                    border: msg.from === 'bot' ? '1px solid var(--glass-border)' : 'none',
+                    color: msg.from === 'user' ? '#fff' : 'var(--white)',
+                    fontSize: '0.85rem',
+                    lineHeight: 1.55,
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-word',
+                  }}>{msg.text}</div>
+                  <div style={{ fontSize: '0.62rem', color: 'var(--text-dim)', marginTop: '4px', padding: '0 6px' }}>{msg.time}</div>
+                </div>
+
+                {/* Option buttons */}
+                {msg.options && msg.options.length > 0 && (
+                  <div style={{
+                    marginTop: '10px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '6px',
+                    animation: 'msgIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both',
+                  }}>
+                    {msg.options.map((opt, oi) => (
+                      <button
+                        key={oi}
+                        onClick={() => handleOptionClick(opt)}
+                        style={{
+                          background: 'rgba(16,161,219,0.06)',
+                          border: '1px solid rgba(16,161,219,0.2)',
+                          color: 'var(--white)',
+                          padding: '10px 14px',
+                          borderRadius: '10px',
+                          fontSize: '0.82rem',
+                          fontWeight: 500,
+                          cursor: 'pointer',
+                          fontFamily: 'Inter, sans-serif',
+                          transition: 'all 0.15s',
+                          textAlign: 'left',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                        }}
+                        onMouseEnter={e => {
+                          e.currentTarget.style.background = 'rgba(16,161,219,0.15)'
+                          e.currentTarget.style.borderColor = 'rgba(16,161,219,0.4)'
+                        }}
+                        onMouseLeave={e => {
+                          e.currentTarget.style.background = 'rgba(16,161,219,0.06)'
+                          e.currentTarget.style.borderColor = 'rgba(16,161,219,0.2)'
+                        }}
+                      >
+                        {opt.emoji && <span>{opt.emoji}</span>}
+                        <span style={{ flex: 1 }}>{opt.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
 
@@ -347,104 +397,23 @@ export default function SupportBot() {
                     width: '6px', height: '6px',
                     borderRadius: '50%',
                     background: 'var(--sky)',
-                    animation: `typing 1.4s infinite ${i * 0.2}s`,
+                    animation: `botTyping 1.4s infinite ${i * 0.2}s`,
                   }} />
                 ))}
               </div>
             )}
           </div>
 
-          {/* QUICK REPLIES (only if no user message yet) */}
-          {messages.filter(m => m.from === 'user').length === 0 && messages.length > 0 && !typing && (
-            <div style={{
-              padding: '0 20px 12px',
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: '6px',
-            }}>
-              {quickReplies.map(reply => (
-                <button
-                  key={reply}
-                  onClick={() => handleQuickReply(reply)}
-                  style={{
-                    background: 'rgba(16,161,219,0.08)',
-                    border: '1px solid rgba(16,161,219,0.2)',
-                    color: 'var(--sky)',
-                    padding: '6px 12px',
-                    borderRadius: '100px',
-                    fontSize: '0.72rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    fontFamily: 'Inter, sans-serif',
-                    transition: 'all 0.15s',
-                  }}
-                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(16,161,219,0.15)'}
-                  onMouseLeave={e => e.currentTarget.style.background = 'rgba(16,161,219,0.08)'}
-                >{reply}</button>
-              ))}
-            </div>
-          )}
-
-          {/* INPUT */}
+          {/* Footer */}
           <div style={{
-            padding: '14px 18px',
+            padding: '10px 18px 14px',
             borderTop: '1px solid var(--glass-border)',
             background: 'rgba(0,0,0,0.2)',
-            display: 'flex',
-            gap: '8px',
-            alignItems: 'center',
-          }}>
-            <input
-              type="text"
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && send()}
-              placeholder="Type your message..."
-              style={{
-                flex: 1,
-                background: 'rgba(249,253,254,0.04)',
-                border: '1px solid var(--glass-border)',
-                borderRadius: '100px',
-                padding: '10px 16px',
-                color: 'var(--white)',
-                fontFamily: 'Inter, sans-serif',
-                fontSize: '0.85rem',
-                outline: 'none',
-              }}
-              onFocus={e => e.currentTarget.style.borderColor = 'rgba(16,161,219,0.4)'}
-              onBlur={e => e.currentTarget.style.borderColor = 'var(--glass-border)'}
-            />
-            <button
-              id="bot-send-btn"
-              onClick={send}
-              disabled={!input.trim()}
-              style={{
-                background: 'linear-gradient(135deg, var(--sky), var(--purple))',
-                border: 'none',
-                borderRadius: '50%',
-                width: '38px',
-                height: '38px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: input.trim() ? 'pointer' : 'not-allowed',
-                opacity: input.trim() ? 1 : 0.4,
-                color: '#fff',
-                fontSize: '0.9rem',
-                transition: 'all 0.2s',
-              }}
-              aria-label="Send message"
-            >→</button>
-          </div>
-
-          {/* WhatsApp fallback footer */}
-          <div style={{
-            padding: '8px 18px 12px',
             fontSize: '0.68rem',
             color: 'var(--text-dim)',
             textAlign: 'center',
           }}>
-            Need a human? <a href={WHATSAPP_URL} target="_blank" rel="noopener" style={{ color: 'var(--sky)', fontWeight: 600 }}>Chat on WhatsApp →</a>
+            Need a real conversation? <a href={WHATSAPP_URL} target="_blank" rel="noopener" style={{ color: 'var(--sky)', fontWeight: 600 }}>Chat on WhatsApp →</a>
           </div>
         </div>
       )}
@@ -454,7 +423,7 @@ export default function SupportBot() {
           0%, 100% { box-shadow: 0 8px 32px rgba(16,161,219,0.4), 0 0 0 0 rgba(16,161,219,0.5); }
           50% { box-shadow: 0 8px 32px rgba(16,161,219,0.4), 0 0 0 12px rgba(16,161,219,0); }
         }
-        @keyframes pulse {
+        @keyframes pulseDot {
           0%, 100% { transform: scale(1); opacity: 1; }
           50% { transform: scale(1.2); opacity: 0.7; }
         }
@@ -466,7 +435,7 @@ export default function SupportBot() {
           from { opacity: 0; transform: translateY(6px); }
           to { opacity: 1; transform: translateY(0); }
         }
-        @keyframes typing {
+        @keyframes botTyping {
           0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
           30% { transform: translateY(-6px); opacity: 1; }
         }
@@ -477,6 +446,7 @@ export default function SupportBot() {
             left: 12px !important;
             width: auto !important;
             max-width: none !important;
+            height: calc(100vh - 24px) !important;
           }
         }
       `}</style>
