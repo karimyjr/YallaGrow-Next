@@ -47,13 +47,14 @@ interface BuilderState {
   budgets: { meta: number; tiktok: number }
   web: 'none' | 'yes' | 'consultancy'
   webBudget: number
+  consultancyUrl: string
   addons: Record<string, boolean>
 }
 
 const INITIAL_STATE: BuilderState = {
   staticPosts: 8, carousel: 0, reels: 0, reelScript: 10, reelEdit: 15,
   marketing: '', platforms: { meta: false, tiktok: false }, budgets: { meta: 0, tiktok: 0 },
-  web: 'none', webBudget: 0, addons: {},
+  web: 'none', webBudget: 0, consultancyUrl: '', addons: {},
 }
 
 // Website tier previews
@@ -149,6 +150,7 @@ export default function PackageBuilder() {
           'ad-platforms': Object.entries(s.platforms).filter(([, v]) => v).map(([k]) => k).join(', '),
           'meta-budget': String(s.budgets.meta), 'tiktok-budget': String(s.budgets.tiktok),
           'website-tier': s.web, 'website-budget': String(s.webBudget),
+          'consultancy-url': s.consultancyUrl,
           'add-ons': Object.entries(s.addons).filter(([, v]) => v).map(([k]) => k).join(', '),
           'estimated-monthly': String(monthlyTotal),
         }).toString(),
@@ -380,7 +382,7 @@ export default function PackageBuilder() {
                       <div style={{ fontSize: '0.82rem', color: 'rgba(249,253,254,0.7)', lineHeight: 1.7, fontWeight: 300, marginBottom: '16px' }}>
                         A comprehensive review of your existing website — what&apos;s working, what&apos;s broken, and exactly what to fix to increase conversions.
                       </div>
-                      <div style={{ display: 'grid', gap: '8px' }}>
+                      <div style={{ display: 'grid', gap: '8px', marginBottom: '20px' }}>
                         {[
                           '🔍 Full technical + UX audit of your current site',
                           '📊 Conversion rate analysis with real fixes',
@@ -393,6 +395,22 @@ export default function PackageBuilder() {
                             <span style={{ color: 'var(--purple)', fontWeight: 700, flexShrink: 0 }}>✓</span>{f}
                           </div>
                         ))}
+                      </div>
+                      {/* Website URL input */}
+                      <div style={{ background: 'rgba(6,12,20,0.4)', border: '1px solid rgba(106,70,217,0.25)', borderRadius: '10px', padding: '14px 16px' }}>
+                        <label style={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '1px', color: 'var(--purple)', marginBottom: '8px', display: 'block', textTransform: 'uppercase' }}>
+                          🌐 Your website URL *
+                        </label>
+                        <input
+                          type="url"
+                          placeholder="https://yoursite.com"
+                          value={s.consultancyUrl}
+                          onChange={e => setS({ ...s, consultancyUrl: e.target.value })}
+                          style={inputStyle}
+                        />
+                        <p style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginTop: '8px', lineHeight: 1.5 }}>
+                          We&apos;ll audit this website before our call and come prepared with actionable insights.
+                        </p>
                       </div>
                     </div>
                   )}
@@ -491,7 +509,12 @@ export default function PackageBuilder() {
                     {hasPaid && <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--text-muted)' }}>Ads mgmt</span><span style={{ color: 'var(--white)' }}>${rates.adMgmt}</span></div>}
                     {metaBudget > 0 && <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--text-muted)' }}>Meta ad budget</span><span style={{ color: 'var(--white)' }}>${metaBudget}</span></div>}
                     {tiktokBudget > 0 && <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--text-muted)' }}>TikTok ad budget</span><span style={{ color: 'var(--white)' }}>${tiktokBudget}</span></div>}
-                    {s.web === 'consultancy' && <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--text-muted)' }}>Website Consultancy + Audit</span><span style={{ color: 'var(--purple)', fontWeight: 700 }}>${CONSULTANCY_PRICE}</span></div>}
+                    {s.web === 'consultancy' && (
+                      <>
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--text-muted)' }}>Website Consultancy + Audit</span><span style={{ color: 'var(--purple)', fontWeight: 700 }}>${CONSULTANCY_PRICE}</span></div>
+                        {s.consultancyUrl && <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem' }}><span style={{ color: 'var(--text-dim)' }}>↳ Site to audit</span><span style={{ color: 'var(--sky)', wordBreak: 'break-all', maxWidth: '60%', textAlign: 'right' }}>{s.consultancyUrl}</span></div>}
+                      </>
+                    )}
                     {Object.entries(s.addons).filter(([, on]) => on).map(([k]) => (
                       <div key={k} style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--text-muted)' }}>{ADDON_INFO[k].name}</span><span style={{ color: 'var(--white)' }}>${rates[ADDON_INFO[k].key]}</span></div>
                     ))}
@@ -523,10 +546,47 @@ export default function PackageBuilder() {
               )}
 
               {step === 6 && sent && (
-                <div style={{ textAlign: 'center', padding: '40px 20px' }}>
-                  <div style={{ fontSize: '3rem', marginBottom: '16px' }}>✅</div>
-                  <h3 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: '1.4rem', color: 'var(--white)', marginBottom: '10px' }}>Request Received!</h3>
-                  <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '24px' }}>We&apos;ll reach out within 24 hours to set up your consultation.</p>
+                <div style={{ textAlign: 'center', padding: '30px 20px' }}>
+                  <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🎉</div>
+                  <h3 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: '1.4rem', color: 'var(--white)', marginBottom: '10px', letterSpacing: '-0.5px' }}>
+                    Info Received!
+                  </h3>
+                  <p style={{ fontSize: '0.88rem', color: 'rgba(249,253,254,0.7)', lineHeight: 1.7, marginBottom: '28px', maxWidth: '380px', margin: '0 auto 28px' }}>
+                    Now let&apos;s lock in your <strong style={{ color: 'var(--sky)' }}>free 30-minute strategy call</strong>. Pick a time that works for you and we&apos;ll walk you through your custom package.
+                  </p>
+
+                  {/* Big prominent calendar CTA */}
+                  <div style={{ background: 'linear-gradient(135deg,rgba(1,32,76,0.6),rgba(16,161,219,0.15))', border: '1px solid rgba(16,161,219,0.3)', borderRadius: '16px', padding: '28px 24px', marginBottom: '20px', boxShadow: '0 8px 32px rgba(16,161,219,0.1)' }}>
+                    <div style={{ fontSize: '2rem', marginBottom: '12px' }}>📅</div>
+                    <div style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: '1.1rem', color: 'var(--white)', marginBottom: '8px' }}>
+                      Book Your Meeting
+                    </div>
+                    <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '20px', lineHeight: 1.6 }}>
+                      Free · 30 minutes · No commitment
+                    </p>
+                    <a
+                      href={process.env.NEXT_PUBLIC_BOOKING_URL || 'https://calendar.app.google/3WibM5kWvizhnHJt8'}
+                      target="_blank"
+                      rel="noopener"
+                      style={{
+                        display: 'inline-flex', alignItems: 'center', gap: '8px',
+                        background: 'var(--sky)', color: 'var(--dark)',
+                        padding: '14px 32px', borderRadius: '12px',
+                        fontSize: '0.92rem', fontWeight: 800, textDecoration: 'none',
+                        fontFamily: 'Inter,sans-serif', transition: 'all 0.2s',
+                        boxShadow: '0 4px 20px rgba(16,161,219,0.4)',
+                      }}
+                      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 28px rgba(16,161,219,0.55)' }}
+                      onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(16,161,219,0.4)' }}
+                    >
+                      📅 Pick a Time →
+                    </a>
+                  </div>
+
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginBottom: '20px' }}>
+                    You&apos;ll also get a confirmation email with your custom package details.
+                  </div>
+
                   <button onClick={reset} className="btn-secondary">Build Another →</button>
                 </div>
               )}
@@ -535,7 +595,14 @@ export default function PackageBuilder() {
               {step < 6 && !sent && (
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '32px' }}>
                   {step > 1 ? <button onClick={() => setStep(step - 1)} className="btn-secondary">← Back</button> : <div />}
-                  <button onClick={() => setStep(step + 1)} className="btn-primary">{step === 5 ? 'See Summary →' : 'Next →'}</button>
+                  <button onClick={() => {
+                    // Validate consultancy website URL if step 4 + consultancy selected
+                    if (step === 4 && s.web === 'consultancy' && !s.consultancyUrl.trim()) {
+                      showToast('Please enter your website URL for the consultancy audit.', 'error')
+                      return
+                    }
+                    setStep(step + 1)
+                  }} className="btn-primary">{step === 5 ? 'See Summary →' : 'Next →'}</button>
                 </div>
               )}
             </div>
