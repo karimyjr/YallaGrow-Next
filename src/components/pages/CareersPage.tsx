@@ -2,7 +2,6 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useToast } from '@/components/ui/Toast'
-import { usePageMeta } from '@/lib/usePageMeta'
 
 const CULTURE = [
   { icon: '🚀', title: 'Move fast', desc: "No bureaucracy. You'll ship real work for real clients from day one." },
@@ -117,7 +116,6 @@ const JOBS: Job[] = [
 ]
 
 export default function CareersPage() {
-  usePageMeta({ title: 'Careers — Join YallaGrow', description: `We're hiring designers, copywriters, and media buyers. Work with a small, results-focused team in Lebanon.` })
   const { showToast } = useToast()
   const [form, setForm] = useState({ name: '', email: '', phone: '', role: '', portfolio: '', linkedin: '', message: '' })
   const [sent, setSent] = useState(false)
