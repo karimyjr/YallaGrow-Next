@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useToast } from '@/components/ui/Toast'
+import { usePageMeta } from '@/lib/usePageMeta'
 
 const CULTURE = [
   { icon: '🚀', title: 'Move fast', desc: "No bureaucracy. You'll ship real work for real clients from day one." },
@@ -116,6 +117,7 @@ const JOBS: Job[] = [
 ]
 
 export default function CareersPage() {
+  usePageMeta({ title: 'Careers — Join YallaGrow', description: `We're hiring designers, copywriters, and media buyers. Work with a small, results-focused team in Lebanon.` })
   const { showToast } = useToast()
   const [form, setForm] = useState({ name: '', email: '', phone: '', role: '', portfolio: '', linkedin: '', message: '' })
   const [sent, setSent] = useState(false)
@@ -127,13 +129,17 @@ export default function CareersPage() {
     if (!form.name || !form.email || !form.role) { showToast('Please fill in name, email, and role.', 'error'); return }
     setLoading(true)
     try {
-      await fetch('/', {
+      const res = await fetch('/api/submissions/career', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({ 'form-name': 'job-application', ...form }).toString(),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
       })
-      setSent(true)
-    } catch { setSent(true) }
+      if (res.ok) {
+        setSent(true)
+      } else {
+        showToast('Failed to submit. Please try again.', 'error')
+      }
+    } catch { showToast('Network error. Please try again.', 'error') }
     setLoading(false)
   }
 

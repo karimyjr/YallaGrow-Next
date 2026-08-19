@@ -139,24 +139,32 @@ export default function PackageBuilder() {
   const submit = async () => {
     if (!form.name || !form.email) { showToast('Please enter your name and email.', 'error'); return }
     try {
-      await fetch('/', {
+      const res = await fetch('/api/submissions/package', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-          'form-name': 'package-builder',
-          name: form.name, email: form.email, whatsapp: form.whatsapp,
-          'static-posts': String(s.staticPosts), carousels: String(s.carousel), 'ugc-reels': String(s.reels),
-          'marketing-type': s.marketing,
-          'ad-platforms': Object.entries(s.platforms).filter(([, v]) => v).map(([k]) => k).join(', '),
-          'meta-budget': String(s.budgets.meta), 'tiktok-budget': String(s.budgets.tiktok),
-          'website-tier': s.web, 'website-budget': String(s.webBudget),
-          'consultancy-url': s.consultancyUrl,
-          'add-ons': Object.entries(s.addons).filter(([, v]) => v).map(([k]) => k).join(', '),
-          'estimated-monthly': String(monthlyTotal),
-        }).toString(),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: form.name,
+          email: form.email,
+          whatsapp: form.whatsapp,
+          staticPosts: s.staticPosts,
+          carousels: s.carousel,
+          reels: s.reels,
+          marketingType: s.marketing,
+          metaBudget: s.budgets.meta,
+          tiktokBudget: s.budgets.tiktok,
+          websiteTier: s.web,
+          websiteBudget: s.webBudget,
+          consultancyUrl: s.consultancyUrl,
+          addons: Object.entries(s.addons).filter(([, v]) => v).map(([k]) => k),
+          estimatedMonthly: monthlyTotal,
+        }),
       })
-      setSent(true)
-    } catch { setSent(true) }
+      if (res.ok) {
+        setSent(true)
+      } else {
+        showToast('Failed to submit. Please try again.', 'error')
+      }
+    } catch { showToast('Network error. Please try again.', 'error') }
   }
 
   const reset = () => { setS(INITIAL_STATE); setStep(1); setSent(false); setForm({ name: '', email: '', whatsapp: '' }) }

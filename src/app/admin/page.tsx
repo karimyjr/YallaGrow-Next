@@ -6,6 +6,7 @@ import AdminPricingPage from './pricing/page'
 import AdminAffiliatesPage from './affiliates/page'
 import AdminMaintenancePage from './maintenance/page'
 import AdminNewsletterPage from './newsletter/page'
+import AdminSubmissionsPage from './submissions/page'
 
 const TABS = [
   { id: 'blog', label: '📝 Blog', component: AdminBlogPage },
@@ -14,6 +15,7 @@ const TABS = [
   { id: 'affiliates', label: '🤝 Affiliate Program', component: AdminAffiliatesPage },
   { id: 'newsletter', label: '📬 Newsletter', component: AdminNewsletterPage },
   { id: 'maintenance', label: '🔧 Maintenance', component: AdminMaintenancePage },
+  { id: 'submissions', label: '📋 Submissions', component: AdminSubmissionsPage },
 ]
 
 export default function AdminPage() {
