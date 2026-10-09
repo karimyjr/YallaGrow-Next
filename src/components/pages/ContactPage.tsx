@@ -1,3 +1,4 @@
+// src/components/pages/ContactPage.tsx
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
@@ -75,7 +76,7 @@ export default function ContactPage() {
               Prefer to skip the form? Pick the option that works best for you.
             </p>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '32px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '28px' }}>
               {[
                 { icon: '💬', title: 'WhatsApp', desc: 'Fastest reply — usually within the hour', href: 'https://wa.me/447376441603', cta: 'Chat now →' },
                 { icon: '📧', title: 'Email', desc: 'We respond to all emails within 24 hours', href: 'mailto:info@yallagrow.net', cta: 'info@yallagrow.net' },
@@ -105,13 +106,22 @@ export default function ContactPage() {
               ))}
             </div>
 
-            <div style={{ background: 'rgba(16,161,219,0.04)', border: '1px solid rgba(16,161,219,0.15)', borderRadius: '12px', padding: '16px 18px' }}>
-              <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '0.88rem', color: 'var(--white)', marginBottom: '6px' }}>
-                📍 Based in Lebanon
+            {/* Address block */}
+            <div style={{ background: 'rgba(16,161,219,0.04)', border: '1px solid rgba(16,161,219,0.15)', borderRadius: '12px', padding: '18px 20px' }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                <div style={{ fontSize: '1.4rem', flexShrink: 0, marginTop: '2px' }}>📍</div>
+                <div>
+                  <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '0.88rem', color: 'var(--white)', marginBottom: '6px' }}>
+                    Based in Lebanon
+                  </div>
+                  <p style={{ fontSize: '0.8rem', color: 'rgba(249,253,254,0.65)', lineHeight: 1.6, margin: 0, marginBottom: '8px' }}>
+                    Baabda, Beirut — Lebanon
+                  </p>
+                  <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: 1.6, margin: 0 }}>
+                    Serving clients globally. Fully remote-friendly across time zones.
+                  </p>
+                </div>
               </div>
-              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 1.6, margin: 0 }}>
-                Working with clients globally. Fully remote-friendly.
-              </p>
             </div>
           </div>
 
@@ -138,7 +148,7 @@ export default function ContactPage() {
                 <textarea placeholder="Your message... *" rows={6} value={form.message} onChange={e => setForm({ ...form, message: e.target.value })} style={{ ...inputStyle, resize: 'vertical', marginBottom: '16px' }} />
 
                 <p style={{ fontSize: '0.72rem', color: 'var(--text-dim)', marginBottom: '14px' }}>
-                  By submitting, you agree to our <Link href="/privacy" style={{ color: 'var(--sky)' }}>Privacy Policy</Link>.
+                  By submitting, you agree to our <Link href="/privacy" style={{ color: 'var(--sky)' }}>Privacy Policy</Link> and <Link href="/terms" style={{ color: 'var(--sky)' }}>Terms of Service</Link>.
                 </p>
 
                 <button onClick={submit} disabled={loading} className="btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
