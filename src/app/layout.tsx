@@ -7,6 +7,8 @@ import SupportBot from '@/components/ui/SupportBot'
 import ScrollAnimator from '@/components/ui/ScrollAnimator'
 import ExitIntentPopup from '@/components/ui/ExitIntentPopup'
 import { ToastProvider } from '@/components/ui/Toast'
+import StickyMobileCTA from '@/components/ui/StickyMobileCTA'
+import Analytics from '@/components/Analytics'
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://yallagrow.net'),
@@ -127,15 +129,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <ToastProvider>
-          <MaintenanceGate>
-            <Navbar />
-            <main>{children}</main>
-            <CookieBanner />
-            <SupportBot />
-            <ScrollAnimator />
-            <ExitIntentPopup />
-          </MaintenanceGate>
-        </ToastProvider>
+  <MaintenanceGate>
+    <Navbar />
+    <main>{children}</main>
+    <CookieBanner />
+    <SupportBot />
+    <ScrollAnimator />
+    <ExitIntentPopup />
+  </MaintenanceGate>
+</ToastProvider>
+
       </body>
     </html>
   )
