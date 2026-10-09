@@ -6,6 +6,15 @@ import { useSearchParams } from 'next/navigation'
 
 const BOOKING_URL = 'https://calendar.app.google/3WibM5kWvizhnHJt8'
 
+interface ContentConfig {
+  icon: string
+  title: string
+  message: string
+  cta: string
+  ctaSub: string
+  ctaHref: string
+}
+
 function ThankYouContent() {
   const params = useSearchParams()
   const type = params.get('type') || 'contact'
@@ -15,13 +24,14 @@ function ThankYouContent() {
     setTimeout(() => setConfetti(true), 300)
   }, [])
 
-  const content = {
+  const configs: Record<string, ContentConfig> = {
     package: {
       icon: '📦',
       title: 'Package request received!',
       message: "We got the details of your custom package. We'll review it and reach out within 24 hours to lock in your free strategy call.",
       cta: 'Book Your Strategy Call Now',
       ctaSub: "Don't wait — grab a time that works for you.",
+      ctaHref: BOOKING_URL,
     },
     contact: {
       icon: '💬',
@@ -47,17 +57,18 @@ function ThankYouContent() {
       ctaSub: 'Jump into some insights while you wait.',
       ctaHref: '/blog',
     },
-  }[type] || {
-    icon: '✓',
-    title: 'All done!',
-    message: "We've received your submission and will get back to you soon.",
-    cta: 'Back to Home',
-    ctaSub: '',
-    ctaHref: '/',
+    default: {
+      icon: '✓',
+      title: 'All done!',
+      message: "We've received your submission and will get back to you soon.",
+      cta: 'Back to Home',
+      ctaSub: '',
+      ctaHref: '/',
+    },
   }
 
-  const ctaHref = 'ctaHref' in content ? content.ctaHref : BOOKING_URL
-  const isExternal = ctaHref === BOOKING_URL
+  const content: ContentConfig = configs[type] || configs.default
+  const isExternal = content.ctaHref === BOOKING_URL
 
   return (
     <div style={{
@@ -69,7 +80,6 @@ function ThankYouContent() {
       position: 'relative',
       overflow: 'hidden',
     }}>
-      {/* Background glow */}
       <div style={{
         position: 'absolute',
         top: '20%',
@@ -81,7 +91,6 @@ function ThankYouContent() {
         pointerEvents: 'none',
       }} />
 
-      {/* Floating particles */}
       {confetti && [...Array(12)].map((_, i) => (
         <div
           key={i}
@@ -100,7 +109,6 @@ function ThankYouContent() {
       ))}
 
       <div style={{ maxWidth: '520px', textAlign: 'center', position: 'relative', zIndex: 1 }}>
-        {/* Icon */}
         <div style={{
           width: '96px',
           height: '96px',
@@ -143,7 +151,6 @@ function ThankYouContent() {
           {content.message}
         </p>
 
-        {/* Main CTA */}
         <div style={{
           background: 'linear-gradient(135deg, rgba(1,32,76,0.5), rgba(16,161,219,0.1))',
           border: '1px solid rgba(16,161,219,0.25)',
@@ -151,20 +158,22 @@ function ThankYouContent() {
           padding: '28px 24px',
           marginBottom: '24px',
         }}>
-          <p style={{
-            fontSize: '0.78rem',
-            color: 'var(--text-muted)',
-            marginBottom: '14px',
-            lineHeight: 1.5,
-          }}>
-            {content.ctaSub}
-          </p>
+          {content.ctaSub && (
+            <p style={{
+              fontSize: '0.78rem',
+              color: 'var(--text-muted)',
+              marginBottom: '14px',
+              lineHeight: 1.5,
+            }}>
+              {content.ctaSub}
+            </p>
+          )}
           {isExternal ? (
-            <a href={ctaHref} target="_blank" rel="noopener" className="btn-primary" style={{ fontSize: '0.92rem' }}>
+            <a href={content.ctaHref} target="_blank" rel="noopener" className="btn-primary" style={{ fontSize: '0.92rem' }}>
               {content.cta} →
             </a>
           ) : (
-            <Link href={ctaHref} className="btn-primary" style={{ fontSize: '0.92rem' }}>
+            <Link href={content.ctaHref} className="btn-primary" style={{ fontSize: '0.92rem' }}>
               {content.cta} →
             </Link>
           )}
