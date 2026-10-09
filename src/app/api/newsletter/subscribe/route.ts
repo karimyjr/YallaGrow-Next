@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import crypto from 'crypto'
+import { rateLimit, getClientIp, makeKey } from '@/lib/rate-limit'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -17,6 +18,14 @@ function isValidEmail(email: string): boolean {
 }
 
 export async function POST(req: NextRequest) {
+    const ip = getClientIp(req)
+  const limit = rateLimit(makeKey(ip, 'newsletter-subscribe'), 5, 10 * 60 * 1000)
+  if (!limit.success) {
+    return NextResponse.json(
+      { error: 'Too many requests. Please try again later.' },
+      { status: 429, headers: { 'Retry-After': String(Math.ceil((limit.resetAt - Date.now()) / 1000)) } }
+    )
+  }
   try {
     const { email, source = 'unknown' } = await req.json()
 

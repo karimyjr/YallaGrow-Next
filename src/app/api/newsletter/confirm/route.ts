@@ -1,6 +1,7 @@
 // src/app/api/newsletter/confirm/route.ts
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { rateLimit, getClientIp, makeKey } from '@/lib/rate-limit'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -12,6 +13,11 @@ const FROM_EMAIL = 'YallaGrow <info@yallagrow.net>'
 const SITE_URL = 'https://yallagrow.net'
 
 export async function GET(req: NextRequest) {
+    const ip = getClientIp(req)
+  const limit = rateLimit(makeKey(ip, 'newsletter-confirm'), 20, 60 * 60 * 1000)
+  if (!limit.success) {
+    return NextResponse.redirect(`${SITE_URL}/newsletter/confirmed?status=error`)
+  }
   const token = req.nextUrl.searchParams.get('token')
 
   if (!token) {

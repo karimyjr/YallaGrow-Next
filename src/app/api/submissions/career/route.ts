@@ -1,6 +1,7 @@
 // src/app/api/submissions/career/route.ts
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { rateLimit, getClientIp, makeKey } from '@/lib/rate-limit'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -12,6 +13,14 @@ const FROM_EMAIL = 'YallaGrow <info@yallagrow.net>'
 const TO_EMAIL = 'info@yallagrow.net'
 
 export async function POST(req: NextRequest) {
+    const ip = getClientIp(req)
+  const limit = rateLimit(makeKey(ip, 'submissions-career'), 5, 10 * 60 * 1000)
+  if (!limit.success) {
+    return NextResponse.json(
+      { error: 'Too many requests. Please try again later.' },
+      { status: 429, headers: { 'Retry-After': String(Math.ceil((limit.resetAt - Date.now()) / 1000)) } }
+    )
+  }
   try {
     const { name, email, phone, role, portfolio, linkedin, message } = await req.json()
 
