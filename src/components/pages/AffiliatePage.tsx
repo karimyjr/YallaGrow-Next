@@ -154,8 +154,7 @@ export default function AffiliatePage() {
           <div style={{display:'inline-block',background:'linear-gradient(135deg,rgba(16,161,219,0.08),rgba(106,70,217,0.05))',border:'1px solid rgba(16,161,219,0.2)',borderRadius:'16px',padding:'20px 32px'}}>
             <p style={{fontSize:'0.88rem',fontWeight:600,color:'var(--white)',marginBottom:'4px'}}>Already an affiliate?</p>
             <p style={{fontSize:'0.75rem',color:'var(--text-muted)',marginBottom:'16px'}}>Sign in to track referrals, earnings and payouts.</p>
-            <Link href="/affiliate/dashboard" className="btn-primary" style={{padding:'11px 24px',fontSize:'0.85rem'}}>Access My Dashboard →</Link>
-          </div>
+<a href="/affiliate-dashboard.html" className="btn-primary" style={{padding:'11px 24px',fontSize:'0.85rem'}}>Access My Dashboard →</a>          </div>
         </div>
       </div>
     </div>
