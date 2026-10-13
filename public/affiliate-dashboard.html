@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>YallaGrow — Affiliate Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --white: #f9fdfe;
+  --sky: #10a1db;
+  --purple: #6a46d9;
+  --dark: #080f1a;
+  --dark2: #060c14;
+  --glass: rgba(249,253,254,0.04);
+  --glass-border: rgba(249,253,254,0.08);
+  --text-muted: rgba(249,253,254,0.45);
+  --text-dim: rgba(249,253,254,0.25);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--dark2);
+  color: var(--white);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3 { font-family: 'Syne', sans-serif; }
+a { color: var(--sky); text-decoration: none; }
+button { font-family: 'Inter', sans-serif; cursor: pointer; }
+input {
+  width: 100%;
+  background: rgba(249,253,254,0.03);
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  color: var(--white);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  outline: none;
+}
+input:focus { border-color: rgba(16,161,219,0.4); }
+.btn-primary {
+  background: var(--sky);
+  color: var(--dark);
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  border: 1px solid var(--sky);
+}
+.btn-primary:hover { background: var(--white); }
+.btn-secondary {
+  background: transparent;
+  color: rgba(249,253,254,0.7);
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  border: 1px solid var(--glass-border);
+}
+.hidden { display: none !important; }
+
+/* LOGIN */
+.login-wrap { max-width: 420px; margin: 0 auto; padding: 80px 20px; text-align: center; }
+.login-wrap h2 { font-size: 1.4rem; margin-bottom: 8px; font-weight: 800; }
+.login-wrap p { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 24px; }
+.header {
+  padding: 16px 6%; border-bottom: 1px solid var(--glass-border);
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; background: rgba(6,12,20,0.95); backdrop-filter: blur(20px); z-index: 100;
+}
+.logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.1rem; color: var(--white); }
+.logo em { color: var(--sky); font-style: normal; }
+.error-msg { color: #ff5555; font-size: 0.78rem; margin-top: 10px; }
+
+/* DASHBOARD */
+.dash { display: flex; min-height: 100vh; }
+.sidebar {
+  width: 260px; background: rgba(6,12,20,0.95); border-right: 1px solid var(--glass-border);
+  padding: 20px 16px; position: fixed; top: 0; left: 0; bottom: 0; z-index: 200;
+  display: flex; flex-direction: column; overflow-y: auto;
+  transition: left 0.3s ease;
+}
+.sidebar nav { display: flex; flex-direction: column; gap: 4px; flex: 1; margin-top: 24px; }
+.nav-btn {
+  display: flex; align-items: center; gap: 12px; padding: 12px 14px;
+  border-radius: 10px; border: none; background: transparent;
+  color: rgba(249,253,254,0.6); font-size: 0.88rem; font-weight: 500;
+  text-align: left; width: 100%;
+}
+.nav-btn:hover { background: rgba(249,253,254,0.03); }
+.nav-btn.active {
+  background: rgba(16,161,219,0.08); color: var(--sky); font-weight: 600;
+  border-left: 2px solid var(--sky);
+}
+.user-info {
+  border-top: 1px solid var(--glass-border); padding-top: 14px; margin-top: 14px;
+}
+.main {
+  flex: 1; margin-left: 260px; padding: 24px 32px; min-height: 100vh;
+}
+.mobile-header {
+  display: none; position: fixed; top: 0; left: 0; right: 0; z-index: 150;
+  padding: 12px 16px; background: rgba(6,12,20,0.95);
+  border-bottom: 1px solid var(--glass-border);
+  align-items: center; justify-content: space-between;
+}
+.menu-btn {
+  background: var(--glass); border: 1px solid var(--glass-border);
+  border-radius: 10px; padding: 8px 14px;
+  color: var(--white); font-size: 0.85rem; font-weight: 600;
+}
+.backdrop {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 190;
+}
+
+.hero-card {
+  background: linear-gradient(135deg, rgba(1,32,76,0.9), rgba(16,161,219,0.25));
+  border: 1px solid rgba(16,161,219,0.25);
+  border-radius: 20px; padding: 28px 32px; margin-bottom: 20px;
+}
+.eyebrow {
+  font-size: 0.68rem; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--sky); margin-bottom: 8px;
+}
+.hero-card h1 {
+  font-size: clamp(1.4rem, 3vw, 2rem); margin-bottom: 10px; font-weight: 800;
+  letter-spacing: -1px;
+}
+.hero-card p {
+  font-size: 0.9rem; color: rgba(249,253,254,0.7); line-height: 1.6; margin-bottom: 16px;
+}
+.hero-cta {
+  background: var(--white); color: var(--dark); padding: 10px 20px;
+  border-radius: 10px; font-size: 0.85rem; font-weight: 700; border: none;
+}
+
+.stats {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px;
+}
+.stat {
+  background: rgba(249,253,254,0.02); border: 1px solid var(--glass-border);
+  border-radius: 14px; padding: 18px;
+}
+.stat-label {
+  font-size: 0.62rem; font-weight: 700; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--text-dim); margin-bottom: 10px;
+}
+.stat-value {
+  font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.5rem;
+  letter-spacing: -1px; line-height: 1;
+}
+.stat-sub {
+  font-size: 0.65rem; color: var(--text-dim); margin-top: 6px;
+}
+
+.card {
+  background: rgba(249,253,254,0.02); border: 1px solid var(--glass-border);
+  border-radius: 14px; overflow: hidden;
+}
+.card-head {
+  padding: 16px 20px; border-bottom: 1px solid var(--glass-border);
+}
+.card-title {
+  font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.95rem;
+  color: var(--white);
+}
+table {
+  width: 100%; border-collapse: collapse; min-width: 500px;
+}
+th {
+  padding: 12px 16px; font-size: 0.62rem; font-weight: 700;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--text-dim); text-align: left;
+  border-bottom: 1px solid var(--glass-border);
+}
+td {
+  padding: 12px 16px; font-size: 0.82rem;
+  border-bottom: 1px solid rgba(249,253,254,0.03);
+}
+.status-badge {
+  display: inline-block; padding: 3px 10px; border-radius: 100px;
+  font-size: 0.6rem; font-weight: 700; text-transform: uppercase;
+}
+.empty {
+  text-align: center; padding: 50px 20px; color: var(--text-dim);
+}
+
+.code-box {
+  background: rgba(6,12,20,0.6); border: 1px solid var(--glass-border);
+  border-radius: 12px; padding: 24px; text-align: center; margin-bottom: 16px;
+}
+.ref-code {
+  font-family: 'Syne', sans-serif; font-weight: 800;
+  font-size: clamp(1.6rem, 5vw, 2.4rem); color: var(--sky);
+  letter-spacing: 3px; word-break: break-all;
+}
+
+.faq {
+  background: rgba(249,253,254,0.02); border: 1px solid var(--glass-border);
+  border-radius: 12px; overflow: hidden; margin-bottom: 10px;
+}
+.faq-btn {
+  width: 100%; background: transparent; border: none;
+  padding: 14px 18px; font-size: 0.88rem; font-weight: 600;
+  color: var(--white); display: flex; justify-content: space-between;
+  align-items: center; text-align: left; font-family: 'Inter', sans-serif;
+}
+.faq-answer {
+  padding: 0 18px 14px; font-size: 0.82rem;
+  color: rgba(249,253,254,0.7); line-height: 1.7;
+}
+.plus { color: var(--sky); font-size: 1.1rem; transition: transform 0.2s; }
+.faq.open .plus { transform: rotate(45deg); }
+
+.sign-out {
+  width: 100%; padding: 10px 14px; border-radius: 10px;
+  background: transparent; border: 1px solid rgba(255,85,85,0.2);
+  color: #ff5555; font-size: 0.78rem; font-weight: 600;
+  font-family: 'Inter', sans-serif;
+}
+
+.toast {
+  position: fixed; bottom: 24px; right: 24px; z-index: 10000;
+  padding: 14px 18px; border-radius: 12px;
+  background: rgba(6,12,20,0.95); backdrop-filter: blur(20px);
+  border: 1px solid rgba(16,219,100,0.3); border-left: 3px solid #16db64;
+  color: var(--white); font-size: 0.85rem; font-weight: 500;
+  transform: translateX(120%); transition: transform 0.35s ease;
+}
+.toast.show { transform: translateX(0); }
+
+@media (max-width: 900px) {
+  .sidebar { left: -280px; }
+  .sidebar.open { left: 0; }
+  .main { margin-left: 0; padding: 70px 16px 20px; }
+  .mobile-header { display: flex; }
+  .stats { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN VIEW -->
+<div id="loginView">
+  <div class="header">
+    <a href="/" class="logo">Yalla<em>Grow</em></a>
+    <span style="font-size:0.72rem;color:var(--text-dim);">Affiliate Dashboard</span>
+    <a href="/affiliate" class="btn-secondary" style="font-size:0.72rem;padding:7px 14px;">← Back</a>
+  </div>
+  <div class="login-wrap">
+    <div style="font-size:2.5rem;margin-bottom:20px;">🔐</div>
+    <h2>Affiliate Login</h2>
+    <p>Enter your email and referral code.</p>
+    <input type="email" id="loginEmail" placeholder="Email Address" />
+    <input type="text" id="loginCode" placeholder="Referral Code" style="margin-top:12px;text-transform:uppercase;" />
+    <div id="loginError" class="error-msg hidden"></div>
+    <button class="btn-primary" id="loginBtn" style="width:100%;justify-content:center;margin-top:16px;">
+      Sign In →
+    </button>
+    <p style="font-size:0.72rem;color:var(--text-dim);margin-top:16px;">
+      No account? <a href="/affiliate">Apply here →</a>
+    </p>
+  </div>
+</div>
+
+<!-- DASHBOARD VIEW -->
+<div id="dashView" class="dash hidden">
+
+  <div class="mobile-header">
+    <button class="menu-btn" id="openMenu">☰ Menu</button>
+    <div class="logo" style="font-size:0.95rem;">Yalla<em>Grow</em></div>
+    <div style="width:70px;"></div>
+  </div>
+
+  <aside class="sidebar" id="sidebar">
+    <a href="/" style="display:flex;align-items:center;gap:10px;padding:8px 12px;">
+      <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--sky),var(--purple));display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;color:#fff;">Y</div>
+      <span class="logo" style="font-size:1.05rem;">Yalla<em>Grow</em></span>
+    </a>
+
+    <nav id="nav"></nav>
+
+    <div class="user-info">
+      <div style="padding:8px 14px;margin-bottom:8px;">
+        <div style="font-size:0.68rem;color:var(--text-dim);">Signed in as</div>
+        <div id="userName" style="font-size:0.82rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
+        <div id="userCode" style="font-size:0.68rem;color:var(--sky);font-weight:600;margin-top:2px;"></div>
+      </div>
+      <button class="sign-out" id="signOut">🚪 Sign Out</button>
+    </div>
+  </aside>
+
+  <div class="backdrop hidden" id="backdrop"></div>
+
+  <main class="main" id="main"></main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ======== CONFIG ========
+const SUPABASE_URL = 'https://hsalmqrrrtaccjufkslg.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzYWxtcXJycnRhY2NqdWZrc2xnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI1NTQ0NDYsImV4cCI6MjA5ODEzMDQ0Nn0.l9-1wk2ymwUqtuKz83oQfWZ9fJJKVF-otYVtLzNxbck';
+
+const NAV_ITEMS = [
+  { id: 'dashboard', icon: '🏠', label: 'Dashboard' },
+  { id: 'link', icon: '🔗', label: 'My Referral Code' },
+  { id: 'referrals', icon: '📊', label: 'Referrals' },
+  { id: 'earnings', icon: '💰', label: 'Earnings' },
+  { id: 'faqs', icon: '❓', label: 'FAQs' },
+  { id: 'support', icon: '📞', label: 'Support' },
+];
+
+const FAQS = [
+  { q: 'When do I get paid?', a: "Commissions are approved once the referred client's first invoice clears. Payouts start when your balance reaches $50." },
+  { q: 'How much can I earn?', a: "You earn 20% on invoices $179–$999, and 35% on invoices of $1,000+. No cap." },
+  { q: 'How is a referral tracked?', a: 'When someone uses your referral code during signup or their consultation, we credit it to your account.' },
+  { q: 'Can I refer myself?', a: 'No. Self-referrals are strictly prohibited.' },
+  { q: 'What if a referral is refunded?', a: 'Commission is not paid for refunded or cancelled purchases.' },
+  { q: 'How do I get paid?', a: "Reach out via WhatsApp when you're ready to withdraw." },
+  { q: 'Can I promote on paid ads?', a: 'Please contact us first — we need to approve creative to protect the brand.' },
+];
+
+// ======== STATE ========
+let session = null;
+let referrals = [];
+let activeNav = 'dashboard';
+
+// ======== SUPABASE HELPERS ========
+async function supaGet(table, params = '') {
+  const url = SUPABASE_URL + '/rest/v1/' + table + '?' + params;
+  const res = await fetch(url, {
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_KEY,
+    }
+  });
+  if (!res.ok) return null;
+  return res.json();
+}
+
+// ======== DOM REFS ========
+const loginView = document.getElementById('loginView');
+const dashView = document.getElementById('dashView');
+const loginBtn = document.getElementById('loginBtn');
+const loginEmail = document.getElementById('loginEmail');
+const loginCode = document.getElementById('loginCode');
+const loginError = document.getElementById('loginError');
+const signOutBtn = document.getElementById('signOut');
+const openMenuBtn = document.getElementById('openMenu');
+const sidebar = document.getElementById('sidebar');
+const backdrop = document.getElementById('backdrop');
+const navEl = document.getElementById('nav');
+const mainEl = document.getElementById('main');
+const toastEl = document.getElementById('toast');
+
+// ======== SESSION ========
+function loadSession() {
+  try {
+    const saved = sessionStorage.getItem('yg_aff');
+    if (saved) {
+      session = JSON.parse(saved);
+      return true;
+    }
+  } catch {}
+  return false;
+}
+
+function saveSession(data) {
+  try {
+    sessionStorage.setItem('yg_aff', JSON.stringify(data));
+  } catch {}
+  session = data;
+}
+
+function clearSession() {
+  try {
+    sessionStorage.removeItem('yg_aff');
+  } catch {}
+  session = null;
+  referrals = [];
+}
+
+// ======== VIEWS ========
+function showLogin() {
+  loginView.classList.remove('hidden');
+  dashView.classList.add('hidden');
+}
+
+function showDashboard() {
+  loginView.classList.add('hidden');
+  dashView.classList.remove('hidden');
+  renderNav();
+  renderUser();
+  renderMain();
+}
+
+function renderNav() {
+  navEl.innerHTML = NAV_ITEMS.map(item => `
+    <button class="nav-btn ${activeNav === item.id ? 'active' : ''}" data-nav="${item.id}">
+      <span style="font-size:1.1rem;width:22px;text-align:center;">${item.icon}</span>
+      ${item.label}
+    </button>
+  `).join('');
+  navEl.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      activeNav = btn.dataset.nav;
+      sidebar.classList.remove('open');
+      backdrop.classList.add('hidden');
+      renderNav();
+      renderMain();
+    });
+  });
+}
+
+function renderUser() {
+  if (!session) return;
+  document.getElementById('userName').textContent = session.full_name;
+  document.getElementById('userCode').textContent = session.ref_code;
+}
+
+function renderMain() {
+  if (activeNav === 'dashboard') renderDashboardTab();
+  else if (activeNav === 'link') renderLinkTab();
+  else if (activeNav === 'referrals') renderReferralsTab();
+  else if (activeNav === 'earnings') renderEarningsTab();
+  else if (activeNav === 'faqs') renderFaqsTab();
+  else if (activeNav === 'support') renderSupportTab();
+}
+
+function stats() {
+  const totalPaid = referrals.filter(r => r.status === 'paid').reduce((a, r) => a + Number(r.commission_amount || 0), 0);
+  const pending = referrals.filter(r => r.status === 'pending' || r.status === 'approved').reduce((a, r) => a + Number(r.commission_amount || 0), 0);
+  return { totalPaid, pending, totalEarned: totalPaid + pending };
+}
+
+function statusColor(s) {
+  return { pending: '#ffc107', approved: '#16db64', paid: '#10a1db', rejected: '#ff4d4d' }[s] || '#999';
+}
+function statusBg(s) {
+  return { pending: 'rgba(255,193,7,0.1)', approved: 'rgba(16,219,100,0.1)', paid: 'rgba(16,161,219,0.1)', rejected: 'rgba(255,77,77,0.1)' }[s] || 'transparent';
+}
+
+function renderDashboardTab() {
+  const s = stats();
+  mainEl.innerHTML = `
+    <div class="hero-card">
+      <div class="eyebrow">Affiliate Dashboard</div>
+      <h1>Welcome back, ${session.full_name.split(' ')[0]} 👋</h1>
+      <p>Track your referrals, earnings, and resources.</p>
+      <button class="hero-cta" id="viewCodeBtn">View My Referral Code →</button>
+    </div>
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-label">Total Earned</div>
+        <div class="stat-value" style="color:var(--sky);">$${s.totalEarned.toFixed(2)}</div>
+        <div class="stat-sub">All time</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Pending</div>
+        <div class="stat-value" style="color:#ffc107;">$${s.pending.toFixed(2)}</div>
+        <div class="stat-sub">Awaiting approval</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Paid Out</div>
+        <div class="stat-value" style="color:#16db64;">$${s.totalPaid.toFixed(2)}</div>
+        <div class="stat-sub">Total paid</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Referrals</div>
+        <div class="stat-value" style="color:var(--purple);">${referrals.length}</div>
+        <div class="stat-sub">Total tracked</div>
+      </div>
+    </div>
+    ${referralsTable()}
+  `;
+  document.getElementById('viewCodeBtn').addEventListener('click', () => {
+    activeNav = 'link';
+    renderNav();
+    renderMain();
+  });
+}
+
+function referralsTable() {
+  if (referrals.length === 0) {
+    return `<div class="card"><div class="card-head"><div class="card-title">Referrals</div></div><div class="empty"><div style="font-size:2rem;margin-bottom:10px;opacity:0.4;">📊</div><div style="font-size:0.88rem;color:var(--white);margin-bottom:4px;font-weight:600;">No referrals yet</div><div style="font-size:0.75rem;">Share your code to get started.</div></div></div>`;
+  }
+  return `
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Referrals</div>
+        <div style="font-size:0.72rem;color:var(--text-dim);margin-top:2px;">${referrals.length} total</div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Client</th><th>Date</th><th>Invoice</th><th>Commission</th><th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${referrals.map(r => `
+              <tr>
+                <td style="color:var(--white);font-weight:500;">${r.client_name || '—'}</td>
+                <td style="color:rgba(249,253,254,0.6);font-size:0.76rem;">${new Date(r.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: '2-digit' })}</td>
+                <td style="color:rgba(249,253,254,0.6);font-size:0.76rem;">${r.invoice_amount ? '$' + Number(r.invoice_amount).toFixed(2) : 'Pending'}</td>
+                <td style="color:var(--sky);font-weight:700;">${r.commission_amount ? '$' + Number(r.commission_amount).toFixed(2) : '—'}</td>
+                <td><span class="status-badge" style="background:${statusBg(r.status)};color:${statusColor(r.status)};border:1px solid ${statusColor(r.status)}40;">${r.status}</span></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+function renderLinkTab() {
+  const shareText = encodeURIComponent('Check out YallaGrow! Use my referral code: ' + session.ref_code + ' at yallagrow.net');
+  mainEl.innerHTML = `
+    <h1 style="font-size:1.5rem;margin-bottom:8px;font-weight:800;letter-spacing:-0.5px;">My Referral Code</h1>
+    <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:20px;">Share your unique code to earn commission.</p>
+    <div style="background:linear-gradient(135deg,rgba(1,32,76,0.5),rgba(106,70,217,0.1));border:1px solid rgba(16,161,219,0.25);border-radius:16px;padding:24px;">
+      <div class="eyebrow">Your code</div>
+      <div class="code-box"><div class="ref-code">${session.ref_code}</div></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="btn-primary" id="copyBtn">📋 Copy Code</button>
+        <a href="https://wa.me/?text=${shareText}" target="_blank" rel="noopener" class="btn-secondary" style="display:inline-flex;align-items:center;">💬 Share on WhatsApp</a>
+      </div>
+    </div>
+  `;
+  document.getElementById('copyBtn').addEventListener('click', () => {
+    navigator.clipboard.writeText(session.ref_code).then(() => toast('Copied!'));
+  });
+}
+
+function renderReferralsTab() {
+  mainEl.innerHTML = `
+    <h1 style="font-size:1.5rem;margin-bottom:8px;font-weight:800;letter-spacing:-0.5px;">All Referrals</h1>
+    <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:20px;">Complete history of your referrals.</p>
+    ${referralsTable()}
+  `;
+}
+
+function renderEarningsTab() {
+  const s = stats();
+  mainEl.innerHTML = `
+    <h1 style="font-size:1.5rem;margin-bottom:8px;font-weight:800;letter-spacing:-0.5px;">Earnings Overview</h1>
+    <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:20px;">Track your total earnings and payouts.</p>
+    <div class="stats" style="grid-template-columns:repeat(3,1fr);">
+      <div class="stat"><div class="stat-label">Total Earned</div><div class="stat-value">$${s.totalEarned.toFixed(2)}</div></div>
+      <div class="stat"><div class="stat-label">Pending</div><div class="stat-value" style="color:#ffc107;">$${s.pending.toFixed(2)}</div></div>
+      <div class="stat"><div class="stat-label">Paid Out</div><div class="stat-value" style="color:#16db64;">$${s.totalPaid.toFixed(2)}</div></div>
+    </div>
+    <div class="card" style="padding:20px;">
+      <div class="card-title" style="margin-bottom:10px;">💰 Payout Information</div>
+      <p style="font-size:0.85rem;color:rgba(249,253,254,0.7);line-height:1.7;margin-bottom:12px;">Minimum $50 to withdraw. Payouts via WhatsApp coordination.</p>
+      <a href="https://wa.me/447376441603?text=Request+Payout" target="_blank" rel="noopener" class="btn-primary" style="display:inline-flex;align-items:center;">💬 Request Payout</a>
+    </div>
+  `;
+}
+
+function renderFaqsTab() {
+  mainEl.innerHTML = `
+    <h1 style="font-size:1.5rem;margin-bottom:8px;font-weight:800;letter-spacing:-0.5px;">Frequently Asked Questions</h1>
+    <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:20px;">Everything about the YallaGrow affiliate program.</p>
+    <div>
+      ${FAQS.map((f, i) => `
+        <div class="faq" data-i="${i}">
+          <button class="faq-btn"><span>${f.q}</span><span class="plus">+</span></button>
+          <div class="faq-answer hidden">${f.a}</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+  mainEl.querySelectorAll('.faq').forEach(faq => {
+    faq.querySelector('.faq-btn').addEventListener('click', () => {
+      const answer = faq.querySelector('.faq-answer');
+      faq.classList.toggle('open');
+      answer.classList.toggle('hidden');
+    });
+  });
+}
+
+function renderSupportTab() {
+  mainEl.innerHTML = `
+    <h1 style="font-size:1.5rem;margin-bottom:8px;font-weight:800;letter-spacing:-0.5px;">Support</h1>
+    <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:20px;">Need help? Reach out.</p>
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px;">
+      <a href="https://wa.me/447376441603" target="_blank" rel="noopener" class="card" style="padding:22px;display:block;">
+        <div style="font-size:1.6rem;margin-bottom:10px;">💬</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;color:var(--white);margin-bottom:6px;">WhatsApp</div>
+        <div style="font-size:0.78rem;color:var(--text-muted);line-height:1.6;margin-bottom:12px;">Fastest response — usually within an hour.</div>
+        <div style="font-size:0.78rem;color:var(--sky);font-weight:600;">Open WhatsApp →</div>
+      </a>
+      <a href="mailto:info@yallagrow.net" class="card" style="padding:22px;display:block;">
+        <div style="font-size:1.6rem;margin-bottom:10px;">📧</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;color:var(--white);margin-bottom:6px;">Email</div>
+        <div style="font-size:0.78rem;color:var(--text-muted);line-height:1.6;margin-bottom:12px;">We respond within 24 hours.</div>
+        <div style="font-size:0.78rem;color:var(--sky);font-weight:600;">Send Email →</div>
+      </a>
+    </div>
+  `;
+}
+
+function toast(msg) {
+  toastEl.textContent = '✓ ' + msg;
+  toastEl.classList.add('show');
+  setTimeout(() => toastEl.classList.remove('show'), 2500);
+}
+
+// ======== LOGIN LOGIC ========
+async function doLogin() {
+  const email = loginEmail.value.trim();
+  const code = loginCode.value.trim().toUpperCase();
+  if (!email || !code) {
+    loginError.textContent = 'Enter your email and referral code.';
+    loginError.classList.remove('hidden');
+    return;
+  }
+  loginBtn.textContent = 'Signing in…';
+  loginBtn.disabled = true;
+  loginError.classList.add('hidden');
+
+  try {
+    const params = 'email=eq.' + encodeURIComponent(email) + '&ref_code=eq.' + encodeURIComponent(code) + '&limit=1';
+    const data = await supaGet('affiliates', params);
+    if (data && data.length > 0) {
+      saveSession(data[0]);
+      await loadReferrals();
+      showDashboard();
+    } else {
+      loginError.textContent = 'Invalid credentials. Check your email and code.';
+      loginError.classList.remove('hidden');
+    }
+  } catch (e) {
+    loginError.textContent = 'Something went wrong. Try again.';
+    loginError.classList.remove('hidden');
+  }
+  loginBtn.textContent = 'Sign In →';
+  loginBtn.disabled = false;
+}
+
+async function loadReferrals() {
+  if (!session) return;
+  const params = 'ref_code=eq.' + encodeURIComponent(session.ref_code) + '&order=created_at.desc';
+  const data = await supaGet('referrals', params);
+  if (data) referrals = data;
+}
+
+// ======== EVENT HANDLERS ========
+loginBtn.addEventListener('click', doLogin);
+loginCode.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+loginEmail.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+signOutBtn.addEventListener('click', () => {
+  clearSession();
+  showLogin();
+  loginEmail.value = '';
+  loginCode.value = '';
+  activeNav = 'dashboard';
+});
+
+openMenuBtn.addEventListener('click', () => {
+  sidebar.classList.add('open');
+  backdrop.classList.remove('hidden');
+});
+
+backdrop.addEventListener('click', () => {
+  sidebar.classList.remove('open');
+  backdrop.classList.add('hidden');
+});
+
+// ======== INIT ========
+(async function init() {
+  if (loadSession()) {
+    await loadReferrals();
+    showDashboard();
+  } else {
+    showLogin();
+  }
+})();
+</script>
+</body>
+</html>

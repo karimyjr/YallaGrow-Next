@@ -79,7 +79,7 @@ const MENUS: Record<string, Menu> = {
       { label: 'How much can I earn?', emoji: '💵', action: 'response', response: "You earn:\n\n💰 **20% commission** on invoices $179-$999\n💎 **35% commission** on invoices $1,000+\n♾️ **No cap** on how many referrals you can bring\n\nCommissions paid via WhatsApp coordination once your balance reaches $50." },
       { label: 'How does tracking work?', emoji: '🔗', action: 'response', response: "Each affiliate gets a unique referral code. When someone signs up mentioning your code (during signup or their consultation call), it's credited to your account. Simple!" },
       { label: 'How do I apply?', emoji: '📝', action: 'response', response: "Apply here to become an affiliate:\n\n👉 yallagrow.net/affiliate\n\nApplications are reviewed within 24-48 hours. Once approved, you'll get your unique code and access to the dashboard." },
-      { label: 'Existing affiliate login', emoji: '🔐', action: 'response', response: "Sign in to your affiliate dashboard here:\n\n👉 yallagrow.net/affiliate/dashboard\n\nUse your email + referral code to access earnings, referrals, and marketing resources." },
+      { label: 'Existing affiliate login', emoji: '🔐', action: 'response', response: "Sign in to your affiliate dashboard here:\n\n👉 yallagrow.net/affiliate-dashboard.html\n\nUse your email + referral code to access earnings, referrals, and marketing resources." },
       { label: '← Back to main menu', action: 'menu', submenu: 'root' },
     ],
   },
