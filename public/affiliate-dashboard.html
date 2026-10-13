@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>YallaGrow — Affiliate Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -18,12 +18,22 @@
   --text-dim: rgba(249,253,254,0.25);
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  overflow-x: hidden;
+}
+html, body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
 body {
   background: var(--dark2);
   color: var(--white);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
+  width: 100%;
 }
 h1, h2, h3 { font-family: 'Syne', sans-serif; }
 a { color: var(--sky); text-decoration: none; }
@@ -36,7 +46,7 @@ input {
   padding: 12px 14px;
   color: var(--white);
   font-family: 'Inter', sans-serif;
-  font-size: 0.9rem;
+  font-size: 16px; /* 16px prevents iOS auto-zoom on focus */
   outline: none;
 }
 input:focus { border-color: rgba(16,161,219,0.4); }
@@ -75,7 +85,7 @@ input:focus { border-color: rgba(16,161,219,0.4); }
 .error-msg { color: #ff5555; font-size: 0.78rem; margin-top: 10px; }
 
 /* DASHBOARD */
-.dash { display: flex; min-height: 100vh; }
+.dash { display: flex; min-height: 100vh; width: 100%; }
 .sidebar {
   width: 260px; background: rgba(6,12,20,0.95); border-right: 1px solid var(--glass-border);
   padding: 20px 16px; position: fixed; top: 0; left: 0; bottom: 0; z-index: 200;
@@ -99,6 +109,8 @@ input:focus { border-color: rgba(16,161,219,0.4); }
 }
 .main {
   flex: 1; margin-left: 260px; padding: 24px 32px; min-height: 100vh;
+  min-width: 0; /* allow flex child to shrink below content */
+  max-width: 100%;
 }
 .mobile-header {
   display: none; position: fixed; top: 0; left: 0; right: 0; z-index: 150;
@@ -125,8 +137,8 @@ input:focus { border-color: rgba(16,161,219,0.4); }
   text-transform: uppercase; color: var(--sky); margin-bottom: 8px;
 }
 .hero-card h1 {
-  font-size: clamp(1.4rem, 3vw, 2rem); margin-bottom: 10px; font-weight: 800;
-  letter-spacing: -1px;
+  font-size: clamp(1.3rem, 3vw, 2rem); margin-bottom: 10px; font-weight: 800;
+  letter-spacing: -1px; line-height: 1.15; word-break: break-word;
 }
 .hero-card p {
   font-size: 0.9rem; color: rgba(249,253,254,0.7); line-height: 1.6; margin-bottom: 16px;
@@ -142,6 +154,7 @@ input:focus { border-color: rgba(16,161,219,0.4); }
 .stat {
   background: rgba(249,253,254,0.02); border: 1px solid var(--glass-border);
   border-radius: 14px; padding: 18px;
+  min-width: 0; /* prevent grid blow-out */
 }
 .stat-label {
   font-size: 0.62rem; font-weight: 700; letter-spacing: 1.5px;
@@ -150,6 +163,7 @@ input:focus { border-color: rgba(16,161,219,0.4); }
 .stat-value {
   font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.5rem;
   letter-spacing: -1px; line-height: 1;
+  word-break: break-word;
 }
 .stat-sub {
   font-size: 0.65rem; color: var(--text-dim); margin-top: 6px;
@@ -158,6 +172,7 @@ input:focus { border-color: rgba(16,161,219,0.4); }
 .card {
   background: rgba(249,253,254,0.02); border: 1px solid var(--glass-border);
   border-radius: 14px; overflow: hidden;
+  max-width: 100%;
 }
 .card-head {
   padding: 16px 20px; border-bottom: 1px solid var(--glass-border);
@@ -165,6 +180,11 @@ input:focus { border-color: rgba(16,161,219,0.4); }
 .card-title {
   font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.95rem;
   color: var(--white);
+}
+.table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
 }
 table {
   width: 100%; border-collapse: collapse; min-width: 500px;
@@ -174,10 +194,12 @@ th {
   letter-spacing: 1.5px; text-transform: uppercase;
   color: var(--text-dim); text-align: left;
   border-bottom: 1px solid var(--glass-border);
+  white-space: nowrap;
 }
 td {
   padding: 12px 16px; font-size: 0.82rem;
   border-bottom: 1px solid rgba(249,253,254,0.03);
+  white-space: nowrap;
 }
 .status-badge {
   display: inline-block; padding: 3px 10px; border-radius: 100px;
@@ -193,7 +215,7 @@ td {
 }
 .ref-code {
   font-family: 'Syne', sans-serif; font-weight: 800;
-  font-size: clamp(1.6rem, 5vw, 2.4rem); color: var(--sky);
+  font-size: clamp(1.4rem, 5vw, 2.4rem); color: var(--sky);
   letter-spacing: 3px; word-break: break-all;
 }
 
@@ -206,12 +228,14 @@ td {
   padding: 14px 18px; font-size: 0.88rem; font-weight: 600;
   color: var(--white); display: flex; justify-content: space-between;
   align-items: center; text-align: left; font-family: 'Inter', sans-serif;
+  gap: 10px;
 }
+.faq-btn span:first-child { flex: 1; }
 .faq-answer {
   padding: 0 18px 14px; font-size: 0.82rem;
   color: rgba(249,253,254,0.7); line-height: 1.7;
 }
-.plus { color: var(--sky); font-size: 1.1rem; transition: transform 0.2s; }
+.plus { color: var(--sky); font-size: 1.1rem; transition: transform 0.2s; flex-shrink: 0; }
 .faq.open .plus { transform: rotate(45deg); }
 
 .sign-out {
@@ -231,12 +255,63 @@ td {
 }
 .toast.show { transform: translateX(0); }
 
+/* Grid helpers used by Earnings and Support tabs */
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
+.grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+
+/* ============ TABLET ============ */
 @media (max-width: 900px) {
   .sidebar { left: -280px; }
   .sidebar.open { left: 0; }
   .main { margin-left: 0; padding: 70px 16px 20px; }
   .mobile-header { display: flex; }
-  .stats { grid-template-columns: 1fr 1fr; }
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  .grid-3 { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ============ PHONE ============ */
+@media (max-width: 640px) {
+  .main { padding: 68px 14px 20px; }
+  .hero-card { padding: 20px 18px; border-radius: 16px; margin-bottom: 16px; }
+  .hero-card h1 { font-size: 1.3rem; letter-spacing: -0.5px; }
+  .hero-card p { font-size: 0.82rem; }
+  .hero-cta { padding: 10px 16px; font-size: 0.8rem; }
+  .eyebrow { font-size: 0.6rem; letter-spacing: 1.5px; }
+
+  /* Stats stack to a single column so values can't clip */
+  .stats { grid-template-columns: 1fr; gap: 10px; margin-bottom: 16px; }
+  .stat { padding: 16px; }
+  .stat-value { font-size: 1.6rem; }
+
+  /* Earnings & Support grids collapse */
+  .grid-3 { grid-template-columns: 1fr; gap: 10px; }
+  .grid-2 { grid-template-columns: 1fr; gap: 10px; }
+
+  /* Section headings slimmer */
+  main h1 { font-size: 1.25rem !important; letter-spacing: -0.5px; }
+
+  /* Cards and table container */
+  .card { border-radius: 12px; }
+  .card-head { padding: 14px 16px; }
+  th, td { padding: 10px 12px; font-size: 0.76rem; }
+  th { font-size: 0.58rem; }
+
+  /* Buttons flex */
+  .btn-primary, .btn-secondary {
+    padding: 10px 18px; font-size: 0.82rem;
+  }
+
+  /* Ref code box tighter */
+  .code-box { padding: 20px 14px; }
+
+  /* Toast fills bottom */
+  .toast { right: 14px; left: 14px; bottom: 14px; }
+}
+
+@media (max-width: 380px) {
+  .main { padding: 68px 12px 20px; }
+  .hero-card { padding: 18px 16px; }
+  .hero-card h1 { font-size: 1.2rem; }
 }
 </style>
 </head>
@@ -493,7 +568,7 @@ function referralsTable() {
         <div class="card-title">Referrals</div>
         <div style="font-size:0.72rem;color:var(--text-dim);margin-top:2px;">${referrals.length} total</div>
       </div>
-      <div style="overflow-x:auto;">
+      <div class="table-wrap">
         <table>
           <thead>
             <tr>
@@ -549,7 +624,7 @@ function renderEarningsTab() {
   mainEl.innerHTML = `
     <h1 style="font-size:1.5rem;margin-bottom:8px;font-weight:800;letter-spacing:-0.5px;">Earnings Overview</h1>
     <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:20px;">Track your total earnings and payouts.</p>
-    <div class="stats" style="grid-template-columns:repeat(3,1fr);">
+    <div class="grid-3">
       <div class="stat"><div class="stat-label">Total Earned</div><div class="stat-value">$${s.totalEarned.toFixed(2)}</div></div>
       <div class="stat"><div class="stat-label">Pending</div><div class="stat-value" style="color:#ffc107;">$${s.pending.toFixed(2)}</div></div>
       <div class="stat"><div class="stat-label">Paid Out</div><div class="stat-value" style="color:#16db64;">$${s.totalPaid.toFixed(2)}</div></div>
@@ -588,7 +663,7 @@ function renderSupportTab() {
   mainEl.innerHTML = `
     <h1 style="font-size:1.5rem;margin-bottom:8px;font-weight:800;letter-spacing:-0.5px;">Support</h1>
     <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:20px;">Need help? Reach out.</p>
-    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px;">
+    <div class="grid-2">
       <a href="https://wa.me/447376441603" target="_blank" rel="noopener" class="card" style="padding:22px;display:block;">
         <div style="font-size:1.6rem;margin-bottom:10px;">💬</div>
         <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;color:var(--white);margin-bottom:6px;">WhatsApp</div>

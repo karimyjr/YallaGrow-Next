@@ -6,7 +6,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/admin/', '/affiliate/dashboard/', '/api/'],
+        disallow: ['/admin/', '/affiliate-dashboard.html', '/api/'],
       },
     ],
     sitemap: 'https://yallagrow.net/sitemap.xml',
