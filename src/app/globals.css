@@ -74,6 +74,7 @@ h1,h2,h3,h4,h5 { font-family: 'Syne', sans-serif; }
   align-items: center;
   gap: 8px;
   white-space: nowrap;
+  text-decoration: none;
 }
 .btn-primary:hover { background: var(--white); border-color: var(--white); }
 
@@ -91,6 +92,7 @@ h1,h2,h3,h4,h5 { font-family: 'Syne', sans-serif; }
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  text-decoration: none;
 }
 .btn-secondary:hover { border-color: rgba(249,253,254,0.3); color: var(--white); }
 
@@ -117,50 +119,35 @@ h1,h2,h3,h4,h5 { font-family: 'Syne', sans-serif; }
 }
 .page-enter { animation: pageIn 0.5s cubic-bezier(0.16,1,0.3,1) both; }
 
-/* Smooth page transition on load */
 main {
   animation: pageIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* =============================================
-   MOBILE RESPONSIVE FIXES (UPDATED)
-   ============================================= */
-
+/* MOBILE RESPONSIVE FIXES */
 @media (max-width: 768px) {
-
-  /* Hero H1 — bring down significantly */
   h1 {
     font-size: clamp(1.75rem, 7vw, 2.4rem) !important;
     letter-spacing: -1px !important;
     line-height: 1.1 !important;
   }
-
-  /* Section titles */
   .section-title {
     font-size: clamp(1.4rem, 5.5vw, 2rem) !important;
     letter-spacing: -0.5px !important;
     line-height: 1.2 !important;
   }
-
-  /* Section subtitles */
   .section-sub {
     font-size: 0.85rem !important;
     line-height: 1.6 !important;
   }
-
-  /* Big in-card headings (About card, promise sections, etc) */
   h2:not(.section-title) {
     font-size: clamp(1.15rem, 4.5vw, 1.5rem) !important;
     line-height: 1.25 !important;
     letter-spacing: -0.3px !important;
   }
-
   h3 {
     font-size: clamp(0.95rem, 3.5vw, 1.2rem) !important;
     line-height: 1.3 !important;
   }
-
-  /* Hero section — reduce padding so CTA is above the fold */
   section:first-of-type,
   section[style*="minHeight: '100vh'"],
   section[style*="min-height: 100vh"] {
@@ -168,87 +155,64 @@ main {
     padding-top: 90px !important;
     padding-bottom: 48px !important;
   }
-
-  /* All sections — tighter horizontal padding */
   section {
     padding-left: 20px !important;
     padding-right: 20px !important;
   }
-
-  /* Reduce large vertical paddings */
   section[style*="padding: 100px"],
   section[style*="padding: 120px"],
   section[style*="padding: 140px"] {
     padding-top: 56px !important;
     padding-bottom: 56px !important;
   }
-
   section[style*="padding: 80px"] {
     padding-top: 44px !important;
     padding-bottom: 44px !important;
   }
-
-  /* Buttons stay tappable */
   .btn-primary, .btn-secondary {
     font-size: 0.85rem !important;
     padding: 12px 20px !important;
   }
-
-  /* Eyebrow labels smaller */
   .eyebrow {
     font-size: 0.62rem !important;
     letter-spacing: 2.5px !important;
   }
-
-  /* Better tap targets everywhere */
   button, a {
     min-height: 40px;
   }
 }
 
 @media (max-width: 480px) {
-
   h1 {
     font-size: clamp(1.6rem, 8vw, 2.1rem) !important;
     letter-spacing: -0.5px !important;
   }
-
   .section-title {
     font-size: clamp(1.25rem, 6vw, 1.75rem) !important;
   }
-
   h2:not(.section-title) {
     font-size: clamp(1.05rem, 4.5vw, 1.35rem) !important;
   }
-
   section {
     padding-left: 16px !important;
     padding-right: 16px !important;
   }
-
-  /* Table cells smaller */
   table {
     font-size: 0.75rem !important;
   }
-
   table td, table th {
     padding: 8px 10px !important;
   }
-
-  /* Hero: tighter padding so CTA shows above fold */
   section:first-of-type {
     padding-top: 80px !important;
     padding-bottom: 40px !important;
   }
-
-  /* Hero paragraph slightly smaller */
   section:first-of-type p {
     font-size: 0.88rem !important;
     line-height: 1.6 !important;
   }
 }
 
-/* Respect user motion preferences */
 @media (prefers-reduced-motion: reduce) {
   main, section {
     animation: none !important;

@@ -60,10 +60,6 @@ export default function HomePage() {
         <div style={{ position: 'absolute', top: 0, right: 0, width: '45%', height: '100%', opacity: 0.4, pointerEvents: 'none', background: 'linear-gradient(135deg, transparent 0%, rgba(1,32,76,0.2) 100%)' }} />
 
         <div style={{ maxWidth: '700px', position: 'relative', zIndex: 1 }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', marginBottom: '24px' }}>
-            <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: 'var(--sky)', animation: 'pulse 2s infinite' }} />
-            <span style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--sky)', letterSpacing: '1px' }}>Lebanon&apos;s Premium Growth Agency</span>
-          </div>
 
           <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 'clamp(2.8rem, 6vw, 5rem)', letterSpacing: '-3px', lineHeight: 1.05, marginBottom: '24px', color: 'var(--white)' }}>
             We Don&apos;t Sell<br />Marketing.<br />
