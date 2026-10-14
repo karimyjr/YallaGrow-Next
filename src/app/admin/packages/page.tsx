@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { Icon } from '@/components/ui/Icons'
 
 const DEFAULT_PKGS = [
   { tier:'Launch', subtitle:'Build your foundation.', for:'For businesses that need a professional online presence.', price:149, feats:['Marketing strategy & brand direction','8 static posts/month','2 short-form videos','Caption writing & hashtag research','Content scheduling','Monthly performance report'] },
@@ -24,7 +25,7 @@ export default function AdminPackages() {
   const save = async () => {
     setSaving(true)
     await supabase.from('site_config').upsert({ key: 'packages', value: JSON.stringify(pkgs) }, { onConflict: 'key' })
-    setSaving(false); setMsg('✓ Saved!'); setTimeout(() => setMsg(''), 2500)
+    setSaving(false); setMsg('Saved!'); setTimeout(() => setMsg(''), 2500)
   }
 
   const updatePkg = (i: number, field: string, val: string | number) => {
@@ -56,9 +57,15 @@ export default function AdminPackages() {
   return (
     <div style={{ maxWidth:'1000px' }}>
       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'24px' }}>
-        <h2 style={{ fontFamily:'Syne,sans-serif', fontWeight:800, fontSize:'1.3rem', color:'var(--white)' }}>📦 Packages</h2>
+        <h2 style={{ fontFamily:'Syne,sans-serif', fontWeight:800, fontSize:'1.3rem', color:'var(--white)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <Icon name="package" size={20} />
+          Packages
+        </h2>
         <div style={{ display:'flex', alignItems:'center', gap:'12px' }}>
-          {msg && <span style={{ fontSize:'0.78rem', color:'#16db64' }}>{msg}</span>}
+          {msg && <span style={{ fontSize:'0.78rem', color:'#16db64', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+            <Icon name="check" size={14} />
+            {msg}
+          </span>}
           <button onClick={save} disabled={saving} className="btn-primary">{saving ? 'Saving…' : 'Save All Packages'}</button>
         </div>
       </div>
@@ -66,7 +73,10 @@ export default function AdminPackages() {
       <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'16px' }}>
         {pkgs.map((p, pi) => (
           <div key={pi} style={{ background:'var(--glass)', border:`1px solid ${p.featured?'rgba(16,161,219,0.3)':'var(--glass-border)'}`, borderRadius:'16px', padding:'20px' }}>
-            {p.featured && <div style={{ fontSize:'0.6rem', fontWeight:700, letterSpacing:'1px', color:'var(--sky)', marginBottom:'8px', textTransform:'uppercase' }}>⭐ Featured</div>}
+            {p.featured && <div style={{ fontSize:'0.6rem', fontWeight:700, letterSpacing:'1px', color:'var(--sky)', marginBottom:'8px', textTransform:'uppercase', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <Icon name="star" size={11} />
+              Featured
+            </div>}
             <div style={{ display:'flex', flexDirection:'column', gap:'8px', marginBottom:'16px' }}>
               <div>
                 <label style={{ fontSize:'0.62rem', color:'var(--text-dim)', display:'block', marginBottom:'3px' }}>Tier Name</label>

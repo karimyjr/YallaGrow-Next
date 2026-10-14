@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { Icon } from '@/components/ui/Icons'
 
 const DEFAULT_RATES = { staticPost:5, carousel:1.5, reel:25, adMgmt:30, branding:120, copy:80, photo:100, video:150, strategy:90, reports:60, competitor:70 }
 type Rates = typeof DEFAULT_RATES
@@ -19,7 +20,7 @@ export default function AdminPricing() {
   const save = async () => {
     setSaving(true)
     await supabase.from('site_config').upsert({ key:'rates', value:JSON.stringify(rates) }, { onConflict:'key' })
-    setSaving(false); setMsg('✓ Saved!'); setTimeout(()=>setMsg(''),2500)
+    setSaving(false); setMsg('Saved!'); setTimeout(()=>setMsg(''),2500)
   }
 
   const FIELDS: { key: keyof Rates; label: string; desc: string }[] = [
@@ -39,9 +40,15 @@ export default function AdminPricing() {
   return (
     <div style={{ maxWidth:'700px' }}>
       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'24px' }}>
-        <h2 style={{ fontFamily:'Syne,sans-serif', fontWeight:800, fontSize:'1.3rem', color:'var(--white)' }}>💰 Builder Pricing</h2>
+        <h2 style={{ fontFamily:'Syne,sans-serif', fontWeight:800, fontSize:'1.3rem', color:'var(--white)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <Icon name="dollar" size={20} />
+          Builder Pricing
+        </h2>
         <div style={{ display:'flex', alignItems:'center', gap:'12px' }}>
-          {msg && <span style={{ fontSize:'0.78rem', color:'#16db64' }}>{msg}</span>}
+          {msg && <span style={{ fontSize:'0.78rem', color:'#16db64', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+            <Icon name="check" size={14} />
+            {msg}
+          </span>}
           <button onClick={save} disabled={saving} className="btn-primary">{saving?'Saving…':'Save Pricing'}</button>
         </div>
       </div>

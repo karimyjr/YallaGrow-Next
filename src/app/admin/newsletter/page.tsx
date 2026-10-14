@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useToast } from '@/components/ui/Toast'
+import { Icon } from '@/components/ui/Icons'
 
 interface Subscriber {
   id: string
@@ -58,10 +59,16 @@ export default function AdminNewsletterPage() {
     <div style={{ padding: '32px 24px', maxWidth: '1200px', margin: '0 auto' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
         <div>
-          <h2 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: '1.6rem', color: 'var(--white)', marginBottom: '4px' }}>📬 Newsletter Subscribers</h2>
+          <h2 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: '1.6rem', color: 'var(--white)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <Icon name="inbox" size={22} />
+            Newsletter Subscribers
+          </h2>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: 0 }}>{subscribers.length} total subscribers</p>
         </div>
-        <button onClick={exportCSV} className="btn-primary">📥 Export CSV</button>
+        <button onClick={exportCSV} className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+          <Icon name="download" size={15} />
+          Export CSV
+        </button>
       </div>
 
       {/* Stats */}
@@ -79,7 +86,7 @@ export default function AdminNewsletterPage() {
       </div>
 
       <input
-        placeholder="🔍 Search by email or source..."
+        placeholder="Search by email or source..."
         value={search}
         onChange={e => setSearch(e.target.value)}
         style={{
@@ -112,7 +119,9 @@ export default function AdminNewsletterPage() {
                     <td style={{ padding: '14px 20px', fontSize: '0.78rem', color: 'var(--sky)', textTransform: 'capitalize' }}>{s.source}</td>
                     <td style={{ padding: '14px 20px', fontSize: '0.78rem', color: 'rgba(249,253,254,0.6)' }}>{new Date(s.subscribed_at).toLocaleString('en-GB', { day: 'numeric', month: 'short', year: '2-digit', hour: '2-digit', minute: '2-digit' })}</td>
                     <td style={{ padding: '14px 20px' }}>
-                      <button onClick={() => del(s.id)} style={{ background: 'transparent', color: 'var(--text-dim)', border: '1px solid var(--glass-border)', padding: '5px 10px', borderRadius: '6px', fontSize: '0.72rem', cursor: 'pointer' }}>🗑</button>
+                      <button onClick={() => del(s.id)} style={{ background: 'transparent', color: 'var(--text-dim)', border: '1px solid var(--glass-border)', padding: '5px 10px', borderRadius: '6px', fontSize: '0.72rem', cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }} aria-label="Delete">
+                        <Icon name="trash" size={13} />
+                      </button>
                     </td>
                   </tr>
                 ))}

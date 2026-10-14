@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useToast } from '@/components/ui/Toast'
+import { Icon } from '@/components/ui/Icons'
 
 interface Post {
   id: string
@@ -232,11 +233,15 @@ export default function AdminBlogPage() {
             <ToolbarBtn onClick={() => insertMarkdown('**', '**')}><strong>B</strong></ToolbarBtn>
             <ToolbarBtn onClick={() => insertMarkdown('*', '*')}><em>I</em></ToolbarBtn>
             <ToolbarBtn onClick={() => insertMarkdown('~~', '~~')}><s>S</s></ToolbarBtn>
-            <ToolbarBtn onClick={() => insertMarkdown('[', '](url)')}>🔗 Link</ToolbarBtn>
-            <ToolbarBtn onClick={() => insertMarkdown('![alt](', ')')}>🖼 Image</ToolbarBtn>
+            <ToolbarBtn onClick={() => insertMarkdown('[', '](url)')}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}><Icon name="link" size={12} />Link</span>
+            </ToolbarBtn>
+            <ToolbarBtn onClick={() => insertMarkdown('![alt](', ')')}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}><Icon name="image" size={12} />Image</span>
+            </ToolbarBtn>
             <ToolbarBtn onClick={() => insertMarkdown('\n- ')}>• List</ToolbarBtn>
             <ToolbarBtn onClick={() => insertMarkdown('\n1. ')}>1. List</ToolbarBtn>
-            <ToolbarBtn onClick={() => insertMarkdown('\n> ')}>❝ Quote</ToolbarBtn>
+            <ToolbarBtn onClick={() => insertMarkdown('\n> ')}>&ldquo; Quote</ToolbarBtn>
             <ToolbarBtn onClick={() => insertMarkdown('`', '`')}>Code</ToolbarBtn>
             <ToolbarBtn onClick={() => insertMarkdown('\n```\n', '\n```\n')}>Code Block</ToolbarBtn>
             <ToolbarBtn onClick={() => insertMarkdown('\n---\n')}>― HR</ToolbarBtn>
@@ -246,27 +251,7 @@ export default function AdminBlogPage() {
             id="content-editor"
             value={editing.content}
             onChange={e => updateEditing({ content: e.target.value })}
-            placeholder="Write your post content in markdown...
-
-# Heading 1
-## Heading 2
-
-Regular paragraph text with **bold** and *italic*.
-
-- Bullet point
-- Another point
-
-[Link text](https://example.com)
-
-![Image alt text](https://example.com/image.jpg)
-
-> A blockquote for emphasis
-
-`inline code`
-
-```
-code block
-```"
+            placeholder="Write your post content in markdown..."
             rows={20}
             style={{
               ...inputStyle,
@@ -278,8 +263,9 @@ code block
             }}
           />
 
-          <div style={{ fontSize: '0.72rem', color: 'var(--text-dim)', marginTop: '10px' }}>
-            💡 <strong>Tip:</strong> Highlight text first, then click the toolbar buttons to wrap it. Uses standard markdown syntax.
+          <div style={{ fontSize: '0.72rem', color: 'var(--text-dim)', marginTop: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Icon name="info" size={13} color="var(--sky)" />
+            <span><strong>Tip:</strong> Highlight text first, then click the toolbar buttons to wrap it. Uses standard markdown syntax.</span>
           </div>
         </div>
 
@@ -312,14 +298,17 @@ code block
     <div style={{ padding: '32px 24px', maxWidth: '1200px', margin: '0 auto' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
         <div>
-          <h2 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: '1.6rem', color: 'var(--white)', marginBottom: '4px' }}>📝 Blog Posts</h2>
+          <h2 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: '1.6rem', color: 'var(--white)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <Icon name="edit" size={22} />
+            Blog Posts
+          </h2>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: 0 }}>Manage your blog posts.</p>
         </div>
         <button onClick={() => openEditor(null)} className="btn-primary">+ New Post</button>
       </div>
 
       <input
-        placeholder="🔍 Search posts..."
+        placeholder="Search posts..."
         value={search}
         onChange={e => setSearch(e.target.value)}
         style={{ ...inputStyle, maxWidth: '400px', marginBottom: '20px' }}
@@ -336,7 +325,10 @@ code block
               <div style={{ flex: 1, minWidth: '200px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px', flexWrap: 'wrap' }}>
                   <strong style={{ color: 'var(--white)', fontSize: '0.95rem' }}>{p.title}</strong>
-                  {p.featured && <span style={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', padding: '2px 8px', borderRadius: '4px', background: 'rgba(245,158,11,0.15)', color: '#f59e0b' }}>★ Featured</span>}
+                  {p.featured && <span style={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', padding: '2px 8px', borderRadius: '4px', background: 'rgba(245,158,11,0.15)', color: '#f59e0b', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                    <Icon name="star" size={10} />
+                    Featured
+                  </span>}
                 </div>
                 <div style={{ fontSize: '0.72rem', color: 'var(--text-dim)' }}>
                   <code style={{ color: 'var(--sky)' }}>/{p.slug}</code> · {p.author} · {new Date(p.updated_at).toLocaleDateString()}
@@ -348,7 +340,9 @@ code block
                   {p.published ? '● Published' : '○ Draft'}
                 </button>
                 <button onClick={() => openEditor(p)} style={btnPrimary}>Edit</button>
-                <button onClick={() => del(p)} style={btnDelete}>🗑</button>
+                <button onClick={() => del(p)} style={btnDelete} aria-label="Delete">
+                  <Icon name="trash" size={13} />
+                </button>
               </div>
             </div>
           ))}
@@ -382,6 +376,6 @@ function ToolbarBtn({ onClick, children }: { onClick: () => void; children: Reac
 const inputStyle: React.CSSProperties = { background: 'rgba(249,253,254,0.03)', border: '1px solid var(--glass-border)', borderRadius: '8px', padding: '10px 12px', color: 'var(--white)', fontFamily: 'Inter,sans-serif', fontSize: '0.85rem', outline: 'none', width: '100%' }
 const labelStyle: React.CSSProperties = { fontSize: '0.7rem', color: 'var(--text-dim)', marginBottom: '6px', display: 'block', fontWeight: 600, letterSpacing: '0.5px' }
 const btnPrimary: React.CSSProperties = { background: 'var(--sky)', color: 'var(--dark)', border: 'none', padding: '7px 14px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', fontFamily: 'Inter,sans-serif' }
-const btnDelete: React.CSSProperties = { background: 'transparent', color: 'var(--text-dim)', border: '1px solid var(--glass-border)', padding: '5px 10px', borderRadius: '6px', fontSize: '0.72rem', cursor: 'pointer' }
+const btnDelete: React.CSSProperties = { background: 'transparent', color: 'var(--text-dim)', border: '1px solid var(--glass-border)', padding: '5px 10px', borderRadius: '6px', fontSize: '0.72rem', cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }
 const statusActive: React.CSSProperties = { fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', padding: '3px 10px', borderRadius: '100px', letterSpacing: '1px', background: 'rgba(16,219,100,0.1)', color: '#16db64', border: '1px solid rgba(16,219,100,0.25)', cursor: 'pointer' }
 const statusSuspended: React.CSSProperties = { fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', padding: '3px 10px', borderRadius: '100px', letterSpacing: '1px', background: 'rgba(255,193,7,0.1)', color: '#ffc107', border: '1px solid rgba(255,193,7,0.25)', cursor: 'pointer' }

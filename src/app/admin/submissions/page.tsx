@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useToast } from '@/components/ui/Toast'
+import { Icon } from '@/components/ui/Icons'
 
 interface PackageSubmission {
   id: string
@@ -45,6 +46,16 @@ interface ContactSubmission {
   message: string
   status: string
   created_at: string
+}
+
+// Inline icon helper for list items
+function Line({ icon, children }: { icon: string; children: React.ReactNode }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
+      <Icon name={icon as any} size={14} color="var(--text-dim)" />
+      <span>{children}</span>
+    </div>
+  )
 }
 
 export default function AdminSubmissionsPage() {
@@ -107,16 +118,19 @@ export default function AdminSubmissionsPage() {
   return (
     <div style={{ padding: '32px 24px', maxWidth: '1200px', margin: '0 auto' }}>
       <div style={{ marginBottom: '20px' }}>
-        <h2 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: '1.6rem', color: 'var(--white)', marginBottom: '4px' }}>📋 Form Submissions</h2>
+        <h2 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: '1.6rem', color: 'var(--white)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <Icon name="clipboard" size={22} />
+          Form Submissions
+        </h2>
         <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: 0 }}>All incoming leads and applications.</p>
       </div>
 
       {/* Sub-tabs */}
       <div style={{ display: 'flex', gap: '4px', borderBottom: '1px solid var(--glass-border)', marginBottom: '20px', flexWrap: 'wrap' }}>
         {[
-          { id: 'packages', label: '📦 Package Requests', count: packages.length, newCount: counts.packages },
-          { id: 'jobs', label: '💼 Job Applications', count: jobs.length, newCount: counts.jobs },
-          { id: 'contacts', label: '💬 Contact Messages', count: contacts.length, newCount: counts.contacts },
+          { id: 'packages', icon: 'package', label: 'Package Requests', count: packages.length, newCount: counts.packages },
+          { id: 'jobs', icon: 'briefcase', label: 'Job Applications', count: jobs.length, newCount: counts.jobs },
+          { id: 'contacts', icon: 'chat', label: 'Contact Messages', count: contacts.length, newCount: counts.contacts },
         ].map(t => (
           <button key={t.id} onClick={() => setTab(t.id as 'packages' | 'jobs' | 'contacts')} style={{
             background: tab === t.id ? 'rgba(16,161,219,0.08)' : 'transparent',
@@ -126,7 +140,9 @@ export default function AdminSubmissionsPage() {
             color: tab === t.id ? 'var(--sky)' : 'var(--text-muted)',
             fontSize: '0.85rem', fontWeight: 600,
             marginBottom: '-1px', position: 'relative',
+            display: 'inline-flex', alignItems: 'center', gap: '8px',
           }}>
+            <Icon name={t.icon as any} size={14} />
             {t.label} <span style={{ opacity: 0.6, fontSize: '0.72rem' }}>({t.count})</span>
             {t.newCount > 0 && (
               <span style={{ marginLeft: '6px', background: '#ff4d4d', color: '#fff', fontSize: '0.6rem', fontWeight: 800, padding: '2px 6px', borderRadius: '100px' }}>{t.newCount} new</span>
@@ -136,7 +152,7 @@ export default function AdminSubmissionsPage() {
       </div>
 
       <input
-        placeholder="🔍 Search by name or email..."
+        placeholder="Search by name or email..."
         value={search}
         onChange={e => setSearch(e.target.value)}
         style={{
@@ -175,25 +191,26 @@ export default function AdminSubmissionsPage() {
                   <div style={{ padding: '16px 0' }}>
                     <div style={{ fontSize: '0.72rem', color: 'var(--text-dim)', marginBottom: '10px', letterSpacing: '1.5px', textTransform: 'uppercase' }}>Contact</div>
                     <div style={{ fontSize: '0.82rem', color: 'rgba(249,253,254,0.75)', lineHeight: 1.8 }}>
-                      📧 <a href={`mailto:${p.email}`} style={{ color: 'var(--sky)' }}>{p.email}</a><br />
-                      {p.whatsapp && <>💬 <a href={`https://wa.me/${p.whatsapp.replace(/[^\d]/g, '')}`} target="_blank" rel="noopener" style={{ color: 'var(--sky)' }}>{p.whatsapp}</a><br /></>}
+                      <Line icon="mail"><a href={`mailto:${p.email}`} style={{ color: 'var(--sky)' }}>{p.email}</a></Line>
+                      {p.whatsapp && <Line icon="chat"><a href={`https://wa.me/${p.whatsapp.replace(/[^\d]/g, '')}`} target="_blank" rel="noopener" style={{ color: 'var(--sky)' }}>{p.whatsapp}</a></Line>}
                     </div>
                   </div>
 
                   <div style={{ padding: '16px 0', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
                     <div style={{ fontSize: '0.72rem', color: 'var(--text-dim)', marginBottom: '10px', letterSpacing: '1.5px', textTransform: 'uppercase' }}>Package Details</div>
                     <div style={{ fontSize: '0.82rem', color: 'rgba(249,253,254,0.75)', lineHeight: 1.8 }}>
-                      {p.static_posts > 0 && <div>📸 Static posts: <strong>{p.static_posts}/mo</strong></div>}
-                      {p.carousels > 0 && <div>🎨 Carousels: <strong>{p.carousels}/mo</strong></div>}
-                      {p.reels > 0 && <div>🎬 Reels: <strong>{p.reels}/mo</strong></div>}
-                      {p.marketing_type && <div>📈 Marketing: <strong>{p.marketing_type}</strong></div>}
-                      {p.meta_budget > 0 && <div>💰 Meta ad budget: <strong>${p.meta_budget}/mo</strong></div>}
-                      {p.tiktok_budget > 0 && <div>🎵 TikTok ad budget: <strong>${p.tiktok_budget}/mo</strong></div>}
-                      {p.website_tier && p.website_tier !== 'none' && <div>🌐 Website: <strong>{p.website_tier}</strong>{p.website_budget > 0 && ` ($${p.website_budget})`}</div>}
-                      {p.consultancy_url && <div>🔍 Audit URL: <a href={p.consultancy_url} target="_blank" rel="noopener" style={{ color: 'var(--sky)' }}>{p.consultancy_url}</a></div>}
-                      {p.addons && p.addons.length > 0 && <div>➕ Add-ons: <strong>{p.addons.join(', ')}</strong></div>}
-                      <div style={{ marginTop: '10px', paddingTop: '10px', borderTop: '1px solid rgba(255,255,255,0.05)', fontSize: '0.95rem' }}>
-                        💵 Total: <strong style={{ color: 'var(--sky)' }}>${p.estimated_monthly}/mo</strong>
+                      {p.static_posts > 0 && <Line icon="camera">Static posts: <strong>{p.static_posts}/mo</strong></Line>}
+                      {p.carousels > 0 && <Line icon="palette">Carousels: <strong>{p.carousels}/mo</strong></Line>}
+                      {p.reels > 0 && <Line icon="film">Reels: <strong>{p.reels}/mo</strong></Line>}
+                      {p.marketing_type && <Line icon="chart-up">Marketing: <strong>{p.marketing_type}</strong></Line>}
+                      {p.meta_budget > 0 && <Line icon="dollar">Meta ad budget: <strong>${p.meta_budget}/mo</strong></Line>}
+                      {p.tiktok_budget > 0 && <Line icon="music">TikTok ad budget: <strong>${p.tiktok_budget}/mo</strong></Line>}
+                      {p.website_tier && p.website_tier !== 'none' && <Line icon="globe">Website: <strong>{p.website_tier}</strong>{p.website_budget > 0 && ` ($${p.website_budget})`}</Line>}
+                      {p.consultancy_url && <Line icon="search">Audit URL: <a href={p.consultancy_url} target="_blank" rel="noopener" style={{ color: 'var(--sky)' }}>{p.consultancy_url}</a></Line>}
+                      {p.addons && p.addons.length > 0 && <div style={{ marginTop: '4px' }}>Add-ons: <strong>{p.addons.join(', ')}</strong></div>}
+                      <div style={{ marginTop: '10px', paddingTop: '10px', borderTop: '1px solid rgba(255,255,255,0.05)', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Icon name="dollar" size={16} color="var(--sky)" />
+                        Total: <strong style={{ color: 'var(--sky)' }}>${p.estimated_monthly}/mo</strong>
                       </div>
                     </div>
                   </div>
@@ -209,7 +226,10 @@ export default function AdminSubmissionsPage() {
                         textTransform: 'capitalize',
                       }}>{s}</button>
                     ))}
-                    <button onClick={() => del('package_submissions', p.id, p.name)} style={{ marginLeft: 'auto', background: 'transparent', color: '#ff4d4d', border: '1px solid rgba(255,77,77,0.25)', padding: '5px 10px', borderRadius: '6px', fontSize: '0.72rem', cursor: 'pointer' }}>🗑 Delete</button>
+                    <button onClick={() => del('package_submissions', p.id, p.name)} style={{ marginLeft: 'auto', background: 'transparent', color: '#ff4d4d', border: '1px solid rgba(255,77,77,0.25)', padding: '5px 10px', borderRadius: '6px', fontSize: '0.72rem', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                      <Icon name="trash" size={13} />
+                      Delete
+                    </button>
                   </div>
                 </div>
               )}
@@ -244,10 +264,10 @@ export default function AdminSubmissionsPage() {
               {expanded === j.id && (
                 <div style={{ padding: '0 20px 20px', borderTop: '1px solid var(--glass-border)', background: 'rgba(0,0,0,0.15)' }}>
                   <div style={{ padding: '16px 0', fontSize: '0.82rem', color: 'rgba(249,253,254,0.75)', lineHeight: 1.9 }}>
-                    📧 <a href={`mailto:${j.email}`} style={{ color: 'var(--sky)' }}>{j.email}</a><br />
-                    {j.phone && <>💬 <a href={`https://wa.me/${j.phone.replace(/[^\d]/g, '')}`} target="_blank" rel="noopener" style={{ color: 'var(--sky)' }}>{j.phone}</a><br /></>}
-                    {j.portfolio && <>📁 Portfolio: <a href={j.portfolio} target="_blank" rel="noopener" style={{ color: 'var(--sky)', wordBreak: 'break-all' }}>{j.portfolio}</a><br /></>}
-                    {j.linkedin && <>🔗 LinkedIn: <a href={j.linkedin} target="_blank" rel="noopener" style={{ color: 'var(--sky)', wordBreak: 'break-all' }}>{j.linkedin}</a><br /></>}
+                    <Line icon="mail"><a href={`mailto:${j.email}`} style={{ color: 'var(--sky)' }}>{j.email}</a></Line>
+                    {j.phone && <Line icon="chat"><a href={`https://wa.me/${j.phone.replace(/[^\d]/g, '')}`} target="_blank" rel="noopener" style={{ color: 'var(--sky)' }}>{j.phone}</a></Line>}
+                    {j.portfolio && <Line icon="folder">Portfolio: <a href={j.portfolio} target="_blank" rel="noopener" style={{ color: 'var(--sky)', wordBreak: 'break-all' }}>{j.portfolio}</a></Line>}
+                    {j.linkedin && <Line icon="link">LinkedIn: <a href={j.linkedin} target="_blank" rel="noopener" style={{ color: 'var(--sky)', wordBreak: 'break-all' }}>{j.linkedin}</a></Line>}
                   </div>
 
                   {j.message && (
@@ -268,7 +288,10 @@ export default function AdminSubmissionsPage() {
                         textTransform: 'capitalize',
                       }}>{s}</button>
                     ))}
-                    <button onClick={() => del('job_applications', j.id, j.name)} style={{ marginLeft: 'auto', background: 'transparent', color: '#ff4d4d', border: '1px solid rgba(255,77,77,0.25)', padding: '5px 10px', borderRadius: '6px', fontSize: '0.72rem', cursor: 'pointer' }}>🗑 Delete</button>
+                    <button onClick={() => del('job_applications', j.id, j.name)} style={{ marginLeft: 'auto', background: 'transparent', color: '#ff4d4d', border: '1px solid rgba(255,77,77,0.25)', padding: '5px 10px', borderRadius: '6px', fontSize: '0.72rem', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                      <Icon name="trash" size={13} />
+                      Delete
+                    </button>
                   </div>
                 </div>
               )}
@@ -307,7 +330,10 @@ export default function AdminSubmissionsPage() {
                   </div>
 
                   <div style={{ padding: '16px 0 0', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                    <a href={`mailto:${c.email}?subject=Re: ${c.subject || 'Your message'}`} style={{ background: 'var(--sky)', color: 'var(--dark)', padding: '5px 12px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: 700, textDecoration: 'none' }}>📧 Reply</a>
+                    <a href={`mailto:${c.email}?subject=Re: ${c.subject || 'Your message'}`} style={{ background: 'var(--sky)', color: 'var(--dark)', padding: '5px 12px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                      <Icon name="mail" size={13} />
+                      Reply
+                    </a>
                     {['new', 'replied', 'closed'].map(s => (
                       <button key={s} onClick={() => updateStatus('contact_submissions', c.id, s)} style={{
                         background: c.status === s ? statusBg[s] : 'transparent',
@@ -318,7 +344,10 @@ export default function AdminSubmissionsPage() {
                         textTransform: 'capitalize',
                       }}>{s}</button>
                     ))}
-                    <button onClick={() => del('contact_submissions', c.id, c.name)} style={{ marginLeft: 'auto', background: 'transparent', color: '#ff4d4d', border: '1px solid rgba(255,77,77,0.25)', padding: '5px 10px', borderRadius: '6px', fontSize: '0.72rem', cursor: 'pointer' }}>🗑 Delete</button>
+                    <button onClick={() => del('contact_submissions', c.id, c.name)} style={{ marginLeft: 'auto', background: 'transparent', color: '#ff4d4d', border: '1px solid rgba(255,77,77,0.25)', padding: '5px 10px', borderRadius: '6px', fontSize: '0.72rem', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                      <Icon name="trash" size={13} />
+                      Delete
+                    </button>
                   </div>
                 </div>
               )}
