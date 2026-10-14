@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { Icon } from '@/components/ui/Icons'
 
 interface SingleStep {
   type: 'single'
@@ -15,7 +16,7 @@ interface MultiStep {
   key: string
   q: string
   sub: string
-  options: { v: string; l: string }[]
+  options: { v: string; l: string; icon: string }[]
 }
 
 type Step = SingleStep | MultiStep
@@ -27,11 +28,11 @@ const STEPS: Step[] = [
     q: 'What best describes your business?',
     sub: 'This helps us tailor everything to your specific context.',
     options: [
-      { v: 'local', l: 'Local Business', d: 'Restaurant, salon, clinic, shop — serving your community', icon: '🏪' },
-      { v: 'startup', l: 'Startup', d: 'Early-stage, building a product or service from scratch', icon: '🚀' },
-      { v: 'ecommerce', l: 'E-commerce', d: 'Selling products online', icon: '🛒' },
-      { v: 'service', l: 'Service Business', d: 'Freelancer, agency, consultant, B2B', icon: '💼' },
-      { v: 'personal', l: 'Personal Brand', d: 'Creator, influencer, coach, speaker', icon: '🎤' },
+      { v: 'local', l: 'Local Business', d: 'Restaurant, salon, clinic, shop — serving your community', icon: 'building' },
+      { v: 'startup', l: 'Startup', d: 'Early-stage, building a product or service from scratch', icon: 'rocket' },
+      { v: 'ecommerce', l: 'E-commerce', d: 'Selling products online', icon: 'package' },
+      { v: 'service', l: 'Service Business', d: 'Freelancer, agency, consultant, B2B', icon: 'briefcase' },
+      { v: 'personal', l: 'Personal Brand', d: 'Creator, influencer, coach, speaker', icon: 'megaphone' },
     ],
   },
   {
@@ -40,11 +41,11 @@ const STEPS: Step[] = [
     q: "What's your #1 goal right now?",
     sub: "Pick the one that matters most — we'll optimize for it.",
     options: [
-      { v: 'awareness', l: 'Get discovered', d: 'Build brand awareness and reach new audiences', icon: '📣' },
-      { v: 'leads', l: 'Generate leads', d: 'Turn social into a consistent source of inquiries', icon: '🎯' },
-      { v: 'sales', l: 'Drive sales', d: 'Convert followers and ad traffic into paying customers', icon: '💰' },
-      { v: 'presence', l: 'Build a professional presence', d: 'Look credible, consistent, and trustworthy online', icon: '✨' },
-      { v: 'scale', l: "Scale what's already working", d: 'Amplify existing momentum with strategy and ads', icon: '📈' },
+      { v: 'awareness', l: 'Get discovered', d: 'Build brand awareness and reach new audiences', icon: 'megaphone' },
+      { v: 'leads', l: 'Generate leads', d: 'Turn social into a consistent source of inquiries', icon: 'target' },
+      { v: 'sales', l: 'Drive sales', d: 'Convert followers and ad traffic into paying customers', icon: 'dollar' },
+      { v: 'presence', l: 'Build a professional presence', d: 'Look credible, consistent, and trustworthy online', icon: 'sparkle' },
+      { v: 'scale', l: "Scale what's already working", d: 'Amplify existing momentum with strategy and ads', icon: 'chart-up' },
     ],
   },
   {
@@ -53,10 +54,10 @@ const STEPS: Step[] = [
     q: 'Where are you with marketing right now?',
     sub: 'Honest answer helps us give you the right recommendation.',
     options: [
-      { v: 'none', l: 'Starting from zero', d: 'No social presence, no strategy — starting fresh', icon: '🔴' },
-      { v: 'inconsistent', l: 'Posting inconsistently', d: 'Active sometimes, but no real strategy or system', icon: '🟡' },
-      { v: 'active', l: 'Posting regularly', d: 'Consistent presence but not seeing strong results', icon: '🟢' },
-      { v: 'scaling', l: 'Already running ads + content', d: 'Want to optimize, scale, or hand off to professionals', icon: '🔵' },
+      { v: 'none', l: 'Starting from zero', d: 'No social presence, no strategy — starting fresh', icon: 'dot-red' },
+      { v: 'inconsistent', l: 'Posting inconsistently', d: 'Active sometimes, but no real strategy or system', icon: 'dot-yellow' },
+      { v: 'active', l: 'Posting regularly', d: 'Consistent presence but not seeing strong results', icon: 'dot-green' },
+      { v: 'scaling', l: 'Already running ads + content', d: 'Want to optimize, scale, or hand off to professionals', icon: 'dot-blue' },
     ],
   },
   {
@@ -65,14 +66,14 @@ const STEPS: Step[] = [
     q: 'What services are you looking for?',
     sub: 'Select all that apply — no pressure to know exactly.',
     options: [
-      { v: 'posts', l: '📸 Social Media Posts' },
-      { v: 'reels', l: '🎬 Reels & Video Content' },
-      { v: 'ads', l: '📈 Paid Advertising (Meta/TikTok)' },
-      { v: 'strategy', l: '🎯 Marketing Strategy' },
-      { v: 'branding', l: '🎨 Branding & Identity' },
-      { v: 'copy', l: '✍️ Copywriting' },
-      { v: 'web', l: '🌐 Website Development' },
-      { v: 'analytics', l: '📊 Analytics & Reports' },
+      { v: 'posts', l: 'Social Media Posts', icon: 'camera' },
+      { v: 'reels', l: 'Reels & Video Content', icon: 'film' },
+      { v: 'ads', l: 'Paid Advertising (Meta/TikTok)', icon: 'chart-up' },
+      { v: 'strategy', l: 'Marketing Strategy', icon: 'target' },
+      { v: 'branding', l: 'Branding & Identity', icon: 'palette' },
+      { v: 'copy', l: 'Copywriting', icon: 'pen' },
+      { v: 'web', l: 'Website Development', icon: 'globe' },
+      { v: 'analytics', l: 'Analytics & Reports', icon: 'bar-chart' },
     ],
   },
   {
@@ -81,9 +82,9 @@ const STEPS: Step[] = [
     q: 'How involved do you want to be?',
     sub: "There's no wrong answer — this helps us set the right expectations.",
     options: [
-      { v: 'handoff', l: 'Fully hand it off', d: 'I trust you — just keep me updated monthly', icon: '🙌' },
-      { v: 'collab', l: 'Collaborate together', d: 'I want to review and approve content before it goes live', icon: '🤝' },
-      { v: 'guided', l: 'Guide my team', d: 'Strategy and oversight — my team does execution', icon: '🧭' },
+      { v: 'handoff', l: 'Fully hand it off', d: 'I trust you — just keep me updated monthly', icon: 'handshake' },
+      { v: 'collab', l: 'Collaborate together', d: 'I want to review and approve content before it goes live', icon: 'users' },
+      { v: 'guided', l: 'Guide my team', d: 'Strategy and oversight — my team does execution', icon: 'target' },
     ],
   },
   {
@@ -92,10 +93,10 @@ const STEPS: Step[] = [
     q: "What's your approximate monthly budget?",
     sub: 'This is a soft signal — not a commitment. It helps us recommend the right starting point.',
     options: [
-      { v: 'low', l: 'Under $200/month', d: 'Starting lean — want maximum value for budget', icon: '💚' },
-      { v: 'mid', l: '$200 – $400/month', d: 'Ready to invest in consistent, quality marketing', icon: '💛' },
-      { v: 'high', l: '$400+/month', d: 'Serious about scaling with a full-service approach', icon: '💙' },
-      { v: 'unsure', l: 'Not sure yet', d: 'Let the recommendation guide me', icon: '🤔' },
+      { v: 'low', l: 'Under $200/month', d: 'Starting lean — want maximum value for budget', icon: 'dot-green' },
+      { v: 'mid', l: '$200 – $400/month', d: 'Ready to invest in consistent, quality marketing', icon: 'dot-yellow' },
+      { v: 'high', l: '$400+/month', d: 'Serious about scaling with a full-service approach', icon: 'dot-blue' },
+      { v: 'unsure', l: 'Not sure yet', d: 'Let the recommendation guide me', icon: 'help' },
     ],
   },
 ]
@@ -126,14 +127,14 @@ const PLANS: Record<string, { name: string; price: number; feats: string[]; reas
 }
 
 const ADDONS = [
-  { id: 'extra_posts', label: '📸 Extra Posts', price: '+$5/post' },
-  { id: 'extra_reels', label: '🎬 Extra Reels', price: '+$25/reel' },
-  { id: 'branding', label: '🎨 Branding', price: '+$120/mo' },
-  { id: 'copy', label: '✍️ Copywriting', price: '+$80/mo' },
-  { id: 'photography', label: '📷 Photography', price: '+$100/mo' },
-  { id: 'videography', label: '🎥 Videography', price: '+$150/mo' },
-  { id: 'seo', label: '🔍 SEO', price: '+$90/mo' },
-  { id: 'reports', label: '📊 Monthly Reports', price: '+$60/mo' },
+  { id: 'extra_posts', icon: 'camera', label: 'Extra Posts', price: '+$5/post' },
+  { id: 'extra_reels', icon: 'film', label: 'Extra Reels', price: '+$25/reel' },
+  { id: 'branding', icon: 'palette', label: 'Branding', price: '+$120/mo' },
+  { id: 'copy', icon: 'pen', label: 'Copywriting', price: '+$80/mo' },
+  { id: 'photography', icon: 'camera', label: 'Photography', price: '+$100/mo' },
+  { id: 'videography', icon: 'video', label: 'Videography', price: '+$150/mo' },
+  { id: 'seo', icon: 'search', label: 'SEO', price: '+$90/mo' },
+  { id: 'reports', icon: 'bar-chart', label: 'Monthly Reports', price: '+$60/mo' },
 ]
 
 function recommend(answers: Record<string, string | string[]>): string {
@@ -154,13 +155,12 @@ function recommend(answers: Record<string, string | string[]>): string {
 }
 
 export default function QuizPage() {
-  const [step, setStep] = useState(1) // 1-6 quiz, 7 processing, 8 results, 9 customize, 10 final
+  const [step, setStep] = useState(1)
   const [answers, setAnswers] = useState<Record<string, string | string[]>>({ services: [] })
   const [result, setResult] = useState<string | null>(null)
   const [addons, setAddons] = useState<Record<string, boolean>>({})
   const [procStep, setProcStep] = useState(0)
 
-  // Processing animation
   useEffect(() => {
     if (step === 7) {
       setProcStep(0)
@@ -186,7 +186,7 @@ export default function QuizPage() {
     setAnswers(newAnswers)
     setTimeout(() => {
       if (step < 6) setStep(step + 1)
-      else setStep(7) // trigger processing
+      else setStep(7)
     }, 250)
   }
 
@@ -212,13 +212,11 @@ export default function QuizPage() {
   const plan = result ? PLANS[result] : null
   const otherPlans = result ? Object.entries(PLANS).filter(([k]) => k !== result) : []
 
-  // Get current step data
   const currentStepData = step >= 1 && step <= 6 ? STEPS[step - 1] : null
 
   return (
     <div style={{ minHeight: '100vh', paddingTop: '80px', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '100px 6% 80px' }}>
 
-      {/* Progress bar (only for question steps 1-6) */}
       {step >= 1 && step <= 6 && (
         <div style={{ width: '100%', maxWidth: '640px', marginBottom: '40px' }}>
           <div style={{ height: '3px', background: 'rgba(249,253,254,0.08)', borderRadius: '2px', overflow: 'hidden' }}>
@@ -236,7 +234,7 @@ export default function QuizPage() {
 
       <div style={{ width: '100%', maxWidth: '640px' }}>
 
-        {/* SINGLE-SELECT STEPS */}
+        {/* SINGLE-SELECT */}
         {currentStepData && currentStepData.type === 'single' && (
           <div key={step} style={{ animation: 'pageIn 0.4s cubic-bezier(0.16,1,0.3,1) both' }}>
             <h1 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: 'clamp(1.4rem,4vw,2rem)', color: 'var(--white)', letterSpacing: '-0.5px', marginBottom: '10px', lineHeight: 1.2 }}>
@@ -255,8 +253,8 @@ export default function QuizPage() {
                 }}
                   onMouseEnter={e => { if (answers[currentStepData.key] !== o.v) e.currentTarget.style.borderColor = 'rgba(16,161,219,0.3)' }}
                   onMouseLeave={e => { if (answers[currentStepData.key] !== o.v) e.currentTarget.style.borderColor = 'var(--glass-border)' }}>
-                  <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(16,161,219,0.08)', border: '1px solid rgba(16,161,219,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', flexShrink: 0 }}>
-                    {o.icon}
+                  <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(16,161,219,0.08)', border: '1px solid rgba(16,161,219,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: 'var(--sky)' }}>
+                    <Icon name={o.icon as any} size={20} />
                   </div>
                   <div>
                     <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--white)', marginBottom: '2px' }}>{o.l}</div>
@@ -273,7 +271,7 @@ export default function QuizPage() {
           </div>
         )}
 
-        {/* MULTI-SELECT (Services) */}
+        {/* MULTI-SELECT */}
         {currentStepData && currentStepData.type === 'multi' && (
           <div key={step} style={{ animation: 'pageIn 0.4s cubic-bezier(0.16,1,0.3,1) both' }}>
             <h1 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: 'clamp(1.4rem,4vw,2rem)', color: 'var(--white)', letterSpacing: '-0.5px', marginBottom: '10px', lineHeight: 1.2 }}>
@@ -290,9 +288,10 @@ export default function QuizPage() {
                     borderRadius: '12px', padding: '14px 16px', cursor: 'pointer',
                     display: 'flex', alignItems: 'center', gap: '10px', transition: 'all 0.2s',
                   }}>
-                    <div style={{ width: '20px', height: '20px', borderRadius: '5px', border: `2px solid ${selected ? 'var(--sky)' : 'var(--glass-border)'}`, background: selected ? 'var(--sky)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '0.7rem', color: 'var(--dark)', fontWeight: 800 }}>
-                      {selected && '✓'}
+                    <div style={{ width: '20px', height: '20px', borderRadius: '5px', border: `2px solid ${selected ? 'var(--sky)' : 'var(--glass-border)'}`, background: selected ? 'var(--sky)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: 'var(--dark)' }}>
+                      {selected && <Icon name="check" size={12} strokeWidth={3} />}
                     </div>
+                    <Icon name={o.icon as any} size={16} color="var(--sky)" />
                     <span style={{ fontSize: '0.82rem', color: 'var(--white)', fontWeight: 500 }}>{o.l}</span>
                   </div>
                 )
@@ -307,7 +306,6 @@ export default function QuizPage() {
           </div>
         )}
 
-        {/* STEP 6 SKIP TO RESULTS OVERRIDE */}
         {step === 6 && currentStepData && (
           <div style={{ textAlign: 'center', marginTop: '20px' }}>
             <button onClick={goToProcessing} style={{ background: 'none', border: 'none', color: 'var(--text-dim)', fontSize: '0.78rem', cursor: 'pointer', fontFamily: 'Inter,sans-serif' }}>
@@ -316,7 +314,7 @@ export default function QuizPage() {
           </div>
         )}
 
-        {/* STEP 7: PROCESSING */}
+        {/* PROCESSING */}
         {step === 7 && (
           <div style={{ animation: 'pageIn 0.4s cubic-bezier(0.16,1,0.3,1) both', textAlign: 'center' }}>
             <div style={{ width: '60px', height: '60px', margin: '0 auto 32px', border: '3px solid rgba(16,161,219,0.15)', borderTopColor: 'var(--sky)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
@@ -326,8 +324,8 @@ export default function QuizPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxWidth: '340px', margin: '0 auto', textAlign: 'left' }}>
               {PROC_STEPS.map((s, i) => (
                 <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px', opacity: procStep > i ? 1 : 0.3, transition: 'opacity 0.4s' }}>
-                  <div style={{ width: '22px', height: '22px', borderRadius: '50%', background: procStep > i ? 'rgba(16,161,219,0.15)' : 'transparent', border: `1.5px solid ${procStep > i ? 'var(--sky)' : 'var(--glass-border)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--sky)', fontSize: '0.72rem', fontWeight: 800 }}>
-                    {procStep > i ? '✓' : ''}
+                  <div style={{ width: '22px', height: '22px', borderRadius: '50%', background: procStep > i ? 'rgba(16,161,219,0.15)' : 'transparent', border: `1.5px solid ${procStep > i ? 'var(--sky)' : 'var(--glass-border)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--sky)' }}>
+                    {procStep > i && <Icon name="check" size={12} strokeWidth={3} />}
                   </div>
                   <span style={{ fontSize: '0.82rem', color: procStep > i ? 'var(--white)' : 'var(--text-muted)' }}>{s}</span>
                 </div>
@@ -336,12 +334,12 @@ export default function QuizPage() {
           </div>
         )}
 
-        {/* STEP 8: RESULTS */}
+        {/* RESULTS */}
         {step === 8 && plan && (
           <div style={{ animation: 'pageIn 0.4s cubic-bezier(0.16,1,0.3,1) both' }}>
             <div style={{ background: 'linear-gradient(135deg,rgba(1,32,76,0.5),rgba(16,161,219,0.08))', border: '1px solid rgba(16,161,219,0.25)', borderRadius: '20px', padding: '32px', marginBottom: '16px' }}>
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'linear-gradient(135deg,var(--sky),var(--purple))', color: '#fff', fontSize: '0.6rem', fontWeight: 800, letterSpacing: '1.5px', textTransform: 'uppercase', padding: '4px 12px', borderRadius: '100px', marginBottom: '16px' }}>
-                ⭐ Best Match
+                <Icon name="star" size={11} /> Best Match
               </div>
               <h1 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: '2.5rem', color: 'var(--white)', letterSpacing: '-1px', marginBottom: '4px' }}>{plan.name}</h1>
               <div style={{ fontSize: '0.9rem', color: 'var(--sky)', fontWeight: 600, marginBottom: '12px' }}>${plan.price} / month</div>
@@ -355,7 +353,6 @@ export default function QuizPage() {
               </ul>
             </div>
 
-            {/* Alt plans */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '20px' }}>
               {otherPlans.map(([k, p]) => (
                 <div key={k} style={{ background: 'rgba(249,253,254,0.02)', border: '1px solid var(--glass-border)', borderRadius: '14px', padding: '18px' }}>
@@ -376,7 +373,7 @@ export default function QuizPage() {
           </div>
         )}
 
-        {/* STEP 9: CUSTOMIZATION */}
+        {/* CUSTOMIZATION */}
         {step === 9 && plan && (
           <div style={{ animation: 'pageIn 0.4s cubic-bezier(0.16,1,0.3,1) both' }}>
             <h1 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: '1.6rem', color: 'var(--white)', letterSpacing: '-0.5px', marginBottom: '10px' }}>
@@ -385,8 +382,9 @@ export default function QuizPage() {
             <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '20px', fontWeight: 300 }}>
               Your recommended plan is already included. Add or remove extras to match exactly what you need.
             </p>
-            <div style={{ background: 'rgba(16,161,219,0.05)', border: '1px solid rgba(16,161,219,0.15)', borderRadius: '12px', padding: '14px 16px', marginBottom: '20px', fontSize: '0.8rem', color: 'var(--sky)', fontWeight: 500 }}>
-              ✓ Base: {plan.name} Plan — ${plan.price}/mo
+            <div style={{ background: 'rgba(16,161,219,0.05)', border: '1px solid rgba(16,161,219,0.15)', borderRadius: '12px', padding: '14px 16px', marginBottom: '20px', fontSize: '0.8rem', color: 'var(--sky)', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Icon name="check" size={14} strokeWidth={2.5} />
+              Base: {plan.name} Plan — ${plan.price}/mo
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '24px' }} className="quiz-check-grid">
               {ADDONS.map(a => (
@@ -396,9 +394,10 @@ export default function QuizPage() {
                   borderRadius: '12px', padding: '12px 14px', cursor: 'pointer',
                   display: 'flex', alignItems: 'center', gap: '10px', transition: 'all 0.2s',
                 }}>
-                  <div style={{ width: '20px', height: '20px', borderRadius: '5px', border: `2px solid ${addons[a.id] ? 'var(--sky)' : 'var(--glass-border)'}`, background: addons[a.id] ? 'var(--sky)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '0.7rem', color: 'var(--dark)', fontWeight: 800 }}>
-                    {addons[a.id] && '✓'}
+                  <div style={{ width: '20px', height: '20px', borderRadius: '5px', border: `2px solid ${addons[a.id] ? 'var(--sky)' : 'var(--glass-border)'}`, background: addons[a.id] ? 'var(--sky)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: 'var(--dark)' }}>
+                    {addons[a.id] && <Icon name="check" size={12} strokeWidth={3} />}
                   </div>
+                  <Icon name={a.icon as any} size={15} color="var(--sky)" />
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: '0.78rem', color: 'var(--white)', fontWeight: 500 }}>{a.label}</div>
                     <div style={{ fontSize: '0.68rem', color: 'var(--sky)', fontWeight: 600 }}>{a.price}</div>
@@ -413,11 +412,13 @@ export default function QuizPage() {
           </div>
         )}
 
-        {/* STEP 10: FINAL CTA */}
+        {/* FINAL CTA */}
         {step === 10 && plan && (
           <div style={{ animation: 'pageIn 0.4s cubic-bezier(0.16,1,0.3,1) both' }}>
             <div style={{ background: 'linear-gradient(135deg,rgba(1,32,76,0.6),rgba(106,70,217,0.15))', border: '1px solid rgba(16,161,219,0.3)', borderRadius: '20px', padding: '40px 32px', textAlign: 'center' }}>
-              <div style={{ fontSize: '3rem', marginBottom: '20px' }}>🎯</div>
+              <div style={{ color: 'var(--sky)', marginBottom: '20px', display: 'flex', justifyContent: 'center' }}>
+                <Icon name="target" size={56} />
+              </div>
               <h1 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: 'clamp(1.6rem,4vw,2.2rem)', color: 'var(--white)', letterSpacing: '-1px', marginBottom: '16px' }}>
                 You&apos;re Ready to Grow
               </h1>

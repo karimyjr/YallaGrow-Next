@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import { Icon } from '@/components/ui/Icons'
 
 const COUNTRIES=['Lebanon','United Arab Emirates','Saudi Arabia','Kuwait','Qatar','Bahrain','Oman','Jordan','Egypt','Iraq','United Kingdom','United States','Canada','France','Germany','Australia','Other']
 
@@ -32,7 +33,9 @@ export default function AffiliatePage() {
       <div style={{padding:'80px 6%',textAlign:'center',position:'relative',overflow:'hidden'}}>
         <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse 80% 60% at 50% 0%,rgba(16,161,219,0.09) 0%,transparent 70%)',pointerEvents:'none'}}/>
         <div style={{position:'relative',zIndex:1}}>
-          <div style={{display:'inline-flex',alignItems:'center',gap:'8px',background:'rgba(16,161,219,0.1)',border:'1px solid rgba(16,161,219,0.2)',color:'var(--sky)',fontSize:'0.7rem',fontWeight:700,padding:'5px 16px',borderRadius:'100px',marginBottom:'24px',letterSpacing:'1px',textTransform:'uppercase'}}>💰 Affiliate Program</div>
+          <div style={{display:'inline-flex',alignItems:'center',gap:'8px',background:'rgba(16,161,219,0.1)',border:'1px solid rgba(16,161,219,0.2)',color:'var(--sky)',fontSize:'0.7rem',fontWeight:700,padding:'5px 16px',borderRadius:'100px',marginBottom:'24px',letterSpacing:'1px',textTransform:'uppercase'}}>
+            <Icon name="dollar" size={13} /> Affiliate Program
+          </div>
           <h1 style={{fontFamily:'Syne,sans-serif',fontWeight:800,fontSize:'clamp(2.4rem,6vw,4rem)',color:'var(--white)',letterSpacing:'-2px',lineHeight:1.1,marginBottom:'20px'}}>
             Grow With Us.<br/><span className="grad">Earn With Us.</span>
           </h1>
@@ -111,7 +114,9 @@ export default function AffiliatePage() {
         <div style={{maxWidth:'640px',margin:'0 auto',background:'var(--glass)',border:'1px solid var(--glass-border)',borderRadius:'20px',padding:'32px',textAlign:'left'}}>
           {sent?(
             <div style={{textAlign:'center',padding:'40px 0'}}>
-              <div style={{fontSize:'3rem',marginBottom:'16px'}}>🎉</div>
+              <div style={{color:'#16db64',marginBottom:'16px',display:'flex',justifyContent:'center'}}>
+                <Icon name="check" size={44} strokeWidth={2.5} />
+              </div>
               <h3 style={{fontFamily:'Syne,sans-serif',fontWeight:800,fontSize:'1.3rem',color:'var(--white)',marginBottom:'8px'}}>Application Received!</h3>
               <p style={{fontSize:'0.85rem',color:'var(--text-muted)',marginBottom:'20px'}}>We&apos;ll review and get back to you within 48 hours.</p>
               <Link href="/" className="btn-secondary">Back to Home</Link>
@@ -154,7 +159,8 @@ export default function AffiliatePage() {
           <div style={{display:'inline-block',background:'linear-gradient(135deg,rgba(16,161,219,0.08),rgba(106,70,217,0.05))',border:'1px solid rgba(16,161,219,0.2)',borderRadius:'16px',padding:'20px 32px'}}>
             <p style={{fontSize:'0.88rem',fontWeight:600,color:'var(--white)',marginBottom:'4px'}}>Already an affiliate?</p>
             <p style={{fontSize:'0.75rem',color:'var(--text-muted)',marginBottom:'16px'}}>Sign in to track referrals, earnings and payouts.</p>
-<a href="/affiliate-dashboard.html" className="btn-primary" style={{padding:'11px 24px',fontSize:'0.85rem'}}>Access My Dashboard →</a>          </div>
+            <a href="/affiliate-dashboard.html" className="btn-primary" style={{padding:'11px 24px',fontSize:'0.85rem'}}>Access My Dashboard →</a>
+          </div>
         </div>
       </div>
     </div>

@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import { Icon } from '@/components/ui/Icons'
 
 interface Model1State {
   revenue: number
@@ -35,7 +36,6 @@ export default function PerformancePartnership() {
     price: 0, margin: 0, sales: 0, length: 3, closeRate: 20, complexity: 'low', growth: 20,
   })
 
-  // ========== MODEL 1 CALCULATIONS ==========
   const netProfit = m1.revenue - m1.expenses
   const m1IsLoss = m1.revenue <= 0 || netProfit <= 0
 
@@ -59,7 +59,6 @@ export default function PerformancePartnership() {
     m1Results = { deposit, commissionPct, monthlyCommission, annual, netProfit }
   }
 
-  // ========== MODEL 2 CALCULATIONS ==========
   const monthlyRevenue2 = m2.price * m2.sales
   const monthlyProfit2 = monthlyRevenue2 * (m2.margin / 100)
   const newSales2 = m2.sales * (m2.growth / 100)
@@ -86,10 +85,9 @@ export default function PerformancePartnership() {
 
   return (
     <section style={{ padding: '80px 6% 60px' }}>
-      {/* Header */}
       <div style={{ textAlign: 'center', marginBottom: '16px' }}>
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'linear-gradient(135deg,var(--sky),var(--purple))', color: '#fff', fontSize: '0.62rem', fontWeight: 800, letterSpacing: '1.5px', padding: '5px 14px', borderRadius: '100px', textTransform: 'uppercase' }}>
-          🔒 Invite-Only
+          <Icon name="lock" size={11} /> Invite-Only
         </span>
       </div>
       <div style={{ textAlign: 'center', marginBottom: '48px' }}>
@@ -100,7 +98,6 @@ export default function PerformancePartnership() {
         </p>
       </div>
 
-      {/* Tabs */}
       <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '32px', maxWidth: '600px', margin: '0 auto 32px', background: 'var(--glass)', border: '1px solid var(--glass-border)', borderRadius: '14px', padding: '5px' }} className="pp-tabs-wrapper">
         <button onClick={() => setActiveModel(1)} style={{
           flex: 1, padding: '11px 16px', borderRadius: '10px',
@@ -120,7 +117,6 @@ export default function PerformancePartnership() {
         }}>Model 2 — Per Sale Commission</button>
       </div>
 
-      {/* MODEL 1 */}
       {activeModel === 1 && (
         <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
           <div style={{ background: 'rgba(249,253,254,0.02)', border: '1px solid var(--glass-border)', borderRadius: '16px', padding: '24px', marginBottom: '24px', textAlign: 'center' }}>
@@ -133,7 +129,6 @@ export default function PerformancePartnership() {
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }} className="pp-calc-grid">
-            {/* Inputs */}
             <div style={{ background: 'var(--glass)', border: '1px solid var(--glass-border)', borderRadius: '16px', padding: '24px' }}>
               <div style={{ marginBottom: '14px' }}>
                 <label style={labelStyle}>MONTHLY REVENUE ($)</label>
@@ -178,11 +173,11 @@ export default function PerformancePartnership() {
               </div>
             </div>
 
-            {/* Results */}
             <div style={{ background: 'linear-gradient(135deg,rgba(1,32,76,0.4),rgba(16,161,219,0.05))', border: '1px solid rgba(16,161,219,0.2)', borderRadius: '16px', padding: '24px' }}>
               {m1IsLoss ? (
-                <div style={{ background: 'rgba(255,193,7,0.08)', border: '1px solid rgba(255,193,7,0.25)', borderRadius: '12px', padding: '20px', color: '#ffc107', fontSize: '0.85rem', lineHeight: 1.6, textAlign: 'center' }}>
-                  ⚠️ Your business is currently operating at a loss. We recommend improving profitability before entering a performance partnership.
+                <div style={{ background: 'rgba(255,193,7,0.08)', border: '1px solid rgba(255,193,7,0.25)', borderRadius: '12px', padding: '20px', color: '#ffc107', fontSize: '0.85rem', lineHeight: 1.6, textAlign: 'center', display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                  <Icon name="alert" size={18} style={{ flexShrink: 0, marginTop: '1px' }} />
+                  <span>Your business is currently operating at a loss. We recommend improving profitability before entering a performance partnership.</span>
                 </div>
               ) : (
                 <>
@@ -203,7 +198,6 @@ export default function PerformancePartnership() {
         </div>
       )}
 
-      {/* MODEL 2 */}
       {activeModel === 2 && (
         <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
           <div style={{ background: 'rgba(249,253,254,0.02)', border: '1px solid var(--glass-border)', borderRadius: '16px', padding: '24px', marginBottom: '24px', textAlign: 'center' }}>
@@ -218,7 +212,6 @@ export default function PerformancePartnership() {
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }} className="pp-calc-grid">
-            {/* Inputs */}
             <div style={{ background: 'var(--glass)', border: '1px solid var(--glass-border)', borderRadius: '16px', padding: '24px' }}>
               <div style={{ marginBottom: '14px' }}>
                 <label style={labelStyle}>PRODUCT / SERVICE PRICE ($)</label>
@@ -265,7 +258,6 @@ export default function PerformancePartnership() {
               </div>
             </div>
 
-            {/* Results */}
             <div style={{ background: 'linear-gradient(135deg,rgba(1,32,76,0.4),rgba(16,161,219,0.05))', border: '1px solid rgba(16,161,219,0.2)', borderRadius: '16px', padding: '24px' }}>
               <div style={{ marginBottom: '20px', paddingBottom: '16px', borderBottom: '1px solid var(--glass-border)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>

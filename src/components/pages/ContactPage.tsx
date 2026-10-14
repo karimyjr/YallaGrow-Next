@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useToast } from '@/components/ui/Toast'
+import { Icon } from '@/components/ui/Icons'
 
 export default function ContactPage() {
   const { showToast } = useToast()
@@ -51,9 +52,14 @@ export default function ContactPage() {
     transition: 'border-color 0.2s',
   }
 
+  const contactOptions = [
+    { icon: 'chat', title: 'WhatsApp', desc: 'Fastest reply — usually within the hour', href: 'https://wa.me/447376441603', cta: 'Chat now →' },
+    { icon: 'mail', title: 'Email', desc: 'We respond to all emails within 24 hours', href: 'mailto:info@yallagrow.net', cta: 'info@yallagrow.net' },
+    { icon: 'calendar', title: 'Book a call', desc: 'Free 30-min strategy session — no commitment', href: process.env.NEXT_PUBLIC_BOOKING_URL || 'https://calendar.app.google/3WibM5kWvizhnHJt8', cta: 'Pick a time →' },
+  ]
+
   return (
     <div style={{ paddingTop: '80px' }}>
-      {/* HERO */}
       <section style={{ padding: '80px 6% 40px', textAlign: 'center' }}>
         <span className="eyebrow" style={{ marginBottom: '12px' }}>Get in Touch</span>
         <h1 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: 'clamp(2.4rem,5vw,4rem)', letterSpacing: '-2px', lineHeight: 1.05, color: 'var(--white)', marginTop: '12px' }}>
@@ -64,10 +70,8 @@ export default function ContactPage() {
         </p>
       </section>
 
-      {/* CONTENT */}
       <section style={{ padding: '40px 6% 100px' }}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px', maxWidth: '1100px', margin: '0 auto', alignItems: 'start' }} className="contact-grid">
-          {/* Left — Contact options */}
           <div>
             <h2 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: '1.4rem', color: 'var(--white)', letterSpacing: '-0.5px', marginBottom: '20px' }}>
               Reach us directly
@@ -77,11 +81,7 @@ export default function ContactPage() {
             </p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '28px' }}>
-              {[
-                { icon: '💬', title: 'WhatsApp', desc: 'Fastest reply — usually within the hour', href: 'https://wa.me/447376441603', cta: 'Chat now →' },
-                { icon: '📧', title: 'Email', desc: 'We respond to all emails within 24 hours', href: 'mailto:info@yallagrow.net', cta: 'info@yallagrow.net' },
-                { icon: '📅', title: 'Book a call', desc: 'Free 30-min strategy session — no commitment', href: process.env.NEXT_PUBLIC_BOOKING_URL || 'https://calendar.app.google/3WibM5kWvizhnHJt8', cta: 'Pick a time →' },
-              ].map(item => (
+              {contactOptions.map(item => (
                 <a
                   key={item.title}
                   href={item.href}
@@ -96,7 +96,9 @@ export default function ContactPage() {
                   onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(16,161,219,0.3)'; e.currentTarget.style.transform = 'translateY(-2px)' }}
                   onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--glass-border)'; e.currentTarget.style.transform = 'none' }}
                 >
-                  <div style={{ fontSize: '1.8rem', flexShrink: 0 }}>{item.icon}</div>
+                  <div style={{ flexShrink: 0, width: '44px', height: '44px', borderRadius: '11px', background: 'rgba(16,161,219,0.08)', border: '1px solid rgba(16,161,219,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--sky)' }}>
+                    <Icon name={item.icon as any} size={20} />
+                  </div>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '0.95rem', color: 'var(--white)', marginBottom: '4px' }}>{item.title}</div>
                     <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '4px' }}>{item.desc}</div>
@@ -106,10 +108,11 @@ export default function ContactPage() {
               ))}
             </div>
 
-            {/* Address block */}
             <div style={{ background: 'rgba(16,161,219,0.04)', border: '1px solid rgba(16,161,219,0.15)', borderRadius: '12px', padding: '18px 20px' }}>
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-                <div style={{ fontSize: '1.4rem', flexShrink: 0, marginTop: '2px' }}>📍</div>
+                <div style={{ flexShrink: 0, marginTop: '2px', color: 'var(--sky)' }}>
+                  <Icon name="map-pin" size={22} />
+                </div>
                 <div>
                   <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '0.88rem', color: 'var(--white)', marginBottom: '6px' }}>
                     Based in Lebanon
@@ -125,11 +128,12 @@ export default function ContactPage() {
             </div>
           </div>
 
-          {/* Right — Form */}
           <div style={{ background: 'var(--glass)', border: '1px solid var(--glass-border)', borderRadius: '20px', padding: '32px' }}>
             {sent ? (
               <div style={{ textAlign: 'center', padding: '40px 20px' }}>
-                <div style={{ fontSize: '3rem', marginBottom: '16px' }}>✅</div>
+                <div style={{ color: '#16db64', marginBottom: '16px', display: 'flex', justifyContent: 'center' }}>
+                  <Icon name="check" size={48} strokeWidth={2.5} />
+                </div>
                 <h3 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: '1.3rem', color: 'var(--white)', marginBottom: '10px' }}>Message sent!</h3>
                 <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.7 }}>
                   We&apos;ll get back to you within 24 hours. Check your inbox!
@@ -138,19 +142,15 @@ export default function ContactPage() {
             ) : (
               <>
                 <h3 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 700, fontSize: '1.05rem', color: 'var(--white)', marginBottom: '20px' }}>Send us a message</h3>
-
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }} className="form-row">
                   <input placeholder="Your Name *" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} style={inputStyle} />
                   <input placeholder="Email *" type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} style={inputStyle} />
                 </div>
-
                 <input placeholder="Subject" value={form.subject} onChange={e => setForm({ ...form, subject: e.target.value })} style={{ ...inputStyle, marginBottom: '12px' }} />
                 <textarea placeholder="Your message... *" rows={6} value={form.message} onChange={e => setForm({ ...form, message: e.target.value })} style={{ ...inputStyle, resize: 'vertical', marginBottom: '16px' }} />
-
                 <p style={{ fontSize: '0.72rem', color: 'var(--text-dim)', marginBottom: '14px' }}>
                   By submitting, you agree to our <Link href="/privacy" style={{ color: 'var(--sky)' }}>Privacy Policy</Link> and <Link href="/terms" style={{ color: 'var(--sky)' }}>Terms of Service</Link>.
                 </p>
-
                 <button onClick={submit} disabled={loading} className="btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
                   {loading ? 'Sending...' : 'Send Message →'}
                 </button>

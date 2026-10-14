@@ -2,12 +2,13 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useToast } from '@/components/ui/Toast'
+import { Icon } from '@/components/ui/Icons'
 
 const CULTURE = [
-  { icon: '🚀', title: 'Move fast', desc: "No bureaucracy. You'll ship real work for real clients from day one." },
-  { icon: '🎯', title: 'Own your work', desc: 'We give you responsibility, not micromanagement. Results matter more than hours.' },
-  { icon: '📈', title: 'Grow with us', desc: "We're building something real. The earlier you join, the more you shape it." },
-  { icon: '🤝', title: 'Honest environment', desc: 'Direct feedback, transparent decisions, no corporate politics.' },
+  { icon: 'rocket', title: 'Move fast', desc: "No bureaucracy. You'll ship real work for real clients from day one." },
+  { icon: 'target', title: 'Own your work', desc: 'We give you responsibility, not micromanagement. Results matter more than hours.' },
+  { icon: 'chart-up', title: 'Grow with us', desc: "We're building something real. The earlier you join, the more you shape it." },
+  { icon: 'handshake', title: 'Honest environment', desc: 'Direct feedback, transparent decisions, no corporate politics.' },
 ]
 
 interface Job {
@@ -17,6 +18,7 @@ interface Job {
   statusColor: 'closed' | 'open'
   iconBg: string
   iconBorder: string
+  locationIcon: string
   location: string
   type: string
   desc: string
@@ -28,12 +30,13 @@ interface Job {
 const JOBS: Job[] = [
   {
     title: 'CEO / Founder',
-    icon: '👤',
+    icon: 'user',
     status: 'Leadership — Not Open',
     statusColor: 'closed',
     iconBg: 'rgba(249,253,254,0.04)',
     iconBorder: 'var(--glass-border)',
-    location: '🏢 YallaGrow HQ',
+    locationIcon: 'building',
+    location: 'YallaGrow HQ',
     type: 'Full-time',
     desc: "Listed for transparency. This role is not open for applications — it exists to show you who's running the ship and how we think about leadership.",
     responsibilities: [
@@ -46,12 +49,13 @@ const JOBS: Job[] = [
   },
   {
     title: 'Designer / Content Creator',
-    icon: '🎨',
+    icon: 'palette',
     status: 'Open Position',
     statusColor: 'open',
     iconBg: 'rgba(16,161,219,0.08)',
     iconBorder: 'rgba(16,161,219,0.15)',
-    location: '📍 Lebanon / Remote',
+    locationIcon: 'map-pin',
+    location: 'Lebanon / Remote',
     type: 'Full-time',
     desc: "We're looking for someone who can make brands look and feel premium. You'll work directly on client accounts — designing posts, building brand visuals, and producing short-form content that actually performs.",
     responsibilities: [
@@ -69,12 +73,13 @@ const JOBS: Job[] = [
   },
   {
     title: 'Copywriter / Content Specialist',
-    icon: '✍️',
+    icon: 'pen',
     status: 'Open Position',
     statusColor: 'open',
     iconBg: 'rgba(106,70,217,0.08)',
     iconBorder: 'rgba(106,70,217,0.15)',
-    location: '📍 Lebanon / Remote',
+    locationIcon: 'map-pin',
+    location: 'Lebanon / Remote',
     type: 'Full-time',
     desc: "We're looking for someone who can write — not just content, but words that make people stop, read, and act. You'll write captions, ad copy, and messaging for real clients across different industries.",
     responsibilities: [
@@ -92,12 +97,13 @@ const JOBS: Job[] = [
   },
   {
     title: 'Freelance Media Buyer',
-    icon: '📈',
+    icon: 'chart-up',
     status: 'Open — Freelance / Part-time',
     statusColor: 'open',
     iconBg: 'rgba(37,135,197,0.08)',
     iconBorder: 'rgba(37,135,197,0.15)',
-    location: '📍 Remote',
+    locationIcon: 'map-pin',
+    location: 'Remote',
     type: 'Part-time / Freelance',
     desc: "Freelance opportunity for someone who knows how to run Meta Ads and get results. You'll manage ad campaigns for our clients — targeting, budgets, optimization — and be judged purely on performance.",
     responsibilities: [
@@ -113,6 +119,12 @@ const JOBS: Job[] = [
       'Organized, reliable, works without hand-holding',
     ],
   },
+]
+
+const APPLY_ITEMS = [
+  { icon: 'folder', text: 'Portfolio or work samples' },
+  { icon: 'link', text: 'Instagram / Behance / LinkedIn' },
+  { icon: 'chat', text: "Which role you want & why you'd be a good fit" },
 ]
 
 export default function CareersPage() {
@@ -145,7 +157,6 @@ export default function CareersPage() {
 
   return (
     <div style={{ paddingTop: '80px' }}>
-      {/* HERO */}
       <div style={{ padding: '80px 6% 60px', textAlign: 'center' }}>
         <span className="eyebrow" style={{ marginBottom: '12px' }}>Join the Team</span>
         <h1 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: 'clamp(2.4rem,5vw,4rem)', letterSpacing: '-2px', lineHeight: 1.05, marginTop: '12px', color: 'var(--white)' }}>
@@ -155,7 +166,6 @@ export default function CareersPage() {
           We&apos;re a small, execution-focused marketing agency based in Lebanon. We don&apos;t hire for titles — we hire for results. If you&apos;re good at what you do and want to work on real client projects, we want to hear from you.
         </p>
 
-        {/* Stats bar */}
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0', marginTop: '32px', background: 'var(--glass)', border: '1px solid var(--glass-border)', borderRadius: '16px', padding: '18px 28px' }} className="careers-stats-bar">
           {[
             { n: '3', l: 'Open roles' },
@@ -173,14 +183,15 @@ export default function CareersPage() {
         </div>
       </div>
 
-      {/* CULTURE STRIP */}
       <section style={{ padding: '40px 6% 80px', background: 'rgba(0,0,0,0.2)' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', maxWidth: '1100px', margin: '0 auto' }} className="culture-grid">
           {CULTURE.map(c => (
             <div key={c.title} style={{ background: 'var(--glass)', border: '1px solid var(--glass-border)', borderRadius: '16px', padding: '24px', transition: 'all 0.3s' }}
               onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(16,161,219,0.2)'; e.currentTarget.style.transform = 'translateY(-4px)' }}
               onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--glass-border)'; e.currentTarget.style.transform = 'none' }}>
-              <div style={{ fontSize: '1.6rem', marginBottom: '12px' }}>{c.icon}</div>
+              <div style={{ color: 'var(--sky)', marginBottom: '14px' }}>
+                <Icon name={c.icon as any} size={24} />
+              </div>
               <h4 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 700, fontSize: '0.95rem', color: 'var(--white)', marginBottom: '8px' }}>{c.title}</h4>
               <p style={{ fontSize: '0.76rem', color: 'var(--text-muted)', lineHeight: 1.6, fontWeight: 300 }}>{c.desc}</p>
             </div>
@@ -188,7 +199,6 @@ export default function CareersPage() {
         </div>
       </section>
 
-      {/* POSITIONS */}
       <section style={{ padding: '80px 6%' }}>
         <div style={{ marginBottom: '48px', maxWidth: '1100px', margin: '0 auto 48px' }}>
           <span className="eyebrow" style={{ marginBottom: '12px' }}>Roles</span>
@@ -196,7 +206,7 @@ export default function CareersPage() {
         </div>
 
         <div style={{ maxWidth: '1100px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          {JOBS.map((j, ji) => (
+          {JOBS.map(j => (
             <div key={j.title} style={{
               background: 'rgba(249,253,254,0.02)',
               border: '1px solid var(--glass-border)',
@@ -208,10 +218,9 @@ export default function CareersPage() {
               onMouseEnter={e => { if (!j.closed) { e.currentTarget.style.borderColor = 'rgba(16,161,219,0.15)' } }}
               onMouseLeave={e => { if (!j.closed) e.currentTarget.style.borderColor = 'var(--glass-border)' }}>
 
-              {/* Header */}
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '18px', marginBottom: '20px', flexWrap: 'wrap' }}>
-                <div style={{ width: '52px', height: '52px', borderRadius: '14px', background: j.iconBg, border: `1px solid ${j.iconBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem', flexShrink: 0 }}>
-                  {j.icon}
+                <div style={{ width: '52px', height: '52px', borderRadius: '14px', background: j.iconBg, border: `1px solid ${j.iconBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: 'var(--sky)' }}>
+                  <Icon name={j.icon as any} size={22} />
                 </div>
                 <div style={{ flex: 1, minWidth: '200px' }}>
                   <div style={{ fontSize: '0.62rem', fontWeight: 700, letterSpacing: '1.5px', textTransform: 'uppercase', color: j.statusColor === 'open' ? '#16db64' : 'var(--text-dim)', marginBottom: '6px' }}>
@@ -219,7 +228,10 @@ export default function CareersPage() {
                   </div>
                   <h3 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: '1.2rem', color: 'var(--white)', marginBottom: '6px' }}>{j.title}</h3>
                   <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                    <span>{j.location}</span>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                      <Icon name={j.locationIcon as any} size={13} />
+                      {j.location}
+                    </span>
                     <span>{j.type}</span>
                   </div>
                 </div>
@@ -232,7 +244,6 @@ export default function CareersPage() {
                 {j.desc}
               </p>
 
-              {/* Responsibilities + Requirements */}
               {j.responsibilities && (
                 <div style={{ display: 'grid', gridTemplateColumns: j.requirements ? '1fr 1fr' : '1fr', gap: '32px' }} className="job-cols">
                   <div>
@@ -268,11 +279,8 @@ export default function CareersPage() {
         </div>
       </section>
 
-      {/* APPLY SECTION */}
       <section id="applySection" style={{ padding: '80px 6% 100px', background: 'rgba(0,0,0,0.2)' }}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '48px', maxWidth: '1100px', margin: '0 auto', alignItems: 'start' }} className="apply-grid">
-
-          {/* Left */}
           <div>
             <span className="eyebrow" style={{ marginBottom: '12px' }}>Apply</span>
             <h2 className="section-title" style={{ marginTop: '12px', marginBottom: '16px' }}>Work With Us</h2>
@@ -280,24 +288,23 @@ export default function CareersPage() {
               No lengthy cover letters. No corporate forms. Just send your portfolio, past work, or a link to your Instagram / Behance — and tell us which role you&apos;re applying for.
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {[
-                { icon: '📁', text: 'Portfolio or work samples' },
-                { icon: '🔗', text: 'Instagram / Behance / LinkedIn' },
-                { icon: '💬', text: "Which role you want & why you'd be a good fit" },
-              ].map(i => (
+              {APPLY_ITEMS.map(i => (
                 <div key={i.text} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', background: 'var(--glass)', border: '1px solid var(--glass-border)', borderRadius: '12px' }}>
-                  <span style={{ fontSize: '1.2rem' }}>{i.icon}</span>
+                  <span style={{ color: 'var(--sky)', display: 'flex', alignItems: 'center' }}>
+                    <Icon name={i.icon as any} size={18} />
+                  </span>
                   <span style={{ fontSize: '0.82rem', color: 'rgba(249,253,254,0.75)' }}>{i.text}</span>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Right - Form */}
           <div style={{ background: 'var(--glass)', border: '1px solid var(--glass-border)', borderRadius: '20px', padding: '32px' }}>
             {sent ? (
               <div style={{ textAlign: 'center', padding: '40px 20px' }}>
-                <div style={{ fontSize: '3rem', marginBottom: '16px' }}>✅</div>
+                <div style={{ color: '#16db64', marginBottom: '16px', display: 'flex', justifyContent: 'center' }}>
+                  <Icon name="check" size={48} strokeWidth={2.5} />
+                </div>
                 <h3 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: '1.3rem', color: 'var(--white)', marginBottom: '10px' }}>Application received.</h3>
                 <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.7 }}>
                   We&apos;ll review your work and get back to you within a few days. No ghosting — we respond to every application.
