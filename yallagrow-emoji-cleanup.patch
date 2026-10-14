@@ -1,0 +1,2558 @@
+diff --git a/src/app/admin/affiliates/page.tsx b/src/app/admin/affiliates/page.tsx
+index b820e0b..237bcde 100644
+--- a/src/app/admin/affiliates/page.tsx
++++ b/src/app/admin/affiliates/page.tsx
+@@ -1,6 +1,7 @@
+ 'use client'
+ import { useState, useEffect, useCallback } from 'react'
+ import { supabase } from '@/lib/supabase'
++import { Icon } from '@/components/ui/Icons'
+ 
+ interface Affiliate {
+   id: string
+@@ -117,9 +118,8 @@ export default function AdminAffiliatesPage() {
+     const title = prompt('Resource title (e.g. "Case Studies"):')
+     if (!title) return
+     const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+-    const icon = prompt('Emoji icon (e.g. 📊):') || '📄'
+     const { data } = await supabase.from('affiliate_resources').insert({
+-      title, slug, icon, sort_order: resources.length + 1,
++      title, slug, icon: '', sort_order: resources.length + 1,
+     }).select().single()
+     if (data) setEditingResource(data)
+     loadAll()
+@@ -144,15 +144,18 @@ export default function AdminAffiliatesPage() {
+ 
+   return (
+     <div style={{ padding: '32px 24px', maxWidth: '1200px', margin: '0 auto' }}>
+-      <h2 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: '1.6rem', color: 'var(--white)', marginBottom: '8px' }}>🤝 Affiliate Program</h2>
++      <h2 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: '1.6rem', color: 'var(--white)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '10px' }}>
++        <Icon name="handshake" size={22} />
++        Affiliate Program
++      </h2>
+       <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '24px' }}>Manage members, referrals, and marketing resources.</p>
+ 
+       {/* Sub-tabs */}
+       <div style={{ display: 'flex', gap: '6px', borderBottom: '1px solid var(--glass-border)', marginBottom: '32px', flexWrap: 'wrap' }}>
+         {[
+-          { id: 'members', label: '👥 Members', count: affiliates.length },
+-          { id: 'referrals', label: '📊 Referrals', count: referrals.length },
+-          { id: 'resources', label: '🎓 Marketing Resources', count: resources.length },
++          { id: 'members', icon: 'users', label: 'Members', count: affiliates.length },
++          { id: 'referrals', icon: 'bar-chart', label: 'Referrals', count: referrals.length },
++          { id: 'resources', icon: 'graduation', label: 'Marketing Resources', count: resources.length },
+         ].map(t => (
+           <button key={t.id} onClick={() => setTab(t.id as 'members' | 'referrals' | 'resources')} style={{
+             background: tab === t.id ? 'rgba(16,161,219,0.08)' : 'transparent',
+@@ -162,7 +165,9 @@ export default function AdminAffiliatesPage() {
+             color: tab === t.id ? 'var(--sky)' : 'var(--text-muted)',
+             fontSize: '0.88rem', fontWeight: 600, fontFamily: 'Inter,sans-serif',
+             marginBottom: '-1px',
++            display: 'inline-flex', alignItems: 'center', gap: '8px',
+           }}>
++            <Icon name={t.icon as any} size={15} />
+             {t.label} <span style={{ opacity: 0.6, fontSize: '0.75rem' }}>({t.count})</span>
+           </button>
+         ))}
+@@ -171,7 +176,7 @@ export default function AdminAffiliatesPage() {
+       {/* MEMBERS TAB */}
+       {tab === 'members' && (
+         <>
+-          <input placeholder="🔍 Search by name, email, or code..." value={search} onChange={e => setSearch(e.target.value)}
++          <input placeholder="Search by name, email, or code..." value={search} onChange={e => setSearch(e.target.value)}
+             style={{ background: 'var(--glass)', border: '1px solid var(--glass-border)', borderRadius: '10px', padding: '11px 16px', color: 'var(--white)', width: '100%', maxWidth: '400px', marginBottom: '20px', fontFamily: 'Inter,sans-serif', fontSize: '0.85rem', outline: 'none' }} />
+ 
+           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+@@ -200,7 +205,9 @@ export default function AdminAffiliatesPage() {
+                   {a.status === 'active' && <><span style={statusActive}>active</span><button onClick={() => updateAffiliateStatus(a.id, 'suspended')} style={btnRed}>Suspend</button></>}
+                   {a.status === 'suspended' && <><span style={statusSuspended}>suspended</span><button onClick={() => updateAffiliateStatus(a.id, 'active')} style={btnGreen}>Reactivate</button></>}
+                   {a.status === 'rejected' && <span style={statusRejected}>rejected</span>}
+-                  <button onClick={() => deleteAffiliate(a.id)} style={btnDelete}>🗑</button>
++                  <button onClick={() => deleteAffiliate(a.id)} style={btnDelete} aria-label="Delete">
++                    <Icon name="trash" size={13} />
++                  </button>
+                 </div>
+               </div>
+             ))}
+@@ -272,7 +279,9 @@ export default function AdminAffiliatesPage() {
+             ) : resources.map(r => (
+               <div key={r.id} style={{ background: 'var(--glass)', border: '1px solid var(--glass-border)', borderRadius: '12px', padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap', opacity: r.enabled ? 1 : 0.5 }}>
+                 <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: 1, minWidth: '200px' }}>
+-                  <div style={{ fontSize: '1.8rem' }}>{r.icon}</div>
++                  <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(16,161,219,0.08)', border: '1px solid rgba(16,161,219,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--sky)' }}>
++                    <Icon name="folder" size={18} />
++                  </div>
+                   <div style={{ flex: 1 }}>
+                     <div style={{ color: 'var(--white)', fontSize: '0.92rem', fontWeight: 600 }}>{r.title}</div>
+                     <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginTop: '2px' }}>Slug: <code style={{ color: 'var(--sky)' }}>{r.slug}</code></div>
+@@ -293,7 +302,7 @@ export default function AdminAffiliatesPage() {
+ }
+ 
+ // =====================================================
+-// RESOURCE EDITOR (opens when clicking "Edit" on a resource)
++// RESOURCE EDITOR
+ // =====================================================
+ function ResourceEditor({ resource, onClose, onDelete }: { resource: Resource; onClose: () => void; onDelete: () => void }) {
+   const [meta, setMeta] = useState(resource)
+@@ -309,7 +318,7 @@ function ResourceEditor({ resource, onClose, onDelete }: { resource: Resource; o
+ 
+   const saveMetadata = async () => {
+     await supabase.from('affiliate_resources').update({
+-      title: meta.title, description: meta.description, icon: meta.icon, cta_text: meta.cta_text, slug: meta.slug,
++      title: meta.title, description: meta.description, cta_text: meta.cta_text, slug: meta.slug,
+     }).eq('id', resource.id)
+     alert('Saved!')
+   }
+@@ -384,10 +393,7 @@ function ResourceEditor({ resource, onClose, onDelete }: { resource: Resource; o
+       {/* Metadata section */}
+       <div style={{ background: 'var(--glass)', border: '1px solid var(--glass-border)', borderRadius: '14px', padding: '20px', marginBottom: '24px' }}>
+         <h3 style={{ fontSize: '0.85rem', color: 'var(--white)', marginBottom: '14px', fontWeight: 700, letterSpacing: '1.5px', textTransform: 'uppercase' }}>Details</h3>
+-        <div style={{ display: 'grid', gridTemplateColumns: '80px 1fr', gap: '10px', marginBottom: '10px' }}>
+-          <input placeholder="Icon" value={meta.icon} onChange={e => setMeta({ ...meta, icon: e.target.value })} style={{ ...inputStyle, textAlign: 'center', fontSize: '1.5rem' }} />
+-          <input placeholder="Title" value={meta.title} onChange={e => setMeta({ ...meta, title: e.target.value })} style={inputStyle} />
+-        </div>
++        <input placeholder="Title" value={meta.title} onChange={e => setMeta({ ...meta, title: e.target.value })} style={{ ...inputStyle, marginBottom: '10px' }} />
+         <input placeholder="Slug (URL path)" value={meta.slug} onChange={e => setMeta({ ...meta, slug: e.target.value })} style={{ ...inputStyle, marginBottom: '10px' }} />
+         <textarea placeholder="Description (shown on tile)" value={meta.description || ''} onChange={e => setMeta({ ...meta, description: e.target.value })} rows={2} style={{ ...inputStyle, resize: 'vertical', marginBottom: '10px' }} />
+         <input placeholder="CTA text (e.g. View Templates)" value={meta.cta_text || ''} onChange={e => setMeta({ ...meta, cta_text: e.target.value })} style={{ ...inputStyle, marginBottom: '14px' }} />
+@@ -422,16 +428,19 @@ function ResourceEditor({ resource, onClose, onDelete }: { resource: Resource; o
+                   <div style={{ display: 'flex', gap: '4px' }}>
+                     <button onClick={() => moveItem(item.id, -1)} disabled={idx === 0} style={{ ...btnSmall, opacity: idx === 0 ? 0.4 : 1 }}>↑</button>
+                     <button onClick={() => moveItem(item.id, 1)} disabled={idx === items.length - 1} style={{ ...btnSmall, opacity: idx === items.length - 1 ? 0.4 : 1 }}>↓</button>
+-                    <button onClick={() => deleteItem(item.id)} style={btnDelete}>🗑</button>
++                    <button onClick={() => deleteItem(item.id)} style={btnDelete} aria-label="Delete">
++                      <Icon name="trash" size={13} />
++                    </button>
+                   </div>
+                 </div>
+                 {item.type === 'text' && (
+                   <textarea value={item.content || ''} onChange={e => updateItem(item.id, { content: e.target.value })} rows={4} placeholder="Content..." style={{ ...inputStyle, resize: 'vertical' }} />
+                 )}
+                 {item.type === 'file' && (
+-                  <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', wordBreak: 'break-all' }}>
+-                    📎 <a href={item.url} target="_blank" rel="noopener" style={{ color: 'var(--sky)' }}>{item.url}</a>
+-                    {item.file_size && <span style={{ marginLeft: '10px', color: 'var(--text-dim)' }}>({item.file_size})</span>}
++                  <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', wordBreak: 'break-all', display: 'flex', alignItems: 'center', gap: '8px' }}>
++                    <Icon name="paperclip" size={14} />
++                    <a href={item.url} target="_blank" rel="noopener" style={{ color: 'var(--sky)' }}>{item.url}</a>
++                    {item.file_size && <span style={{ color: 'var(--text-dim)' }}>({item.file_size})</span>}
+                   </div>
+                 )}
+                 {item.type === 'link' && (
+@@ -458,7 +467,7 @@ const inputStyle: React.CSSProperties = { background: 'rgba(249,253,254,0.03)',
+ const btnPrimary: React.CSSProperties = { background: 'var(--sky)', color: 'var(--dark)', border: 'none', padding: '7px 14px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', fontFamily: 'Inter,sans-serif' }
+ const btnGreen: React.CSSProperties = { background: 'rgba(16,219,100,0.1)', color: '#16db64', border: '1px solid rgba(16,219,100,0.3)', padding: '5px 12px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer' }
+ const btnRed: React.CSSProperties = { background: 'rgba(255,77,77,0.1)', color: '#ff4d4d', border: '1px solid rgba(255,77,77,0.3)', padding: '5px 12px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer' }
+-const btnDelete: React.CSSProperties = { background: 'transparent', color: 'var(--text-dim)', border: '1px solid var(--glass-border)', padding: '5px 10px', borderRadius: '6px', fontSize: '0.72rem', cursor: 'pointer' }
++const btnDelete: React.CSSProperties = { background: 'transparent', color: 'var(--text-dim)', border: '1px solid var(--glass-border)', padding: '5px 10px', borderRadius: '6px', fontSize: '0.72rem', cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }
+ const btnSmall: React.CSSProperties = { background: 'transparent', color: 'var(--text-muted)', border: '1px solid var(--glass-border)', padding: '4px 8px', borderRadius: '6px', fontSize: '0.72rem', cursor: 'pointer' }
+ const statusActive: React.CSSProperties = { fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', padding: '3px 10px', borderRadius: '100px', letterSpacing: '1px', background: 'rgba(16,219,100,0.1)', color: '#16db64', border: 'none' }
+ const statusSuspended: React.CSSProperties = { fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', padding: '3px 10px', borderRadius: '100px', letterSpacing: '1px', background: 'rgba(255,193,7,0.1)', color: '#ffc107', border: 'none' }
+diff --git a/src/app/admin/login/page.tsx b/src/app/admin/login/page.tsx
+index e5cb442..6d7a9b4 100644
+--- a/src/app/admin/login/page.tsx
++++ b/src/app/admin/login/page.tsx
+@@ -4,6 +4,7 @@ import { useState } from 'react'
+ import { useRouter } from 'next/navigation'
+ import Link from 'next/link'
+ import { useToast } from '@/components/ui/Toast'
++import { Icon } from '@/components/ui/Icons'
+ 
+ export default function AdminLoginPage() {
+   const router = useRouter()
+@@ -106,10 +107,10 @@ export default function AdminLoginPage() {
+           display: 'flex',
+           alignItems: 'center',
+           justifyContent: 'center',
+-          fontSize: '2rem',
+           margin: '0 auto 20px',
++          color: 'var(--sky)',
+         }}>
+-          🔐
++          <Icon name="lock" size={32} />
+         </div>
+ 
+         <h1 style={{
+diff --git a/src/app/admin/page.tsx b/src/app/admin/page.tsx
+index 6de3716..3272c38 100644
+--- a/src/app/admin/page.tsx
++++ b/src/app/admin/page.tsx
+@@ -7,15 +7,16 @@ import AdminAffiliatesPage from './affiliates/page'
+ import AdminMaintenancePage from './maintenance/page'
+ import AdminNewsletterPage from './newsletter/page'
+ import AdminSubmissionsPage from './submissions/page'
++import { Icon } from '@/components/ui/Icons'
+ 
+ const TABS = [
+-  { id: 'blog', label: '📝 Blog', component: AdminBlogPage },
+-  { id: 'packages', label: '📦 Packages', component: AdminPackagesPage },
+-  { id: 'pricing', label: '💰 Pricing', component: AdminPricingPage },
+-  { id: 'affiliates', label: '🤝 Affiliate Program', component: AdminAffiliatesPage },
+-  { id: 'newsletter', label: '📬 Newsletter', component: AdminNewsletterPage },
+-  { id: 'maintenance', label: '🔧 Maintenance', component: AdminMaintenancePage },
+-  { id: 'submissions', label: '📋 Submissions', component: AdminSubmissionsPage },
++  { id: 'blog', label: 'Blog', icon: 'edit', component: AdminBlogPage },
++  { id: 'packages', label: 'Packages', icon: 'package', component: AdminPackagesPage },
++  { id: 'pricing', label: 'Pricing', icon: 'dollar', component: AdminPricingPage },
++  { id: 'affiliates', label: 'Affiliate Program', icon: 'handshake', component: AdminAffiliatesPage },
++  { id: 'newsletter', label: 'Newsletter', icon: 'inbox', component: AdminNewsletterPage },
++  { id: 'maintenance', label: 'Maintenance', icon: 'wrench', component: AdminMaintenancePage },
++  { id: 'submissions', label: 'Submissions', icon: 'clipboard', component: AdminSubmissionsPage },
+ ]
+ 
+ export default function AdminPage() {
+@@ -51,6 +52,9 @@ export default function AdminPage() {
+               marginBottom: '-1px',
+               whiteSpace: 'nowrap',
+               transition: 'all 0.15s',
++              display: 'inline-flex',
++              alignItems: 'center',
++              gap: '8px',
+             }}
+             onMouseEnter={e => {
+               if (activeTab !== tab.id) e.currentTarget.style.color = 'var(--white)'
+@@ -59,6 +63,7 @@ export default function AdminPage() {
+               if (activeTab !== tab.id) e.currentTarget.style.color = 'var(--text-muted)'
+             }}
+           >
++            <Icon name={tab.icon as any} size={16} />
+             {tab.label}
+           </button>
+         ))}
+diff --git a/src/app/api/newsletter/confirm/route.ts b/src/app/api/newsletter/confirm/route.ts
+index f4dda09..b1b932d 100644
+--- a/src/app/api/newsletter/confirm/route.ts
++++ b/src/app/api/newsletter/confirm/route.ts
+@@ -61,7 +61,7 @@ export async function GET(req: NextRequest) {
+         body: JSON.stringify({
+           from: FROM_EMAIL,
+           to: subscriber.email,
+-          subject: 'Welcome to YallaGrow 🎉',
++          subject: 'Welcome to YallaGrow',
+           html: getWelcomeEmailHtml(),
+         }),
+       })
+@@ -91,7 +91,7 @@ function getWelcomeEmailHtml(): string {
+     </div>
+ 
+     <div style="background:linear-gradient(135deg,rgba(1,32,76,0.4),rgba(16,161,219,0.06));border:1px solid rgba(16,161,219,0.2);border-radius:20px;padding:36px 32px;">
+-      <div style="text-align:center;font-size:3rem;margin-bottom:16px;">🎉</div>
++      <div style="text-align:center;font-size:1.5rem;margin-bottom:16px;color:#16db64;font-weight:700;">✓</div>
+       <h2 style="font-family:'Syne',Georgia,serif;font-weight:800;font-size:1.5rem;color:#ffffff;margin:0 0 16px;letter-spacing:-0.3px;text-align:center;line-height:1.2;">
+         Welcome to YallaGrow!
+       </h2>
+diff --git a/src/app/api/newsletter/subscribe/route.ts b/src/app/api/newsletter/subscribe/route.ts
+index c9ccd5a..890d899 100644
+--- a/src/app/api/newsletter/subscribe/route.ts
++++ b/src/app/api/newsletter/subscribe/route.ts
+@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
+     if (existing?.confirmed) {
+       return NextResponse.json({
+         success: true,
+-        message: "You're already subscribed! 🎉",
++        message: "You're already subscribed!",
+         alreadySubscribed: true,
+       })
+     }
+@@ -132,7 +132,7 @@ function getConfirmationEmailHtml(confirmUrl: string): string {
+ 
+     <!-- Card -->
+     <div style="background:linear-gradient(135deg,rgba(1,32,76,0.4),rgba(16,161,219,0.06));border:1px solid rgba(16,161,219,0.2);border-radius:20px;padding:36px 32px;">
+-      <div style="text-align:center;font-size:2.5rem;margin-bottom:16px;">📬</div>
++      <div style="text-align:center;font-size:1.5rem;margin-bottom:16px;color:#10a1db;font-weight:700;">YG</div>
+       <h2 style="font-family:'Syne',Georgia,serif;font-weight:800;font-size:1.4rem;color:#ffffff;margin:0 0 16px;letter-spacing:-0.3px;text-align:center;line-height:1.2;">
+         Confirm your subscription
+       </h2>
+diff --git a/src/app/api/submissions/career/route.ts b/src/app/api/submissions/career/route.ts
+index 0d585bf..e905500 100644
+--- a/src/app/api/submissions/career/route.ts
++++ b/src/app/api/submissions/career/route.ts
+@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
+             from: FROM_EMAIL,
+             to: TO_EMAIL,
+             reply_to: email,
+-            subject: `💼 New Job Application: ${role} — ${name}`,
++            subject: `New Job Application: ${role} — ${name}`,
+             html: buildJobEmail({ name, email, phone, role, portfolio, linkedin, message }, saved.id),
+           }),
+         })
+diff --git a/src/app/api/submissions/contact/route.ts b/src/app/api/submissions/contact/route.ts
+index cc6d3af..82a69d9 100644
+--- a/src/app/api/submissions/contact/route.ts
++++ b/src/app/api/submissions/contact/route.ts
+@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
+             from: FROM_EMAIL,
+             to: TO_EMAIL,
+             reply_to: email,
+-            subject: `💬 Contact Form: ${subject || 'New message'} — ${name}`,
++            subject: `Contact Form: ${subject || 'New message'} — ${name}`,
+             html: buildContactEmail({ name, email, subject, message }, saved.id),
+           }),
+         })
+diff --git a/src/app/api/submissions/package/route.ts b/src/app/api/submissions/package/route.ts
+index f5f378c..3ab2b1f 100644
+--- a/src/app/api/submissions/package/route.ts
++++ b/src/app/api/submissions/package/route.ts
+@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
+             from: FROM_EMAIL,
+             to: TO_EMAIL,
+             reply_to: email,
+-            subject: `📦 New Package Request from ${name} — $${estimatedMonthly}/mo`,
++            subject: `New Package Request from ${name} — $${estimatedMonthly}/mo`,
+             html: buildPackageEmail(body, saved.id),
+           }),
+         })
+diff --git a/src/app/blog/[slug]/BlogPostClient.tsx b/src/app/blog/[slug]/BlogPostClient.tsx
+index 24dc710..901cb22 100644
+--- a/src/app/blog/[slug]/BlogPostClient.tsx
++++ b/src/app/blog/[slug]/BlogPostClient.tsx
+@@ -3,6 +3,7 @@
+ import { useEffect, useState } from 'react'
+ import Link from 'next/link'
+ import { supabase } from '@/lib/supabase'
++import { Icon } from '@/components/ui/Icons'
+ 
+ interface Post {
+   id: string
+@@ -130,7 +131,9 @@ export default function BlogPostClient({ slug }: { slug: string }) {
+   if (!post) {
+     return (
+       <div style={{ paddingTop: '80px', padding: '120px 20px', textAlign: 'center' }}>
+-        <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🔍</div>
++        <div style={{ marginBottom: '16px', color: 'var(--sky)', display: 'flex', justifyContent: 'center' }}>
++          <Icon name="search" size={44} />
++        </div>
+         <h1 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: '1.6rem', color: 'var(--white)', marginBottom: '10px' }}>Post not found</h1>
+         <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '20px' }}>This post doesn&apos;t exist or has been unpublished.</p>
+         <Link href="/blog" className="btn-primary">← Back to Blog</Link>
+diff --git a/src/app/blog/page.tsx b/src/app/blog/page.tsx
+index c4df2f5..5513da8 100644
+--- a/src/app/blog/page.tsx
++++ b/src/app/blog/page.tsx
+@@ -2,6 +2,7 @@
+ import { useEffect, useState } from 'react'
+ import Link from 'next/link'
+ import { supabase } from '@/lib/supabase'
++import { Icon } from '@/components/ui/Icons'
+ 
+ interface Post {
+   id: string
+@@ -59,7 +60,9 @@ export default function BlogPage() {
+           </div>
+         ) : posts.length === 0 ? (
+           <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-dim)' }}>
+-            <div style={{ fontSize: '3rem', marginBottom: '16px' }}>✍️</div>
++            <div style={{ marginBottom: '16px', color: 'var(--sky)', display: 'flex', justifyContent: 'center' }}>
++              <Icon name="pen" size={44} />
++            </div>
+             <h3 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 700, fontSize: '1.2rem', color: 'var(--white)', marginBottom: '8px' }}>Coming Soon</h3>
+             <p style={{ fontSize: '0.9rem' }}>We&apos;re working on some great content. Check back soon!</p>
+           </div>
+@@ -68,7 +71,10 @@ export default function BlogPage() {
+             {/* Featured post */}
+             {featured.length > 0 && (
+               <div style={{ marginBottom: '40px' }}>
+-                <div style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase', color: 'var(--sky)', marginBottom: '16px' }}>⭐ Featured</div>
++                <div style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase', color: 'var(--sky)', marginBottom: '16px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
++                  <Icon name="star" size={11} />
++                  Featured
++                </div>
+                 <Link href={`/blog/${featured[0].slug}`} style={{ textDecoration: 'none', display: 'block' }}>
+                   <article style={{
+                     background: 'linear-gradient(135deg, rgba(1,32,76,0.4), rgba(16,161,219,0.06))',
+diff --git a/src/app/global-error.tsx b/src/app/global-error.tsx
+index 178576e..9763696 100644
+--- a/src/app/global-error.tsx
++++ b/src/app/global-error.tsx
+@@ -31,7 +31,14 @@ export default function GlobalError({
+         justifyContent: 'center',
+       }}>
+         <div style={{ maxWidth: '500px', padding: '40px 20px', textAlign: 'center' }}>
+-          <div style={{ fontSize: '3rem', marginBottom: '20px' }}>⚠️</div>
++          <div style={{ marginBottom: '20px', color: '#ffc107', display: 'flex', justifyContent: 'center' }}>
++            {/* Inline SVG — this file renders without the Icon component because the app may be broken */}
++            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
++              <path d="M10.3 3.86L1.82 18a2 2 0 001.72 3h16.92a2 2 0 001.72-3L13.71 3.86a2 2 0 00-3.42 0z" />
++              <line x1="12" y1="9" x2="12" y2="13" />
++              <line x1="12" y1="17" x2="12.01" y2="17" />
++            </svg>
++          </div>
+ 
+           <h1 style={{
+             fontWeight: 800,
+diff --git a/src/app/newsletter/confirmed/page.tsx b/src/app/newsletter/confirmed/page.tsx
+index 2248860..a01ca2e 100644
+--- a/src/app/newsletter/confirmed/page.tsx
++++ b/src/app/newsletter/confirmed/page.tsx
+@@ -2,6 +2,7 @@
+ import Link from 'next/link'
+ import { useSearchParams } from 'next/navigation'
+ import { Suspense } from 'react'
++import { Icon } from '@/components/ui/Icons'
+ 
+ function ConfirmedContent() {
+   const params = useSearchParams()
+@@ -9,31 +10,31 @@ function ConfirmedContent() {
+ 
+   const config = {
+     success: {
+-      icon: '🎉',
++      icon: 'check',
+       title: 'Subscription confirmed!',
+       message: "You're all set. Check your inbox — we just sent you a welcome email with everything you need to know.",
+       color: '#16db64',
+     },
+     already: {
+-      icon: '✓',
++      icon: 'check',
+       title: "You're already subscribed",
+       message: 'Your email is already confirmed and on our list. Nothing more to do!',
+       color: '#10a1db',
+     },
+     invalid: {
+-      icon: '⚠️',
++      icon: 'alert',
+       title: 'Invalid or expired link',
+       message: 'This confirmation link is invalid or has already been used. Try subscribing again.',
+       color: '#ffc107',
+     },
+     error: {
+-      icon: '❌',
++      icon: 'close',
+       title: 'Something went wrong',
+       message: "We couldn't process your confirmation. Please try again or contact us.",
+       color: '#ff4d4d',
+     },
+   }[status || 'success'] || {
+-    icon: '❓',
++    icon: 'help',
+     title: 'Unknown status',
+     message: "We're not sure what happened. Please try again.",
+     color: '#ff4d4d',
+@@ -43,9 +44,11 @@ function ConfirmedContent() {
+     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '80px 20px' }}>
+       <div style={{ maxWidth: '480px', textAlign: 'center' }}>
+         <div style={{
+-          fontSize: '4rem',
+           marginBottom: '20px',
+-        }}>{config.icon}</div>
++          color: config.color,
++          display: 'flex',
++          justifyContent: 'center',
++        }}><Icon name={config.icon as 'check'} size={60} strokeWidth={2.5} /></div>
+ 
+         <h1 style={{
+           fontFamily: 'Syne, sans-serif',
+diff --git a/src/app/partnership/page.tsx b/src/app/partnership/page.tsx
+index a1e9672..afe605a 100644
+--- a/src/app/partnership/page.tsx
++++ b/src/app/partnership/page.tsx
+@@ -1,6 +1,7 @@
+ 'use client'
+ import PerformancePartnership from '@/components/pages/PerformancePartnership'
+ import Link from 'next/link'
++import { Icon } from '@/components/ui/Icons'
+ 
+ export default function PartnershipPage() {
+   return (
+@@ -8,7 +9,7 @@ export default function PartnershipPage() {
+       {/* HERO */}
+       <section style={{ padding: '80px 6% 40px', textAlign: 'center' }}>
+         <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'linear-gradient(135deg,var(--sky),var(--purple))', color: '#fff', fontSize: '0.65rem', fontWeight: 800, letterSpacing: '1.5px', padding: '6px 16px', borderRadius: '100px', textTransform: 'uppercase', marginBottom: '20px' }}>
+-          🔒 Invite-Only
++          <Icon name="lock" size={11} /> Invite-Only
+         </span>
+         <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 'clamp(2.4rem, 5vw, 4rem)', letterSpacing: '-2px', lineHeight: 1.05, color: 'var(--white)', marginBottom: '20px' }}>
+           Performance<br /><span className="grad">Partnership</span>
+diff --git a/src/app/thank-you/thank-you-page-fixed.tsx b/src/app/thank-you/thank-you-page-fixed.tsx
+index 901bf99..3dfeb2d 100644
+--- a/src/app/thank-you/thank-you-page-fixed.tsx
++++ b/src/app/thank-you/thank-you-page-fixed.tsx
+@@ -3,6 +3,7 @@
+ import Link from 'next/link'
+ import { Suspense, useEffect, useState } from 'react'
+ import { useSearchParams } from 'next/navigation'
++import { Icon } from '@/components/ui/Icons'
+ 
+ const BOOKING_URL = 'https://calendar.app.google/3WibM5kWvizhnHJt8'
+ 
+@@ -26,7 +27,7 @@ function ThankYouContent() {
+ 
+   const configs: Record<string, ContentConfig> = {
+     package: {
+-      icon: '📦',
++      icon: 'package',
+       title: 'Package request received!',
+       message: "We got the details of your custom package. We'll review it and reach out within 24 hours to lock in your free strategy call.",
+       cta: 'Book Your Strategy Call Now',
+@@ -34,7 +35,7 @@ function ThankYouContent() {
+       ctaHref: BOOKING_URL,
+     },
+     contact: {
+-      icon: '💬',
++      icon: 'chat',
+       title: 'Message received!',
+       message: "Thanks for reaching out. We respond to every message within 24 hours — usually much faster. Keep an eye on your inbox.",
+       cta: 'Explore Our Packages',
+@@ -42,7 +43,7 @@ function ThankYouContent() {
+       ctaHref: '/packages',
+     },
+     career: {
+-      icon: '💼',
++      icon: 'briefcase',
+       title: 'Application received!',
+       message: "Thanks for applying to join the YallaGrow team. We review every application personally and will get back to you within 3-5 business days.",
+       cta: 'Learn More About Us',
+@@ -50,7 +51,7 @@ function ThankYouContent() {
+       ctaHref: '/about',
+     },
+     newsletter: {
+-      icon: '📬',
++      icon: 'inbox',
+       title: "You're on the list!",
+       message: "Check your inbox for a confirmation email. Click the link inside to officially join the YallaGrow newsletter.",
+       cta: 'Read Our Blog',
+@@ -58,7 +59,7 @@ function ThankYouContent() {
+       ctaHref: '/blog',
+     },
+     default: {
+-      icon: '✓',
++      icon: 'check',
+       title: 'All done!',
+       message: "We've received your submission and will get back to you soon.",
+       cta: 'Back to Home',
+@@ -118,12 +119,12 @@ function ThankYouContent() {
+           display: 'flex',
+           alignItems: 'center',
+           justifyContent: 'center',
+-          fontSize: '2.6rem',
+           margin: '0 auto 28px',
+           animation: 'bounceIn 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
+           boxShadow: '0 10px 40px rgba(16,161,219,0.15)',
++          color: 'var(--sky)',
+         }}>
+-          {content.icon}
++          <Icon name={content.icon as 'package'} size={44} />
+         </div>
+ 
+         <span className="eyebrow" style={{ marginBottom: '14px' }}>Success</span>
+diff --git a/src/components/MaintenanceGate.tsx b/src/components/MaintenanceGate.tsx
+index 5939cf9..b9de0ad 100644
+--- a/src/components/MaintenanceGate.tsx
++++ b/src/components/MaintenanceGate.tsx
+@@ -2,10 +2,11 @@
+ import { useEffect, useState } from 'react'
+ import { supabase } from '@/lib/supabase'
+ import { usePathname } from 'next/navigation'
++import { Icon } from '@/components/ui/Icons'
+ 
+ export default function MaintenanceGate({ children }: { children: React.ReactNode }) {
+   const [maintenance, setMaintenance] = useState(false)
+-  const [settings, setSettings] = useState({ title:"We'll Be Right Back", msg:"We're currently updating our website. This won't take long.", icon:'🔧' })
++  const [settings, setSettings] = useState({ title:"We'll Be Right Back", msg:"We're currently updating our website. This won't take long." })
+   const pathname = usePathname()
+ 
+   useEffect(() => {
+@@ -19,7 +20,7 @@ export default function MaintenanceGate({ children }: { children: React.ReactNod
+         try {
+           const s = JSON.parse(data.value)
+           if (s.active) {
+-            setSettings({ title: s.title || "We'll Be Right Back", msg: s.msg || '', icon: s.icon || '🔧' })
++            setSettings({ title: s.title || "We'll Be Right Back", msg: s.msg || '' })
+             setMaintenance(true)
+           }
+         } catch {}
+@@ -33,8 +34,8 @@ export default function MaintenanceGate({ children }: { children: React.ReactNod
+         <div style={{ fontFamily:'Syne,sans-serif', fontWeight:800, fontSize:'1.5rem', color:'#f9fdfe', marginBottom:'40px' }}>
+           Yalla<em style={{ color:'#10a1db', fontStyle:'normal' }}>Grow</em>
+         </div>
+-        <div style={{ width:'72px', height:'72px', borderRadius:'18px', background:'rgba(16,161,219,0.1)', border:'1px solid rgba(16,161,219,0.2)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'2rem', margin:'0 auto 28px', animation:'pulse 2s ease-in-out infinite' }}>
+-          {settings.icon}
++        <div style={{ width:'72px', height:'72px', borderRadius:'18px', background:'rgba(16,161,219,0.1)', border:'1px solid rgba(16,161,219,0.2)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 28px', animation:'pulse 2s ease-in-out infinite', color:'#10a1db' }}>
++          <Icon name="wrench" size={32} />
+         </div>
+         <h1 style={{ fontFamily:'Syne,sans-serif', fontWeight:800, fontSize:'clamp(1.8rem,5vw,3rem)', color:'#f9fdfe', letterSpacing:'-1px', marginBottom:'16px', lineHeight:1.1 }}>{settings.title}</h1>
+         <p style={{ fontSize:'1rem', color:'rgba(249,253,254,0.5)', maxWidth:'480px', lineHeight:1.7, fontWeight:300, marginBottom:'32px' }}>{settings.msg}</p>
+diff --git a/src/components/pages/AffiliateDashboard.tsx b/src/components/pages/AffiliateDashboard.tsx
+index 8fe6934..3c8ca35 100644
+--- a/src/components/pages/AffiliateDashboard.tsx
++++ b/src/components/pages/AffiliateDashboard.tsx
+@@ -26,7 +26,7 @@ export default function AffiliateDashboard() {
+         Dashboard Diagnostic
+       </h1>
+       <p style={{ color: 'rgba(255,255,255,0.7)', marginBottom: '20px' }}>
+-        {mounted ? '✅ Component mounted successfully' : '⏳ Mounting...'}
++        {mounted ? 'Component mounted successfully' : 'Mounting...'}
+       </p>
+       <a href="/" style={{
+         color: '#10a1db',
+diff --git a/src/components/pages/AffiliatePage.tsx b/src/components/pages/AffiliatePage.tsx
+index e7ae39e..107f402 100644
+--- a/src/components/pages/AffiliatePage.tsx
++++ b/src/components/pages/AffiliatePage.tsx
+@@ -2,6 +2,7 @@
+ import { useState } from 'react'
+ import Link from 'next/link'
+ import { supabase } from '@/lib/supabase'
++import { Icon } from '@/components/ui/Icons'
+ 
+ const COUNTRIES=['Lebanon','United Arab Emirates','Saudi Arabia','Kuwait','Qatar','Bahrain','Oman','Jordan','Egypt','Iraq','United Kingdom','United States','Canada','France','Germany','Australia','Other']
+ 
+@@ -32,7 +33,9 @@ export default function AffiliatePage() {
+       <div style={{padding:'80px 6%',textAlign:'center',position:'relative',overflow:'hidden'}}>
+         <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse 80% 60% at 50% 0%,rgba(16,161,219,0.09) 0%,transparent 70%)',pointerEvents:'none'}}/>
+         <div style={{position:'relative',zIndex:1}}>
+-          <div style={{display:'inline-flex',alignItems:'center',gap:'8px',background:'rgba(16,161,219,0.1)',border:'1px solid rgba(16,161,219,0.2)',color:'var(--sky)',fontSize:'0.7rem',fontWeight:700,padding:'5px 16px',borderRadius:'100px',marginBottom:'24px',letterSpacing:'1px',textTransform:'uppercase'}}>💰 Affiliate Program</div>
++          <div style={{display:'inline-flex',alignItems:'center',gap:'8px',background:'rgba(16,161,219,0.1)',border:'1px solid rgba(16,161,219,0.2)',color:'var(--sky)',fontSize:'0.7rem',fontWeight:700,padding:'5px 16px',borderRadius:'100px',marginBottom:'24px',letterSpacing:'1px',textTransform:'uppercase'}}>
++            <Icon name="dollar" size={13} /> Affiliate Program
++          </div>
+           <h1 style={{fontFamily:'Syne,sans-serif',fontWeight:800,fontSize:'clamp(2.4rem,6vw,4rem)',color:'var(--white)',letterSpacing:'-2px',lineHeight:1.1,marginBottom:'20px'}}>
+             Grow With Us.<br/><span className="grad">Earn With Us.</span>
+           </h1>
+@@ -111,7 +114,9 @@ export default function AffiliatePage() {
+         <div style={{maxWidth:'640px',margin:'0 auto',background:'var(--glass)',border:'1px solid var(--glass-border)',borderRadius:'20px',padding:'32px',textAlign:'left'}}>
+           {sent?(
+             <div style={{textAlign:'center',padding:'40px 0'}}>
+-              <div style={{fontSize:'3rem',marginBottom:'16px'}}>🎉</div>
++              <div style={{color:'#16db64',marginBottom:'16px',display:'flex',justifyContent:'center'}}>
++                <Icon name="check" size={44} strokeWidth={2.5} />
++              </div>
+               <h3 style={{fontFamily:'Syne,sans-serif',fontWeight:800,fontSize:'1.3rem',color:'var(--white)',marginBottom:'8px'}}>Application Received!</h3>
+               <p style={{fontSize:'0.85rem',color:'var(--text-muted)',marginBottom:'20px'}}>We&apos;ll review and get back to you within 48 hours.</p>
+               <Link href="/" className="btn-secondary">Back to Home</Link>
+@@ -154,7 +159,8 @@ export default function AffiliatePage() {
+           <div style={{display:'inline-block',background:'linear-gradient(135deg,rgba(16,161,219,0.08),rgba(106,70,217,0.05))',border:'1px solid rgba(16,161,219,0.2)',borderRadius:'16px',padding:'20px 32px'}}>
+             <p style={{fontSize:'0.88rem',fontWeight:600,color:'var(--white)',marginBottom:'4px'}}>Already an affiliate?</p>
+             <p style={{fontSize:'0.75rem',color:'var(--text-muted)',marginBottom:'16px'}}>Sign in to track referrals, earnings and payouts.</p>
+-<a href="/affiliate-dashboard.html" className="btn-primary" style={{padding:'11px 24px',fontSize:'0.85rem'}}>Access My Dashboard →</a>          </div>
++            <a href="/affiliate-dashboard.html" className="btn-primary" style={{padding:'11px 24px',fontSize:'0.85rem'}}>Access My Dashboard →</a>
++          </div>
+         </div>
+       </div>
+     </div>
+diff --git a/src/components/pages/BlogPage.tsx b/src/components/pages/BlogPage.tsx
+index 8f8ac8d..ba46521 100644
+--- a/src/components/pages/BlogPage.tsx
++++ b/src/components/pages/BlogPage.tsx
+@@ -1,9 +1,22 @@
+ 'use client'
+ import { useEffect, useState } from 'react'
+ import { supabase } from '@/lib/supabase'
+-import Link from 'next/link'
++import { Icon } from '@/components/ui/Icons'
+ 
+-interface Post { id:string; title:string; excerpt:string; category:string; date:string; emoji:string; readtime:string }
++interface Post { id:string; title:string; excerpt:string; category:string; date:string; emoji?:string; readtime:string }
++
++// Category → SVG icon mapping. Unknown categories fall back to 'edit'.
++const CATEGORY_ICONS: Record<string, string> = {
++  'Social Media': 'phone',
++  'Paid Ads': 'dollar',
++  'Content': 'edit',
++  'Strategy': 'target',
++  'Branding': 'palette',
++  'SEO': 'search',
++  'Analytics': 'bar-chart',
++  'Email': 'mail',
++  'Video': 'film',
++}
+ 
+ export default function BlogPage() {
+   const [posts,setPosts]=useState<Post[]>([])
+@@ -12,9 +25,9 @@ export default function BlogPage() {
+     supabase.from('blogs').select('*').order('created_at',{ascending:false}).then(({data})=>{
+       if(data&&data.length>0) setPosts(data)
+       else setPosts([
+-        {id:'1',title:'How Lebanese Businesses Can Win on Social Media in 2025',excerpt:'The landscape has shifted. Here is what actually works for small businesses in Lebanon right now.',category:'Social Media',date:'Jun 2025',emoji:'📱',readtime:'5 min'},
+-        {id:'2',title:'Why Your Ads Aren\u2019t Converting (And How to Fix It)',excerpt:'Most businesses blame the algorithm. The real problem is almost always the offer, the audience, or the creative.',category:'Paid Ads',date:'May 2025',emoji:'💰',readtime:'7 min'},
+-        {id:'3',title:'The Content Calendar That Actually Works for Small Teams',excerpt:'You don\u2019t need to post every day. You need to post the right things consistently.',category:'Content',date:'Apr 2025',emoji:'📅',readtime:'4 min'},
++        {id:'1',title:'How Lebanese Businesses Can Win on Social Media in 2025',excerpt:'The landscape has shifted. Here is what actually works for small businesses in Lebanon right now.',category:'Social Media',date:'Jun 2025',readtime:'5 min'},
++        {id:'2',title:'Why Your Ads Aren’t Converting (And How to Fix It)',excerpt:'Most businesses blame the algorithm. The real problem is almost always the offer, the audience, or the creative.',category:'Paid Ads',date:'May 2025',readtime:'7 min'},
++        {id:'3',title:'The Content Calendar That Actually Works for Small Teams',excerpt:'You don’t need to post every day. You need to post the right things consistently.',category:'Content',date:'Apr 2025',readtime:'4 min'},
+       ])
+     })
+   },[])
+@@ -26,21 +39,26 @@ export default function BlogPage() {
+         <h1 className="section-title" style={{margin:'12px 0 16px'}}>The YallaGrow Blog</h1>
+         <p className="section-sub" style={{marginBottom:'60px'}}>Practical marketing insights from our team.</p>
+         <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:'20px'}}>
+-          {posts.map(p=>(
+-            <div key={p.id} style={{background:'var(--glass)',border:'1px solid var(--glass-border)',borderRadius:'16px',overflow:'hidden',transition:'all 0.3s',cursor:'pointer'}}
+-              onMouseEnter={e=>{e.currentTarget.style.borderColor='rgba(16,161,219,0.2)';e.currentTarget.style.transform='translateY(-4px)'}}
+-              onMouseLeave={e=>{e.currentTarget.style.borderColor='var(--glass-border)';e.currentTarget.style.transform='none'}}>
+-              <div style={{background:'linear-gradient(135deg,rgba(16,161,219,0.08),rgba(106,70,217,0.06))',padding:'32px 24px',fontSize:'2.5rem',textAlign:'center'}}>{p.emoji||'📝'}</div>
+-              <div style={{padding:'24px'}}>
+-                <div style={{display:'flex',gap:'8px',marginBottom:'12px',flexWrap:'wrap'}}>
+-                  <span style={{fontSize:'0.62rem',fontWeight:700,letterSpacing:'1px',textTransform:'uppercase',color:'var(--sky)',background:'rgba(16,161,219,0.1)',padding:'3px 8px',borderRadius:'6px'}}>{p.category}</span>
+-                  <span style={{fontSize:'0.65rem',color:'var(--text-dim)'}}>{p.readtime} read</span>
++          {posts.map(p=>{
++            const iconName = CATEGORY_ICONS[p.category] || 'edit'
++            return (
++              <div key={p.id} style={{background:'var(--glass)',border:'1px solid var(--glass-border)',borderRadius:'16px',overflow:'hidden',transition:'all 0.3s',cursor:'pointer'}}
++                onMouseEnter={e=>{e.currentTarget.style.borderColor='rgba(16,161,219,0.2)';e.currentTarget.style.transform='translateY(-4px)'}}
++                onMouseLeave={e=>{e.currentTarget.style.borderColor='var(--glass-border)';e.currentTarget.style.transform='none'}}>
++                <div style={{background:'linear-gradient(135deg,rgba(16,161,219,0.08),rgba(106,70,217,0.06))',padding:'36px 24px',textAlign:'center',color:'var(--sky)'}}>
++                  <Icon name={iconName as any} size={40} />
++                </div>
++                <div style={{padding:'24px'}}>
++                  <div style={{display:'flex',gap:'8px',marginBottom:'12px',flexWrap:'wrap'}}>
++                    <span style={{fontSize:'0.62rem',fontWeight:700,letterSpacing:'1px',textTransform:'uppercase',color:'var(--sky)',background:'rgba(16,161,219,0.1)',padding:'3px 8px',borderRadius:'6px'}}>{p.category}</span>
++                    <span style={{fontSize:'0.65rem',color:'var(--text-dim)'}}>{p.readtime} read</span>
++                  </div>
++                  <h3 style={{fontFamily:'Syne,sans-serif',fontWeight:700,fontSize:'0.95rem',color:'var(--white)',marginBottom:'8px',lineHeight:1.4}}>{p.title}</h3>
++                  <p style={{fontSize:'0.75rem',color:'var(--text-muted)',lineHeight:1.6,fontWeight:300}}>{p.excerpt}</p>
+                 </div>
+-                <h3 style={{fontFamily:'Syne,sans-serif',fontWeight:700,fontSize:'0.95rem',color:'var(--white)',marginBottom:'8px',lineHeight:1.4}}>{p.title}</h3>
+-                <p style={{fontSize:'0.75rem',color:'var(--text-muted)',lineHeight:1.6,fontWeight:300}}>{p.excerpt}</p>
+               </div>
+-            </div>
+-          ))}
++            )
++          })}
+         </div>
+       </div>
+     </div>
+diff --git a/src/components/pages/CareersPage.tsx b/src/components/pages/CareersPage.tsx
+index 64bcd44..11c995e 100644
+--- a/src/components/pages/CareersPage.tsx
++++ b/src/components/pages/CareersPage.tsx
+@@ -2,12 +2,13 @@
+ import { useState } from 'react'
+ import Link from 'next/link'
+ import { useToast } from '@/components/ui/Toast'
++import { Icon } from '@/components/ui/Icons'
+ 
+ const CULTURE = [
+-  { icon: '🚀', title: 'Move fast', desc: "No bureaucracy. You'll ship real work for real clients from day one." },
+-  { icon: '🎯', title: 'Own your work', desc: 'We give you responsibility, not micromanagement. Results matter more than hours.' },
+-  { icon: '📈', title: 'Grow with us', desc: "We're building something real. The earlier you join, the more you shape it." },
+-  { icon: '🤝', title: 'Honest environment', desc: 'Direct feedback, transparent decisions, no corporate politics.' },
++  { icon: 'rocket', title: 'Move fast', desc: "No bureaucracy. You'll ship real work for real clients from day one." },
++  { icon: 'target', title: 'Own your work', desc: 'We give you responsibility, not micromanagement. Results matter more than hours.' },
++  { icon: 'chart-up', title: 'Grow with us', desc: "We're building something real. The earlier you join, the more you shape it." },
++  { icon: 'handshake', title: 'Honest environment', desc: 'Direct feedback, transparent decisions, no corporate politics.' },
+ ]
+ 
+ interface Job {
+@@ -17,6 +18,7 @@ interface Job {
+   statusColor: 'closed' | 'open'
+   iconBg: string
+   iconBorder: string
++  locationIcon: string
+   location: string
+   type: string
+   desc: string
+@@ -28,12 +30,13 @@ interface Job {
+ const JOBS: Job[] = [
+   {
+     title: 'CEO / Founder',
+-    icon: '👤',
++    icon: 'user',
+     status: 'Leadership — Not Open',
+     statusColor: 'closed',
+     iconBg: 'rgba(249,253,254,0.04)',
+     iconBorder: 'var(--glass-border)',
+-    location: '🏢 YallaGrow HQ',
++    locationIcon: 'building',
++    location: 'YallaGrow HQ',
+     type: 'Full-time',
+     desc: "Listed for transparency. This role is not open for applications — it exists to show you who's running the ship and how we think about leadership.",
+     responsibilities: [
+@@ -46,12 +49,13 @@ const JOBS: Job[] = [
+   },
+   {
+     title: 'Designer / Content Creator',
+-    icon: '🎨',
++    icon: 'palette',
+     status: 'Open Position',
+     statusColor: 'open',
+     iconBg: 'rgba(16,161,219,0.08)',
+     iconBorder: 'rgba(16,161,219,0.15)',
+-    location: '📍 Lebanon / Remote',
++    locationIcon: 'map-pin',
++    location: 'Lebanon / Remote',
+     type: 'Full-time',
+     desc: "We're looking for someone who can make brands look and feel premium. You'll work directly on client accounts — designing posts, building brand visuals, and producing short-form content that actually performs.",
+     responsibilities: [
+@@ -69,12 +73,13 @@ const JOBS: Job[] = [
+   },
+   {
+     title: 'Copywriter / Content Specialist',
+-    icon: '✍️',
++    icon: 'pen',
+     status: 'Open Position',
+     statusColor: 'open',
+     iconBg: 'rgba(106,70,217,0.08)',
+     iconBorder: 'rgba(106,70,217,0.15)',
+-    location: '📍 Lebanon / Remote',
++    locationIcon: 'map-pin',
++    location: 'Lebanon / Remote',
+     type: 'Full-time',
+     desc: "We're looking for someone who can write — not just content, but words that make people stop, read, and act. You'll write captions, ad copy, and messaging for real clients across different industries.",
+     responsibilities: [
+@@ -92,12 +97,13 @@ const JOBS: Job[] = [
+   },
+   {
+     title: 'Freelance Media Buyer',
+-    icon: '📈',
++    icon: 'chart-up',
+     status: 'Open — Freelance / Part-time',
+     statusColor: 'open',
+     iconBg: 'rgba(37,135,197,0.08)',
+     iconBorder: 'rgba(37,135,197,0.15)',
+-    location: '📍 Remote',
++    locationIcon: 'map-pin',
++    location: 'Remote',
+     type: 'Part-time / Freelance',
+     desc: "Freelance opportunity for someone who knows how to run Meta Ads and get results. You'll manage ad campaigns for our clients — targeting, budgets, optimization — and be judged purely on performance.",
+     responsibilities: [
+@@ -115,6 +121,12 @@ const JOBS: Job[] = [
+   },
+ ]
+ 
++const APPLY_ITEMS = [
++  { icon: 'folder', text: 'Portfolio or work samples' },
++  { icon: 'link', text: 'Instagram / Behance / LinkedIn' },
++  { icon: 'chat', text: "Which role you want & why you'd be a good fit" },
++]
++
+ export default function CareersPage() {
+   const { showToast } = useToast()
+   const [form, setForm] = useState({ name: '', email: '', phone: '', role: '', portfolio: '', linkedin: '', message: '' })
+@@ -145,7 +157,6 @@ export default function CareersPage() {
+ 
+   return (
+     <div style={{ paddingTop: '80px' }}>
+-      {/* HERO */}
+       <div style={{ padding: '80px 6% 60px', textAlign: 'center' }}>
+         <span className="eyebrow" style={{ marginBottom: '12px' }}>Join the Team</span>
+         <h1 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: 'clamp(2.4rem,5vw,4rem)', letterSpacing: '-2px', lineHeight: 1.05, marginTop: '12px', color: 'var(--white)' }}>
+@@ -155,7 +166,6 @@ export default function CareersPage() {
+           We&apos;re a small, execution-focused marketing agency based in Lebanon. We don&apos;t hire for titles — we hire for results. If you&apos;re good at what you do and want to work on real client projects, we want to hear from you.
+         </p>
+ 
+-        {/* Stats bar */}
+         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0', marginTop: '32px', background: 'var(--glass)', border: '1px solid var(--glass-border)', borderRadius: '16px', padding: '18px 28px' }} className="careers-stats-bar">
+           {[
+             { n: '3', l: 'Open roles' },
+@@ -173,14 +183,15 @@ export default function CareersPage() {
+         </div>
+       </div>
+ 
+-      {/* CULTURE STRIP */}
+       <section style={{ padding: '40px 6% 80px', background: 'rgba(0,0,0,0.2)' }}>
+         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', maxWidth: '1100px', margin: '0 auto' }} className="culture-grid">
+           {CULTURE.map(c => (
+             <div key={c.title} style={{ background: 'var(--glass)', border: '1px solid var(--glass-border)', borderRadius: '16px', padding: '24px', transition: 'all 0.3s' }}
+               onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(16,161,219,0.2)'; e.currentTarget.style.transform = 'translateY(-4px)' }}
+               onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--glass-border)'; e.currentTarget.style.transform = 'none' }}>
+-              <div style={{ fontSize: '1.6rem', marginBottom: '12px' }}>{c.icon}</div>
++              <div style={{ color: 'var(--sky)', marginBottom: '14px' }}>
++                <Icon name={c.icon as any} size={24} />
++              </div>
+               <h4 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 700, fontSize: '0.95rem', color: 'var(--white)', marginBottom: '8px' }}>{c.title}</h4>
+               <p style={{ fontSize: '0.76rem', color: 'var(--text-muted)', lineHeight: 1.6, fontWeight: 300 }}>{c.desc}</p>
+             </div>
+@@ -188,7 +199,6 @@ export default function CareersPage() {
+         </div>
+       </section>
+ 
+-      {/* POSITIONS */}
+       <section style={{ padding: '80px 6%' }}>
+         <div style={{ marginBottom: '48px', maxWidth: '1100px', margin: '0 auto 48px' }}>
+           <span className="eyebrow" style={{ marginBottom: '12px' }}>Roles</span>
+@@ -196,7 +206,7 @@ export default function CareersPage() {
+         </div>
+ 
+         <div style={{ maxWidth: '1100px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+-          {JOBS.map((j, ji) => (
++          {JOBS.map(j => (
+             <div key={j.title} style={{
+               background: 'rgba(249,253,254,0.02)',
+               border: '1px solid var(--glass-border)',
+@@ -208,10 +218,9 @@ export default function CareersPage() {
+               onMouseEnter={e => { if (!j.closed) { e.currentTarget.style.borderColor = 'rgba(16,161,219,0.15)' } }}
+               onMouseLeave={e => { if (!j.closed) e.currentTarget.style.borderColor = 'var(--glass-border)' }}>
+ 
+-              {/* Header */}
+               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '18px', marginBottom: '20px', flexWrap: 'wrap' }}>
+-                <div style={{ width: '52px', height: '52px', borderRadius: '14px', background: j.iconBg, border: `1px solid ${j.iconBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem', flexShrink: 0 }}>
+-                  {j.icon}
++                <div style={{ width: '52px', height: '52px', borderRadius: '14px', background: j.iconBg, border: `1px solid ${j.iconBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: 'var(--sky)' }}>
++                  <Icon name={j.icon as any} size={22} />
+                 </div>
+                 <div style={{ flex: 1, minWidth: '200px' }}>
+                   <div style={{ fontSize: '0.62rem', fontWeight: 700, letterSpacing: '1.5px', textTransform: 'uppercase', color: j.statusColor === 'open' ? '#16db64' : 'var(--text-dim)', marginBottom: '6px' }}>
+@@ -219,7 +228,10 @@ export default function CareersPage() {
+                   </div>
+                   <h3 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: '1.2rem', color: 'var(--white)', marginBottom: '6px' }}>{j.title}</h3>
+                   <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+-                    <span>{j.location}</span>
++                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
++                      <Icon name={j.locationIcon as any} size={13} />
++                      {j.location}
++                    </span>
+                     <span>{j.type}</span>
+                   </div>
+                 </div>
+@@ -232,7 +244,6 @@ export default function CareersPage() {
+                 {j.desc}
+               </p>
+ 
+-              {/* Responsibilities + Requirements */}
+               {j.responsibilities && (
+                 <div style={{ display: 'grid', gridTemplateColumns: j.requirements ? '1fr 1fr' : '1fr', gap: '32px' }} className="job-cols">
+                   <div>
+@@ -268,11 +279,8 @@ export default function CareersPage() {
+         </div>
+       </section>
+ 
+-      {/* APPLY SECTION */}
+       <section id="applySection" style={{ padding: '80px 6% 100px', background: 'rgba(0,0,0,0.2)' }}>
+         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '48px', maxWidth: '1100px', margin: '0 auto', alignItems: 'start' }} className="apply-grid">
+-
+-          {/* Left */}
+           <div>
+             <span className="eyebrow" style={{ marginBottom: '12px' }}>Apply</span>
+             <h2 className="section-title" style={{ marginTop: '12px', marginBottom: '16px' }}>Work With Us</h2>
+@@ -280,24 +288,23 @@ export default function CareersPage() {
+               No lengthy cover letters. No corporate forms. Just send your portfolio, past work, or a link to your Instagram / Behance — and tell us which role you&apos;re applying for.
+             </p>
+             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+-              {[
+-                { icon: '📁', text: 'Portfolio or work samples' },
+-                { icon: '🔗', text: 'Instagram / Behance / LinkedIn' },
+-                { icon: '💬', text: "Which role you want & why you'd be a good fit" },
+-              ].map(i => (
++              {APPLY_ITEMS.map(i => (
+                 <div key={i.text} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', background: 'var(--glass)', border: '1px solid var(--glass-border)', borderRadius: '12px' }}>
+-                  <span style={{ fontSize: '1.2rem' }}>{i.icon}</span>
++                  <span style={{ color: 'var(--sky)', display: 'flex', alignItems: 'center' }}>
++                    <Icon name={i.icon as any} size={18} />
++                  </span>
+                   <span style={{ fontSize: '0.82rem', color: 'rgba(249,253,254,0.75)' }}>{i.text}</span>
+                 </div>
+               ))}
+             </div>
+           </div>
+ 
+-          {/* Right - Form */}
+           <div style={{ background: 'var(--glass)', border: '1px solid var(--glass-border)', borderRadius: '20px', padding: '32px' }}>
+             {sent ? (
+               <div style={{ textAlign: 'center', padding: '40px 20px' }}>
+-                <div style={{ fontSize: '3rem', marginBottom: '16px' }}>✅</div>
++                <div style={{ color: '#16db64', marginBottom: '16px', display: 'flex', justifyContent: 'center' }}>
++                  <Icon name="check" size={48} strokeWidth={2.5} />
++                </div>
+                 <h3 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: '1.3rem', color: 'var(--white)', marginBottom: '10px' }}>Application received.</h3>
+                 <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.7 }}>
+                   We&apos;ll review your work and get back to you within a few days. No ghosting — we respond to every application.
+diff --git a/src/components/pages/ContactPage.tsx b/src/components/pages/ContactPage.tsx
+index be602ff..240c19b 100644
+--- a/src/components/pages/ContactPage.tsx
++++ b/src/components/pages/ContactPage.tsx
+@@ -3,6 +3,7 @@
+ import { useState } from 'react'
+ import Link from 'next/link'
+ import { useToast } from '@/components/ui/Toast'
++import { Icon } from '@/components/ui/Icons'
+ 
+ export default function ContactPage() {
+   const { showToast } = useToast()
+@@ -51,9 +52,14 @@ export default function ContactPage() {
+     transition: 'border-color 0.2s',
+   }
+ 
++  const contactOptions = [
++    { icon: 'chat', title: 'WhatsApp', desc: 'Fastest reply — usually within the hour', href: 'https://wa.me/447376441603', cta: 'Chat now →' },
++    { icon: 'mail', title: 'Email', desc: 'We respond to all emails within 24 hours', href: 'mailto:info@yallagrow.net', cta: 'info@yallagrow.net' },
++    { icon: 'calendar', title: 'Book a call', desc: 'Free 30-min strategy session — no commitment', href: process.env.NEXT_PUBLIC_BOOKING_URL || 'https://calendar.app.google/3WibM5kWvizhnHJt8', cta: 'Pick a time →' },
++  ]
++
+   return (
+     <div style={{ paddingTop: '80px' }}>
+-      {/* HERO */}
+       <section style={{ padding: '80px 6% 40px', textAlign: 'center' }}>
+         <span className="eyebrow" style={{ marginBottom: '12px' }}>Get in Touch</span>
+         <h1 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: 'clamp(2.4rem,5vw,4rem)', letterSpacing: '-2px', lineHeight: 1.05, color: 'var(--white)', marginTop: '12px' }}>
+@@ -64,10 +70,8 @@ export default function ContactPage() {
+         </p>
+       </section>
+ 
+-      {/* CONTENT */}
+       <section style={{ padding: '40px 6% 100px' }}>
+         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px', maxWidth: '1100px', margin: '0 auto', alignItems: 'start' }} className="contact-grid">
+-          {/* Left — Contact options */}
+           <div>
+             <h2 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: '1.4rem', color: 'var(--white)', letterSpacing: '-0.5px', marginBottom: '20px' }}>
+               Reach us directly
+@@ -77,11 +81,7 @@ export default function ContactPage() {
+             </p>
+ 
+             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '28px' }}>
+-              {[
+-                { icon: '💬', title: 'WhatsApp', desc: 'Fastest reply — usually within the hour', href: 'https://wa.me/447376441603', cta: 'Chat now →' },
+-                { icon: '📧', title: 'Email', desc: 'We respond to all emails within 24 hours', href: 'mailto:info@yallagrow.net', cta: 'info@yallagrow.net' },
+-                { icon: '📅', title: 'Book a call', desc: 'Free 30-min strategy session — no commitment', href: process.env.NEXT_PUBLIC_BOOKING_URL || 'https://calendar.app.google/3WibM5kWvizhnHJt8', cta: 'Pick a time →' },
+-              ].map(item => (
++              {contactOptions.map(item => (
+                 <a
+                   key={item.title}
+                   href={item.href}
+@@ -96,7 +96,9 @@ export default function ContactPage() {
+                   onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(16,161,219,0.3)'; e.currentTarget.style.transform = 'translateY(-2px)' }}
+                   onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--glass-border)'; e.currentTarget.style.transform = 'none' }}
+                 >
+-                  <div style={{ fontSize: '1.8rem', flexShrink: 0 }}>{item.icon}</div>
++                  <div style={{ flexShrink: 0, width: '44px', height: '44px', borderRadius: '11px', background: 'rgba(16,161,219,0.08)', border: '1px solid rgba(16,161,219,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--sky)' }}>
++                    <Icon name={item.icon as any} size={20} />
++                  </div>
+                   <div style={{ flex: 1 }}>
+                     <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '0.95rem', color: 'var(--white)', marginBottom: '4px' }}>{item.title}</div>
+                     <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '4px' }}>{item.desc}</div>
+@@ -106,10 +108,11 @@ export default function ContactPage() {
+               ))}
+             </div>
+ 
+-            {/* Address block */}
+             <div style={{ background: 'rgba(16,161,219,0.04)', border: '1px solid rgba(16,161,219,0.15)', borderRadius: '12px', padding: '18px 20px' }}>
+               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+-                <div style={{ fontSize: '1.4rem', flexShrink: 0, marginTop: '2px' }}>📍</div>
++                <div style={{ flexShrink: 0, marginTop: '2px', color: 'var(--sky)' }}>
++                  <Icon name="map-pin" size={22} />
++                </div>
+                 <div>
+                   <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '0.88rem', color: 'var(--white)', marginBottom: '6px' }}>
+                     Based in Lebanon
+@@ -125,11 +128,12 @@ export default function ContactPage() {
+             </div>
+           </div>
+ 
+-          {/* Right — Form */}
+           <div style={{ background: 'var(--glass)', border: '1px solid var(--glass-border)', borderRadius: '20px', padding: '32px' }}>
+             {sent ? (
+               <div style={{ textAlign: 'center', padding: '40px 20px' }}>
+-                <div style={{ fontSize: '3rem', marginBottom: '16px' }}>✅</div>
++                <div style={{ color: '#16db64', marginBottom: '16px', display: 'flex', justifyContent: 'center' }}>
++                  <Icon name="check" size={48} strokeWidth={2.5} />
++                </div>
+                 <h3 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: '1.3rem', color: 'var(--white)', marginBottom: '10px' }}>Message sent!</h3>
+                 <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.7 }}>
+                   We&apos;ll get back to you within 24 hours. Check your inbox!
+@@ -138,19 +142,15 @@ export default function ContactPage() {
+             ) : (
+               <>
+                 <h3 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 700, fontSize: '1.05rem', color: 'var(--white)', marginBottom: '20px' }}>Send us a message</h3>
+-
+                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }} className="form-row">
+                   <input placeholder="Your Name *" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} style={inputStyle} />
+                   <input placeholder="Email *" type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} style={inputStyle} />
+                 </div>
+-
+                 <input placeholder="Subject" value={form.subject} onChange={e => setForm({ ...form, subject: e.target.value })} style={{ ...inputStyle, marginBottom: '12px' }} />
+                 <textarea placeholder="Your message... *" rows={6} value={form.message} onChange={e => setForm({ ...form, message: e.target.value })} style={{ ...inputStyle, resize: 'vertical', marginBottom: '16px' }} />
+-
+                 <p style={{ fontSize: '0.72rem', color: 'var(--text-dim)', marginBottom: '14px' }}>
+                   By submitting, you agree to our <Link href="/privacy" style={{ color: 'var(--sky)' }}>Privacy Policy</Link> and <Link href="/terms" style={{ color: 'var(--sky)' }}>Terms of Service</Link>.
+                 </p>
+-
+                 <button onClick={submit} disabled={loading} className="btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
+                   {loading ? 'Sending...' : 'Send Message →'}
+                 </button>
+diff --git a/src/components/pages/PackageBuilder.tsx b/src/components/pages/PackageBuilder.tsx
+index eb158ca..add8332 100644
+--- a/src/components/pages/PackageBuilder.tsx
++++ b/src/components/pages/PackageBuilder.tsx
+@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
+ import { supabase } from '@/lib/supabase'
+ import Link from 'next/link'
+ import { useToast } from '@/components/ui/Toast'
++import { Icon } from '@/components/ui/Icons'
+ 
+ interface Rates {
+   staticPost: number
+@@ -57,12 +58,11 @@ const INITIAL_STATE: BuilderState = {
+   web: 'none', webBudget: 0, consultancyUrl: '', addons: {},
+ }
+ 
+-// Website tier previews
+ function getWebTier(budget: number) {
+   if (budget <= 0) return null
+   if (budget <= 150) return {
+     name: 'Starter Site',
+-    icon: '🚀',
++    icon: 'rocket',
+     color: '#10a1db',
+     features: [
+       'Single-page website',
+@@ -75,7 +75,7 @@ function getWebTier(budget: number) {
+   }
+   if (budget <= 300) return {
+     name: 'Business Site',
+-    icon: '💼',
++    icon: 'briefcase',
+     color: '#6a46d9',
+     features: [
+       'Up to 5 pages',
+@@ -89,7 +89,7 @@ function getWebTier(budget: number) {
+   }
+   if (budget <= 600) return {
+     name: 'Advanced Site',
+-    icon: '⚡',
++    icon: 'bolt',
+     color: '#16db64',
+     features: [
+       'Up to 10 pages',
+@@ -102,9 +102,18 @@ function getWebTier(budget: number) {
+     ],
+     ideal: 'Ideal for growing brands, e-commerce stores, and businesses ready to scale their online presence.',
+   }
+-  return null // > 600 handled separately
++  return null
+ }
+ 
++const AUDIT_FEATURES = [
++  { icon: 'search', text: 'Full technical + UX audit of your current site' },
++  { icon: 'bar-chart', text: 'Conversion rate analysis with real fixes' },
++  { icon: 'bolt', text: 'Page speed + SEO review' },
++  { icon: 'phone', text: 'Mobile experience audit' },
++  { icon: 'chat', text: '60-min strategy call with actionable roadmap' },
++  { icon: 'document', text: 'Written report you can share with your team' },
++]
++
+ export default function PackageBuilder() {
+   const { showToast } = useToast()
+   const [rates, setRates] = useState<Rates>(DEFAULT_RATES)
+@@ -121,7 +130,6 @@ export default function PackageBuilder() {
+     })
+   }, [])
+ 
+-  // Pricing calculation
+   const reelPerUnit = s.reels > 0 ? s.reelScript + s.reelEdit : rates.reel
+   const staticCost = s.staticPosts * rates.staticPost
+   const carouselCost = s.carousel * rates.carousel
+@@ -185,9 +193,7 @@ export default function PackageBuilder() {
+ 
+         <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '32px', maxWidth: '1200px', margin: '0 auto', alignItems: 'start' }} className="builder-grid">
+ 
+-          {/* LEFT: Steps */}
+           <div>
+-            {/* Progress dots */}
+             <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '32px', flexWrap: 'wrap' }}>
+               {[1, 2, 3, 4, 5, 6].map(n => (
+                 <div key={n} style={{ display: 'flex', alignItems: 'center', gap: '4px', flex: n < 6 ? 1 : 0 }}>
+@@ -199,7 +205,7 @@ export default function PackageBuilder() {
+                     fontSize: '0.75rem', fontWeight: 700, color: n <= step ? '#fff' : 'var(--text-dim)',
+                     flexShrink: 0, cursor: n < step ? 'pointer' : 'default',
+                   }} onClick={() => n < step && setStep(n)}>
+-                    {n < step ? '✓' : n}
++                    {n < step ? <Icon name="check" size={12} strokeWidth={3} /> : n}
+                   </div>
+                   {n < 6 && <div style={{ flex: 1, height: '1px', background: n < step ? 'var(--sky)' : 'rgba(249,253,254,0.08)' }} />}
+                 </div>
+@@ -208,7 +214,7 @@ export default function PackageBuilder() {
+ 
+             <div style={{ background: 'var(--glass)', border: '1px solid var(--glass-border)', borderRadius: '20px', padding: '32px' }}>
+ 
+-              {/* STEP 1 — Posts */}
++              {/* STEP 1 */}
+               {step === 1 && (
+                 <>
+                   <h3 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: '1.4rem', color: 'var(--white)', marginBottom: '8px', letterSpacing: '-0.5px' }}>How many posts per month?</h3>
+@@ -228,7 +234,7 @@ export default function PackageBuilder() {
+                 </>
+               )}
+ 
+-              {/* STEP 2 — Reels */}
++              {/* STEP 2 */}
+               {step === 2 && (
+                 <>
+                   <h3 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: '1.4rem', color: 'var(--white)', marginBottom: '8px', letterSpacing: '-0.5px' }}>How many UGC reels per month?</h3>
+@@ -242,21 +248,30 @@ export default function PackageBuilder() {
+                     <>
+                       <div style={{ background: 'rgba(249,253,254,0.03)', border: '1px solid var(--glass-border)', borderRadius: '12px', padding: '14px 16px', marginTop: '14px', marginBottom: '12px', fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: 1.8 }}>
+                         <div style={{ color: 'var(--white)', fontWeight: 600, marginBottom: '6px' }}>Base reel (${s.reelScript + s.reelEdit}) includes:</div>
+-                        <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>📝 Script writing</span><span style={{ color: 'var(--sky)', fontWeight: 600 }}>${s.reelScript}</span></div>
+-                        <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>✂️ Editing</span><span style={{ color: 'var(--sky)', fontWeight: 600 }}>${s.reelEdit}</span></div>
++                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
++                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}><Icon name="edit" size={13} />Script writing</span>
++                          <span style={{ color: 'var(--sky)', fontWeight: 600 }}>${s.reelScript}</span>
++                        </div>
++                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
++                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}><Icon name="scissors" size={13} />Editing</span>
++                          <span style={{ color: 'var(--sky)', fontWeight: 600 }}>${s.reelEdit}</span>
++                        </div>
+                       </div>
+                       <div style={{ background: 'rgba(16,161,219,0.04)', border: '1px solid rgba(16,161,219,0.12)', borderRadius: '12px', padding: '16px', marginTop: '12px' }}>
+-                        <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--white)', marginBottom: '12px' }}>🎛 Optional: Upgrade production quality</div>
++                        <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--white)', marginBottom: '12px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
++                          <Icon name="wrench" size={14} color="var(--sky)" />
++                          Optional: Upgrade production quality
++                        </div>
+                         <div style={{ marginBottom: '14px' }}>
+                           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+-                            <span>📝 Script writing budget per reel</span>
++                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><Icon name="edit" size={12} />Script writing budget per reel</span>
+                             <span style={{ color: 'var(--sky)', fontWeight: 700 }}>${s.reelScript}</span>
+                           </div>
+                           <input type="range" min={10} max={150} value={s.reelScript} onChange={e => setS({ ...s, reelScript: +e.target.value })} style={sliderStyle} />
+                         </div>
+                         <div>
+                           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+-                            <span>✂️ Editing budget per reel</span>
++                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><Icon name="scissors" size={12} />Editing budget per reel</span>
+                             <span style={{ color: 'var(--sky)', fontWeight: 700 }}>${s.reelEdit}</span>
+                           </div>
+                           <input type="range" min={15} max={60} value={s.reelEdit} onChange={e => setS({ ...s, reelEdit: +e.target.value })} style={sliderStyle} />
+@@ -270,23 +285,25 @@ export default function PackageBuilder() {
+                 </>
+               )}
+ 
+-              {/* STEP 3 — Marketing */}
++              {/* STEP 3 */}
+               {step === 3 && (
+                 <>
+                   <h3 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: '1.4rem', color: 'var(--white)', marginBottom: '8px', letterSpacing: '-0.5px' }}>What kind of marketing?</h3>
+                   <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '20px', fontWeight: 300 }}>Choose your approach.</p>
+                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '10px', marginBottom: '20px' }} className="mkt-grid">
+                     {[
+-                      { v: 'organic', l: 'Organic Only', icon: '🌱' },
+-                      { v: 'paid', l: 'Paid Advertising', icon: '🚀' },
+-                      { v: 'both', l: 'Organic + Paid', icon: '⚡' },
++                      { v: 'organic', l: 'Organic Only', icon: 'sparkle' },
++                      { v: 'paid', l: 'Paid Advertising', icon: 'rocket' },
++                      { v: 'both', l: 'Organic + Paid', icon: 'bolt' },
+                     ].map(o => (
+                       <div key={o.v} onClick={() => setS({ ...s, marketing: o.v as 'organic' | 'paid' | 'both' })} style={{
+                         background: s.marketing === o.v ? 'rgba(16,161,219,0.08)' : 'rgba(249,253,254,0.02)',
+                         border: s.marketing === o.v ? '1.5px solid var(--sky)' : '1.5px solid var(--glass-border)',
+                         borderRadius: '12px', padding: '16px', textAlign: 'center', cursor: 'pointer', transition: 'all 0.2s',
+                       }}>
+-                        <div style={{ fontSize: '1.5rem', marginBottom: '6px' }}>{o.icon}</div>
++                        <div style={{ color: 'var(--sky)', marginBottom: '8px', display: 'flex', justifyContent: 'center' }}>
++                          <Icon name={o.icon as any} size={24} />
++                        </div>
+                         <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--white)' }}>{o.l}</div>
+                       </div>
+                     ))}
+@@ -296,13 +313,13 @@ export default function PackageBuilder() {
+                     <div style={{ marginTop: '20px' }}>
+                       <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--white)', marginBottom: '12px' }}>Which platforms? (${rates.adMgmt}/mo management fee applies)</div>
+                       {[
+-                        { k: 'meta', label: 'Meta Ads (Facebook + Instagram)', icon: '📘', cpm: 3, ctr: 0.02, conv: 0.045 },
+-                        { k: 'tiktok', label: 'TikTok Ads', icon: '🎵', cpm: 2.5, ctr: 0.015, conv: 0.035 },
++                        { k: 'meta', label: 'Meta Ads (Facebook + Instagram)', icon: 'chat', cpm: 3, ctr: 0.02, conv: 0.045 },
++                        { k: 'tiktok', label: 'TikTok Ads', icon: 'music', cpm: 2.5, ctr: 0.015, conv: 0.035 },
+                       ].map(p => (
+                         <div key={p.k} style={{ marginBottom: '10px', background: 'var(--glass)', border: '1px solid var(--glass-border)', borderRadius: '12px', padding: '14px 16px' }}>
+                           <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
+                             <input type="checkbox" checked={s.platforms[p.k as 'meta' | 'tiktok']} onChange={e => setS({ ...s, platforms: { ...s.platforms, [p.k]: e.target.checked } })} style={{ width: '18px', height: '18px', accentColor: 'var(--sky)' }} />
+-                            <span style={{ fontSize: '1rem' }}>{p.icon}</span>
++                            <Icon name={p.icon as any} size={16} color="var(--sky)" />
+                             <span style={{ fontSize: '0.85rem', color: 'var(--white)', fontWeight: 500 }}>{p.label}</span>
+                           </label>
+                           {s.platforms[p.k as 'meta' | 'tiktok'] && (
+@@ -327,7 +344,10 @@ export default function PackageBuilder() {
+                                       })()}
+                                     </span>
+                                   </div>
+-                                  <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', marginTop: '6px' }}>Estimates based on Lebanon market averages. Actual results vary. ⚠️ Leads ≠ guaranteed sales.</div>
++                                  <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', marginTop: '6px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
++                                    <Icon name="alert" size={11} color="#ffc107" />
++                                    Estimates based on Lebanon market averages. Actual results vary. Leads ≠ guaranteed sales.
++                                  </div>
+                                 </div>
+                               )}
+                             </div>
+@@ -339,20 +359,21 @@ export default function PackageBuilder() {
+                 </>
+               )}
+ 
+-              {/* STEP 4 — Website */}
++              {/* STEP 4 */}
+               {step === 4 && (
+                 <>
+                   <h3 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: '1.4rem', color: 'var(--white)', marginBottom: '8px', letterSpacing: '-0.5px' }}>Do you need a website?</h3>
+                   <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '20px', fontWeight: 300 }}>We build fast, beautiful, conversion-focused websites — or audit and consult on your existing one.</p>
+-                  
+-                  {/* Three options: none / build / consultancy */}
++
+                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '10px', marginBottom: '20px' }} className="web-grid">
+                     <div onClick={() => setS({ ...s, web: 'none', webBudget: 0 })} style={{
+                       background: s.web === 'none' ? 'rgba(16,161,219,0.08)' : 'rgba(249,253,254,0.02)',
+                       border: s.web === 'none' ? '1.5px solid var(--sky)' : '1.5px solid var(--glass-border)',
+                       borderRadius: '12px', padding: '20px 14px', textAlign: 'center', cursor: 'pointer', transition: 'all 0.2s',
+                     }}>
+-                      <div style={{ fontSize: '1.6rem', marginBottom: '8px' }}>✖️</div>
++                      <div style={{ color: 'var(--text-muted)', marginBottom: '8px', display: 'flex', justifyContent: 'center' }}>
++                        <Icon name="close" size={24} />
++                      </div>
+                       <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--white)', marginBottom: '4px' }}>No thanks</div>
+                       <div style={{ fontSize: '0.68rem', color: 'var(--text-dim)' }}>I already have one</div>
+                     </div>
+@@ -361,7 +382,9 @@ export default function PackageBuilder() {
+                       border: s.web === 'yes' ? '1.5px solid var(--sky)' : '1.5px solid var(--glass-border)',
+                       borderRadius: '12px', padding: '20px 14px', textAlign: 'center', cursor: 'pointer', transition: 'all 0.2s',
+                     }}>
+-                      <div style={{ fontSize: '1.6rem', marginBottom: '8px' }}>🌐</div>
++                      <div style={{ color: 'var(--sky)', marginBottom: '8px', display: 'flex', justifyContent: 'center' }}>
++                        <Icon name="globe" size={24} />
++                      </div>
+                       <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--white)', marginBottom: '4px' }}>Build me one</div>
+                       <div style={{ fontSize: '0.68rem', color: 'var(--text-dim)' }}>New site or landing page</div>
+                     </div>
+@@ -371,17 +394,18 @@ export default function PackageBuilder() {
+                       borderRadius: '12px', padding: '20px 14px', textAlign: 'center', cursor: 'pointer', transition: 'all 0.2s', position: 'relative',
+                     }}>
+                       <div style={{ position: 'absolute', top: '-8px', right: '10px', background: 'linear-gradient(135deg,var(--sky),var(--purple))', color: '#fff', fontSize: '0.55rem', fontWeight: 800, letterSpacing: '1px', padding: '2px 8px', borderRadius: '100px', textTransform: 'uppercase' }}>+ Free Audit</div>
+-                      <div style={{ fontSize: '1.6rem', marginBottom: '8px' }}>🎓</div>
++                      <div style={{ color: 'var(--purple)', marginBottom: '8px', display: 'flex', justifyContent: 'center' }}>
++                        <Icon name="graduation" size={24} />
++                      </div>
+                       <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--white)', marginBottom: '4px' }}>Consultancy</div>
+                       <div style={{ fontSize: '0.68rem', color: 'var(--purple)', fontWeight: 700 }}>${CONSULTANCY_PRICE} one-time</div>
+                     </div>
+                   </div>
+ 
+-                  {/* CONSULTANCY DETAILS */}
+                   {s.web === 'consultancy' && (
+                     <div style={{ marginTop: '20px', background: 'linear-gradient(135deg,rgba(106,70,217,0.08),rgba(16,161,219,0.05))', border: '1px solid rgba(106,70,217,0.25)', borderRadius: '14px', padding: '24px' }}>
+                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+-                        <span style={{ fontSize: '1.4rem' }}>🎓</span>
++                        <span style={{ color: 'var(--purple)' }}><Icon name="graduation" size={22} /></span>
+                         <div>
+                           <div style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: '1.05rem', color: 'var(--white)' }}>Website Consultancy + Free Audit</div>
+                           <div style={{ fontSize: '0.72rem', color: 'var(--purple)', fontWeight: 700 }}>${CONSULTANCY_PRICE} one-time — added to your monthly total</div>
+@@ -391,23 +415,17 @@ export default function PackageBuilder() {
+                         A comprehensive review of your existing website — what&apos;s working, what&apos;s broken, and exactly what to fix to increase conversions.
+                       </div>
+                       <div style={{ display: 'grid', gap: '8px', marginBottom: '20px' }}>
+-                        {[
+-                          '🔍 Full technical + UX audit of your current site',
+-                          '📊 Conversion rate analysis with real fixes',
+-                          '⚡ Page speed + SEO review',
+-                          '📱 Mobile experience audit',
+-                          '💬 60-min strategy call with actionable roadmap',
+-                          '📄 Written report you can share with your team',
+-                        ].map(f => (
+-                          <div key={f} style={{ display: 'flex', gap: '10px', fontSize: '0.78rem', color: 'rgba(249,253,254,0.7)' }}>
+-                            <span style={{ color: 'var(--purple)', fontWeight: 700, flexShrink: 0 }}>✓</span>{f}
++                        {AUDIT_FEATURES.map(f => (
++                          <div key={f.text} style={{ display: 'flex', gap: '10px', alignItems: 'center', fontSize: '0.78rem', color: 'rgba(249,253,254,0.7)' }}>
++                            <Icon name={f.icon as any} size={14} color="var(--purple)" />
++                            {f.text}
+                           </div>
+                         ))}
+                       </div>
+-                      {/* Website URL input */}
+                       <div style={{ background: 'rgba(6,12,20,0.4)', border: '1px solid rgba(106,70,217,0.25)', borderRadius: '10px', padding: '14px 16px' }}>
+-                        <label style={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '1px', color: 'var(--purple)', marginBottom: '8px', display: 'block', textTransform: 'uppercase' }}>
+-                          🌐 Your website URL *
++                        <label style={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '1px', color: 'var(--purple)', marginBottom: '8px', display: 'inline-flex', alignItems: 'center', gap: '6px', textTransform: 'uppercase' }}>
++                          <Icon name="globe" size={13} />
++                          Your website URL *
+                         </label>
+                         <input
+                           type="url"
+@@ -423,17 +441,17 @@ export default function PackageBuilder() {
+                     </div>
+                   )}
+ 
+-                  {/* BUILD-ME-ONE budget input + previews */}
+                   {s.web === 'yes' && (
+                     <div style={{ marginTop: '20px' }}>
+                       <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--white)', marginBottom: '10px' }}>Your website budget (one-time, USD):</div>
+                       <input type="number" placeholder="e.g. 300" min={50} value={s.webBudget || ''} onChange={e => setS({ ...s, webBudget: +e.target.value || 0 })} style={inputStyle} />
+ 
+-                      {/* Tier preview */}
+                       {currentTier && (
+                         <div style={{ marginTop: '20px', background: 'rgba(249,253,254,0.02)', border: `1px solid ${currentTier.color}40`, borderRadius: '14px', padding: '24px', animation: 'fadeIn 0.3s ease' }}>
+                           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '14px' }}>
+-                            <div style={{ width: '44px', height: '44px', borderRadius: '10px', background: `${currentTier.color}18`, border: `1px solid ${currentTier.color}40`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem' }}>{currentTier.icon}</div>
++                            <div style={{ width: '44px', height: '44px', borderRadius: '10px', background: `${currentTier.color}18`, border: `1px solid ${currentTier.color}40`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: currentTier.color }}>
++                              <Icon name={currentTier.icon as any} size={20} />
++                            </div>
+                             <div>
+                               <div style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: '1.1rem', color: 'var(--white)' }}>{currentTier.name}</div>
+                               <div style={{ fontSize: '0.7rem', color: currentTier.color, fontWeight: 700 }}>${s.webBudget} one-time · Included in your package</div>
+@@ -451,10 +469,11 @@ export default function PackageBuilder() {
+                         </div>
+                       )}
+ 
+-                      {/* Budget > $600 — attractive CTA */}
+                       {s.webBudget > 600 && (
+                         <div style={{ marginTop: '20px', background: 'linear-gradient(135deg,rgba(1,32,76,0.7),rgba(16,161,219,0.15))', border: '1.5px solid var(--sky)', borderRadius: '16px', padding: '28px', textAlign: 'center', boxShadow: '0 8px 32px rgba(16,161,219,0.15)' }}>
+-                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(16,161,219,0.15)', border: '1px solid rgba(16,161,219,0.3)', color: 'var(--sky)', fontSize: '0.62rem', fontWeight: 800, letterSpacing: '1.5px', padding: '4px 14px', borderRadius: '100px', marginBottom: '16px', textTransform: 'uppercase' }}>💎 Custom Project</div>
++                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(16,161,219,0.15)', border: '1px solid rgba(16,161,219,0.3)', color: 'var(--sky)', fontSize: '0.62rem', fontWeight: 800, letterSpacing: '1.5px', padding: '4px 14px', borderRadius: '100px', marginBottom: '16px', textTransform: 'uppercase' }}>
++                            <Icon name="star" size={11} /> Custom Project
++                          </div>
+                           <h4 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: '1.3rem', color: 'var(--white)', marginBottom: '10px', letterSpacing: '-0.5px' }}>Let&apos;s Build Something Serious</h4>
+                           <p style={{ fontSize: '0.85rem', color: 'rgba(249,253,254,0.7)', lineHeight: 1.6, fontWeight: 300, marginBottom: '20px', maxWidth: '380px', margin: '0 auto 20px' }}>
+                             For a ${s.webBudget}+ budget, we build fully custom sites tailored to your business. Book a free 30-min call and let&apos;s design your project together.
+@@ -468,7 +487,8 @@ export default function PackageBuilder() {
+                           }}
+                             onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 28px rgba(16,161,219,0.55)' }}
+                             onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(16,161,219,0.4)' }}>
+-                            📞 Book a Free Strategy Call →
++                            <Icon name="calendar" size={16} />
++                            Book a Free Strategy Call →
+                           </a>
+                           <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', marginTop: '12px' }}>No commitment · 30 min · Get a proper quote</div>
+                         </div>
+@@ -478,7 +498,7 @@ export default function PackageBuilder() {
+                 </>
+               )}
+ 
+-              {/* STEP 5 — Add-ons */}
++              {/* STEP 5 */}
+               {step === 5 && (
+                 <>
+                   <h3 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: '1.4rem', color: 'var(--white)', marginBottom: '8px', letterSpacing: '-0.5px' }}>Any add-ons?</h3>
+@@ -490,8 +510,8 @@ export default function PackageBuilder() {
+                         border: s.addons[k] ? '1.5px solid var(--sky)' : '1.5px solid var(--glass-border)',
+                         borderRadius: '12px', padding: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px', transition: 'all 0.2s',
+                       }}>
+-                        <div style={{ width: '20px', height: '20px', borderRadius: '5px', border: `2px solid ${s.addons[k] ? 'var(--sky)' : 'var(--glass-border)'}`, background: s.addons[k] ? 'var(--sky)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '0.7rem', color: 'var(--dark)', fontWeight: 800 }}>
+-                          {s.addons[k] && '✓'}
++                        <div style={{ width: '20px', height: '20px', borderRadius: '5px', border: `2px solid ${s.addons[k] ? 'var(--sky)' : 'var(--glass-border)'}`, background: s.addons[k] ? 'var(--sky)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: 'var(--dark)' }}>
++                          {s.addons[k] && <Icon name="check" size={12} strokeWidth={3} />}
+                         </div>
+                         <div style={{ flex: 1 }}>
+                           <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--white)' }}>{info.name}</div>
+@@ -503,7 +523,7 @@ export default function PackageBuilder() {
+                 </>
+               )}
+ 
+-              {/* STEP 6 — Summary */}
++              {/* STEP 6 */}
+               {step === 6 && !sent && (
+                 <>
+                   <h3 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: '1.4rem', color: 'var(--white)', marginBottom: '8px', letterSpacing: '-0.5px' }}>Your Custom Package</h3>
+@@ -555,7 +575,9 @@ export default function PackageBuilder() {
+ 
+               {step === 6 && sent && (
+                 <div style={{ textAlign: 'center', padding: '30px 20px' }}>
+-                  <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🎉</div>
++                  <div style={{ color: '#16db64', marginBottom: '16px', display: 'flex', justifyContent: 'center' }}>
++                    <Icon name="check" size={48} strokeWidth={2.5} />
++                  </div>
+                   <h3 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: '1.4rem', color: 'var(--white)', marginBottom: '10px', letterSpacing: '-0.5px' }}>
+                     Info Received!
+                   </h3>
+@@ -563,9 +585,10 @@ export default function PackageBuilder() {
+                     Now let&apos;s lock in your <strong style={{ color: 'var(--sky)' }}>free 30-minute strategy call</strong>. Pick a time that works for you and we&apos;ll walk you through your custom package.
+                   </p>
+ 
+-                  {/* Big prominent calendar CTA */}
+                   <div style={{ background: 'linear-gradient(135deg,rgba(1,32,76,0.6),rgba(16,161,219,0.15))', border: '1px solid rgba(16,161,219,0.3)', borderRadius: '16px', padding: '28px 24px', marginBottom: '20px', boxShadow: '0 8px 32px rgba(16,161,219,0.1)' }}>
+-                    <div style={{ fontSize: '2rem', marginBottom: '12px' }}>📅</div>
++                    <div style={{ color: 'var(--sky)', marginBottom: '12px', display: 'flex', justifyContent: 'center' }}>
++                      <Icon name="calendar" size={32} />
++                    </div>
+                     <div style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: '1.1rem', color: 'var(--white)', marginBottom: '8px' }}>
+                       Book Your Meeting
+                     </div>
+@@ -587,7 +610,8 @@ export default function PackageBuilder() {
+                       onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 28px rgba(16,161,219,0.55)' }}
+                       onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(16,161,219,0.4)' }}
+                     >
+-                      📅 Pick a Time →
++                      <Icon name="calendar" size={15} />
++                      Pick a Time →
+                     </a>
+                   </div>
+ 
+@@ -599,12 +623,10 @@ export default function PackageBuilder() {
+                 </div>
+               )}
+ 
+-              {/* NAV */}
+               {step < 6 && !sent && (
+                 <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '32px' }}>
+                   {step > 1 ? <button onClick={() => setStep(step - 1)} className="btn-secondary">← Back</button> : <div />}
+                   <button onClick={() => {
+-                    // Validate consultancy website URL if step 4 + consultancy selected
+                     if (step === 4 && s.web === 'consultancy' && !s.consultancyUrl.trim()) {
+                       showToast('Please enter your website URL for the consultancy audit.', 'error')
+                       return
+@@ -616,7 +638,6 @@ export default function PackageBuilder() {
+             </div>
+           </div>
+ 
+-          {/* RIGHT: Live estimate sidebar */}
+           <div style={{ position: 'sticky', top: '100px' }} className="builder-sidebar">
+             <div style={{ background: 'linear-gradient(135deg,rgba(1,32,76,0.5),rgba(106,70,217,0.1))', border: '1px solid rgba(16,161,219,0.2)', borderRadius: '20px', padding: '28px' }}>
+               <div style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase', color: 'var(--sky)', marginBottom: '16px' }}>Live Estimate</div>
+diff --git a/src/components/pages/PackagesPage.tsx b/src/components/pages/PackagesPage.tsx
+index c1a1d68..2c73a7e 100644
+--- a/src/components/pages/PackagesPage.tsx
++++ b/src/components/pages/PackagesPage.tsx
+@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
+ import { supabase } from '@/lib/supabase'
+ import Link from 'next/link'
+ import PackageBuilder from './PackageBuilder'
++import { Icon } from '@/components/ui/Icons'
+ 
+ interface Pkg {
+   tier: string
+@@ -29,11 +30,11 @@ const DEFAULT_PKGS: Pkg[] = [
+ ]
+ 
+ const PHILOSOPHY = [
+-  { icon: '🚫', title: 'No price inflation', desc: "We charge what's fair. Not what the market allows us to get away with." },
+-  { icon: '🔓', title: 'No lock-in contracts', desc: "Month-to-month. Stay because we deliver results, not because you're trapped." },
+-  { icon: '🎯', title: 'No unnecessary upsells', desc: 'We only recommend services that genuinely move the needle for your business.' },
+-  { icon: '📈', title: 'We grow with you', desc: "Start small. Scale up when you're ready. Your plan grows as your business does." },
+-  { icon: '💬', title: 'Marketing made accessible', desc: "Professional marketing shouldn't require a $1,000+/month budget. We built this for you." },
++  { icon: 'close', title: 'No price inflation', desc: "We charge what's fair. Not what the market allows us to get away with." },
++  { icon: 'unlock', title: 'No lock-in contracts', desc: "Month-to-month. Stay because we deliver results, not because you're trapped." },
++  { icon: 'target', title: 'No unnecessary upsells', desc: 'We only recommend services that genuinely move the needle for your business.' },
++  { icon: 'chart-up', title: 'We grow with you', desc: "Start small. Scale up when you're ready. Your plan grows as your business does." },
++  { icon: 'chat', title: 'Marketing made accessible', desc: "Professional marketing shouldn't require a $1,000+/month budget. We built this for you." },
+ ]
+ 
+ const COMPARISON_ROWS = [
+@@ -58,10 +59,19 @@ const COMPARISON_ROWS = [
+ ]
+ 
+ const ADD_ON_CHIPS = [
+-  '🎨 Logo Design', '🏷️ Brand Identity', '🌐 Website Design', '📄 Landing Pages',
+-  '📸 Product Photography', '🎬 Extra Reels', '📝 Extra Posts', '✍️ Copywriting',
+-  '📧 Email Marketing', '💬 WhatsApp Automation', '🔍 SEO', '📍 Google Business Profile',
+-  '🤝 Influencer Outreach',
++  { icon: 'palette', label: 'Logo Design' },
++  { icon: 'edit', label: 'Brand Identity' },
++  { icon: 'globe', label: 'Website Design' },
++  { icon: 'document', label: 'Landing Pages' },
++  { icon: 'camera', label: 'Product Photography' },
++  { icon: 'film', label: 'Extra Reels' },
++  { icon: 'edit', label: 'Extra Posts' },
++  { icon: 'pen', label: 'Copywriting' },
++  { icon: 'mail', label: 'Email Marketing' },
++  { icon: 'chat', label: 'WhatsApp Automation' },
++  { icon: 'search', label: 'SEO' },
++  { icon: 'map-pin', label: 'Google Business Profile' },
++  { icon: 'handshake', label: 'Influencer Outreach' },
+ ]
+ 
+ export default function PackagesPage() {
+@@ -84,7 +94,6 @@ export default function PackagesPage() {
+ 
+   return (
+     <div style={{ paddingTop: '80px' }}>
+-      {/* HERO */}
+       <div style={{ padding: '80px 6% 60px', textAlign: 'center' }}>
+         <span className="eyebrow" style={{ marginBottom: '12px' }}>Pricing</span>
+         <h1 className="section-title" style={{ margin: '12px auto 16px' }}>Simple. Transparent.<br />Built for Real Businesses.</h1>
+@@ -97,11 +106,13 @@ export default function PackagesPage() {
+           ))}
+         </div>
+         <div style={{ marginTop: '28px' }}>
+-          <Link href="/quiz" className="btn-secondary" style={{ fontSize: '0.82rem' }}>🎯 Not sure which plan? Find yours in 2 min →</Link>
++          <Link href="/quiz" className="btn-secondary" style={{ fontSize: '0.82rem', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
++            <Icon name="target" size={14} />
++            Not sure which plan? Find yours in 2 min →
++          </Link>
+         </div>
+       </div>
+ 
+-      {/* PACKAGE CARDS */}
+       <section style={{ padding: '0 6% 100px' }}>
+         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', alignItems: 'stretch', maxWidth: '1200px', margin: '0 auto' }} className="pkg-grid">
+           {pkgs.map((p, i) => (
+@@ -113,7 +124,10 @@ export default function PackagesPage() {
+               onMouseEnter={e => { if (!p.featured) e.currentTarget.style.borderColor = 'rgba(16,161,219,0.2)'; e.currentTarget.style.transform = 'translateY(-4px)' }}
+               onMouseLeave={e => { if (!p.featured) e.currentTarget.style.borderColor = 'var(--glass-border)'; e.currentTarget.style.transform = 'none' }}>
+               {p.featured && (
+-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: 'linear-gradient(135deg, var(--sky), var(--purple))', color: '#fff', fontSize: '0.62rem', fontWeight: 800, letterSpacing: '1px', textTransform: 'uppercase', padding: '4px 12px', borderRadius: '100px', marginBottom: '16px', width: 'fit-content' }}>⭐ Most Popular</div>
++                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: 'linear-gradient(135deg, var(--sky), var(--purple))', color: '#fff', fontSize: '0.62rem', fontWeight: 800, letterSpacing: '1px', textTransform: 'uppercase', padding: '4px 12px', borderRadius: '100px', marginBottom: '16px', width: 'fit-content' }}>
++                  <Icon name="star" size={11} />
++                  Most Popular
++                </div>
+               )}
+               <div style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase', color: 'var(--sky)', marginBottom: '6px' }}>{p.tier}</div>
+               <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: '1.5rem', color: 'var(--white)', marginBottom: '4px' }}>{p.tier}</div>
+@@ -139,7 +153,6 @@ export default function PackagesPage() {
+         </div>
+       </section>
+ 
+-      {/* PHILOSOPHY */}
+       <section style={{ padding: '100px 6%', background: 'rgba(0,0,0,0.2)' }}>
+         <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+           <span className="eyebrow" style={{ marginBottom: '12px' }}>Philosophy</span>
+@@ -150,7 +163,9 @@ export default function PackagesPage() {
+             <div key={p.title} style={{ background: 'var(--glass)', border: '1px solid var(--glass-border)', borderRadius: '16px', padding: '24px 20px', transition: 'all 0.3s' }}
+               onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(16,161,219,0.2)'; e.currentTarget.style.transform = 'translateY(-4px)' }}
+               onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--glass-border)'; e.currentTarget.style.transform = 'none' }}>
+-              <div style={{ fontSize: '1.6rem', marginBottom: '12px' }}>{p.icon}</div>
++              <div style={{ color: 'var(--sky)', marginBottom: '14px' }}>
++                <Icon name={p.icon as any} size={24} />
++              </div>
+               <h4 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '0.9rem', color: 'var(--white)', marginBottom: '8px' }}>{p.title}</h4>
+               <p style={{ fontSize: '0.74rem', color: 'var(--text-muted)', lineHeight: 1.6, fontWeight: 300 }}>{p.desc}</p>
+             </div>
+@@ -158,7 +173,6 @@ export default function PackagesPage() {
+         </div>
+       </section>
+ 
+-      {/* COMPARISON TABLE */}
+       <section style={{ padding: '100px 6%' }}>
+         <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+           <span className="eyebrow" style={{ marginBottom: '12px' }}>Compare</span>
+@@ -200,7 +214,6 @@ export default function PackagesPage() {
+         </div>
+       </section>
+ 
+-      {/* CUSTOMIZE / ADD-ONS */}
+       <section style={{ padding: '100px 6%', background: 'rgba(0,0,0,0.2)' }}>
+         <div style={{ maxWidth: '900px', margin: '0 auto', textAlign: 'center' }}>
+           <span className="eyebrow" style={{ marginBottom: '12px' }}>Flexible</span>
+@@ -208,7 +221,10 @@ export default function PackagesPage() {
+           <p className="section-sub" style={{ margin: '12px auto 40px', maxWidth: '500px' }}>Every business is unique. Build a custom package by selecting only the services you actually need.</p>
+           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: 'center', marginBottom: '36px' }}>
+             {ADD_ON_CHIPS.map(chip => (
+-              <div key={chip} style={{ background: 'var(--glass)', border: '1px solid var(--glass-border)', borderRadius: '100px', padding: '10px 18px', fontSize: '0.82rem', color: 'rgba(249,253,254,0.75)' }}>{chip}</div>
++              <div key={chip.label} style={{ background: 'var(--glass)', border: '1px solid var(--glass-border)', borderRadius: '100px', padding: '10px 18px', fontSize: '0.82rem', color: 'rgba(249,253,254,0.75)', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
++                <Icon name={chip.icon as any} size={14} color="var(--sky)" />
++                {chip.label}
++              </div>
+             ))}
+           </div>
+           <button onClick={scrollToBuilder} className="btn-primary" style={{ fontSize: '1rem', padding: '16px 40px' }}>Build My Package →</button>
+@@ -216,10 +232,11 @@ export default function PackagesPage() {
+         </div>
+       </section>
+ 
+-      {/* STARTUP PROMISE */}
+       <section style={{ padding: '100px 6%' }}>
+         <div style={{ maxWidth: '760px', margin: '0 auto', background: 'linear-gradient(135deg, rgba(1,32,76,0.4), rgba(106,70,217,0.08))', border: '1px solid rgba(16,161,219,0.2)', borderRadius: '24px', padding: '48px 40px', textAlign: 'center' }}>
+-          <div style={{ fontSize: '3rem', marginBottom: '20px' }}>🤝</div>
++          <div style={{ color: 'var(--sky)', marginBottom: '20px', display: 'flex', justifyContent: 'center' }}>
++            <Icon name="handshake" size={56} />
++          </div>
+           <div style={{ display: 'inline-flex', alignItems: 'center', background: 'rgba(16,161,219,0.1)', border: '1px solid rgba(16,161,219,0.2)', color: 'var(--sky)', fontSize: '0.65rem', fontWeight: 700, letterSpacing: '1.5px', textTransform: 'uppercase', padding: '5px 14px', borderRadius: '100px', marginBottom: '20px' }}>The YallaGrow Startup Promise</div>
+           <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 'clamp(1.6rem, 4vw, 2.4rem)', color: 'var(--white)', marginBottom: '20px', letterSpacing: '-1px' }}>We Stand Behind Our Work</h2>
+           <p style={{ fontSize: '0.95rem', color: 'rgba(249,253,254,0.6)', lineHeight: 1.75, fontWeight: 300, marginBottom: '16px' }}>We know investing in marketing can feel risky — especially for a growing business.</p>
+@@ -237,15 +254,14 @@ export default function PackagesPage() {
+         </div>
+       </section>
+ 
+-      {/* PACKAGE BUILDER */}
+       <PackageBuilder />
+-      {/* Performance Partnership Teaser */}
++
+       <section style={{ padding: '60px 6% 100px' }}>
+         <div style={{ maxWidth: '900px', margin: '0 auto', background: 'linear-gradient(135deg, rgba(1,32,76,0.5), rgba(106,70,217,0.15))', border: '1px solid rgba(16,161,219,0.25)', borderRadius: '24px', padding: '48px 40px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
+           <div style={{ position: 'absolute', top: '-50%', right: '-10%', width: '400px', height: '400px', background: 'radial-gradient(circle, rgba(16,161,219,0.2), transparent 60%)', pointerEvents: 'none' }} />
+           <div style={{ position: 'relative', zIndex: 1 }}>
+             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'linear-gradient(135deg, var(--sky), var(--purple))', color: '#fff', fontSize: '0.62rem', fontWeight: 800, letterSpacing: '1.5px', padding: '5px 14px', borderRadius: '100px', textTransform: 'uppercase', marginBottom: '20px' }}>
+-              🔒 Invite-Only
++              <Icon name="lock" size={11} /> Invite-Only
+             </span>
+             <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 'clamp(1.6rem, 4vw, 2.4rem)', color: 'var(--white)', letterSpacing: '-1px', marginBottom: '16px', lineHeight: 1.15 }}>
+               Ready for Something Bigger?<br />Meet Our <span className="grad">Performance Partnership</span>
+diff --git a/src/components/pages/PerformancePartnership.tsx b/src/components/pages/PerformancePartnership.tsx
+index 2e28a21..8490a49 100644
+--- a/src/components/pages/PerformancePartnership.tsx
++++ b/src/components/pages/PerformancePartnership.tsx
+@@ -1,5 +1,6 @@
+ 'use client'
+ import { useState } from 'react'
++import { Icon } from '@/components/ui/Icons'
+ 
+ interface Model1State {
+   revenue: number
+@@ -35,7 +36,6 @@ export default function PerformancePartnership() {
+     price: 0, margin: 0, sales: 0, length: 3, closeRate: 20, complexity: 'low', growth: 20,
+   })
+ 
+-  // ========== MODEL 1 CALCULATIONS ==========
+   const netProfit = m1.revenue - m1.expenses
+   const m1IsLoss = m1.revenue <= 0 || netProfit <= 0
+ 
+@@ -59,7 +59,6 @@ export default function PerformancePartnership() {
+     m1Results = { deposit, commissionPct, monthlyCommission, annual, netProfit }
+   }
+ 
+-  // ========== MODEL 2 CALCULATIONS ==========
+   const monthlyRevenue2 = m2.price * m2.sales
+   const monthlyProfit2 = monthlyRevenue2 * (m2.margin / 100)
+   const newSales2 = m2.sales * (m2.growth / 100)
+@@ -86,10 +85,9 @@ export default function PerformancePartnership() {
+ 
+   return (
+     <section style={{ padding: '80px 6% 60px' }}>
+-      {/* Header */}
+       <div style={{ textAlign: 'center', marginBottom: '16px' }}>
+         <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'linear-gradient(135deg,var(--sky),var(--purple))', color: '#fff', fontSize: '0.62rem', fontWeight: 800, letterSpacing: '1.5px', padding: '5px 14px', borderRadius: '100px', textTransform: 'uppercase' }}>
+-          🔒 Invite-Only
++          <Icon name="lock" size={11} /> Invite-Only
+         </span>
+       </div>
+       <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+@@ -100,7 +98,6 @@ export default function PerformancePartnership() {
+         </p>
+       </div>
+ 
+-      {/* Tabs */}
+       <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '32px', maxWidth: '600px', margin: '0 auto 32px', background: 'var(--glass)', border: '1px solid var(--glass-border)', borderRadius: '14px', padding: '5px' }} className="pp-tabs-wrapper">
+         <button onClick={() => setActiveModel(1)} style={{
+           flex: 1, padding: '11px 16px', borderRadius: '10px',
+@@ -120,7 +117,6 @@ export default function PerformancePartnership() {
+         }}>Model 2 — Per Sale Commission</button>
+       </div>
+ 
+-      {/* MODEL 1 */}
+       {activeModel === 1 && (
+         <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
+           <div style={{ background: 'rgba(249,253,254,0.02)', border: '1px solid var(--glass-border)', borderRadius: '16px', padding: '24px', marginBottom: '24px', textAlign: 'center' }}>
+@@ -133,7 +129,6 @@ export default function PerformancePartnership() {
+           </div>
+ 
+           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }} className="pp-calc-grid">
+-            {/* Inputs */}
+             <div style={{ background: 'var(--glass)', border: '1px solid var(--glass-border)', borderRadius: '16px', padding: '24px' }}>
+               <div style={{ marginBottom: '14px' }}>
+                 <label style={labelStyle}>MONTHLY REVENUE ($)</label>
+@@ -178,11 +173,11 @@ export default function PerformancePartnership() {
+               </div>
+             </div>
+ 
+-            {/* Results */}
+             <div style={{ background: 'linear-gradient(135deg,rgba(1,32,76,0.4),rgba(16,161,219,0.05))', border: '1px solid rgba(16,161,219,0.2)', borderRadius: '16px', padding: '24px' }}>
+               {m1IsLoss ? (
+-                <div style={{ background: 'rgba(255,193,7,0.08)', border: '1px solid rgba(255,193,7,0.25)', borderRadius: '12px', padding: '20px', color: '#ffc107', fontSize: '0.85rem', lineHeight: 1.6, textAlign: 'center' }}>
+-                  ⚠️ Your business is currently operating at a loss. We recommend improving profitability before entering a performance partnership.
++                <div style={{ background: 'rgba(255,193,7,0.08)', border: '1px solid rgba(255,193,7,0.25)', borderRadius: '12px', padding: '20px', color: '#ffc107', fontSize: '0.85rem', lineHeight: 1.6, textAlign: 'center', display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
++                  <Icon name="alert" size={18} style={{ flexShrink: 0, marginTop: '1px' }} />
++                  <span>Your business is currently operating at a loss. We recommend improving profitability before entering a performance partnership.</span>
+                 </div>
+               ) : (
+                 <>
+@@ -203,7 +198,6 @@ export default function PerformancePartnership() {
+         </div>
+       )}
+ 
+-      {/* MODEL 2 */}
+       {activeModel === 2 && (
+         <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
+           <div style={{ background: 'rgba(249,253,254,0.02)', border: '1px solid var(--glass-border)', borderRadius: '16px', padding: '24px', marginBottom: '24px', textAlign: 'center' }}>
+@@ -218,7 +212,6 @@ export default function PerformancePartnership() {
+           </div>
+ 
+           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }} className="pp-calc-grid">
+-            {/* Inputs */}
+             <div style={{ background: 'var(--glass)', border: '1px solid var(--glass-border)', borderRadius: '16px', padding: '24px' }}>
+               <div style={{ marginBottom: '14px' }}>
+                 <label style={labelStyle}>PRODUCT / SERVICE PRICE ($)</label>
+@@ -265,7 +258,6 @@ export default function PerformancePartnership() {
+               </div>
+             </div>
+ 
+-            {/* Results */}
+             <div style={{ background: 'linear-gradient(135deg,rgba(1,32,76,0.4),rgba(16,161,219,0.05))', border: '1px solid rgba(16,161,219,0.2)', borderRadius: '16px', padding: '24px' }}>
+               <div style={{ marginBottom: '20px', paddingBottom: '16px', borderBottom: '1px solid var(--glass-border)' }}>
+                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+diff --git a/src/components/pages/QuizPage.tsx b/src/components/pages/QuizPage.tsx
+index f9849e5..e3e1217 100644
+--- a/src/components/pages/QuizPage.tsx
++++ b/src/components/pages/QuizPage.tsx
+@@ -1,6 +1,7 @@
+ 'use client'
+ import { useState, useEffect } from 'react'
+ import Link from 'next/link'
++import { Icon } from '@/components/ui/Icons'
+ 
+ interface SingleStep {
+   type: 'single'
+@@ -15,7 +16,7 @@ interface MultiStep {
+   key: string
+   q: string
+   sub: string
+-  options: { v: string; l: string }[]
++  options: { v: string; l: string; icon: string }[]
+ }
+ 
+ type Step = SingleStep | MultiStep
+@@ -27,11 +28,11 @@ const STEPS: Step[] = [
+     q: 'What best describes your business?',
+     sub: 'This helps us tailor everything to your specific context.',
+     options: [
+-      { v: 'local', l: 'Local Business', d: 'Restaurant, salon, clinic, shop — serving your community', icon: '🏪' },
+-      { v: 'startup', l: 'Startup', d: 'Early-stage, building a product or service from scratch', icon: '🚀' },
+-      { v: 'ecommerce', l: 'E-commerce', d: 'Selling products online', icon: '🛒' },
+-      { v: 'service', l: 'Service Business', d: 'Freelancer, agency, consultant, B2B', icon: '💼' },
+-      { v: 'personal', l: 'Personal Brand', d: 'Creator, influencer, coach, speaker', icon: '🎤' },
++      { v: 'local', l: 'Local Business', d: 'Restaurant, salon, clinic, shop — serving your community', icon: 'building' },
++      { v: 'startup', l: 'Startup', d: 'Early-stage, building a product or service from scratch', icon: 'rocket' },
++      { v: 'ecommerce', l: 'E-commerce', d: 'Selling products online', icon: 'package' },
++      { v: 'service', l: 'Service Business', d: 'Freelancer, agency, consultant, B2B', icon: 'briefcase' },
++      { v: 'personal', l: 'Personal Brand', d: 'Creator, influencer, coach, speaker', icon: 'megaphone' },
+     ],
+   },
+   {
+@@ -40,11 +41,11 @@ const STEPS: Step[] = [
+     q: "What's your #1 goal right now?",
+     sub: "Pick the one that matters most — we'll optimize for it.",
+     options: [
+-      { v: 'awareness', l: 'Get discovered', d: 'Build brand awareness and reach new audiences', icon: '📣' },
+-      { v: 'leads', l: 'Generate leads', d: 'Turn social into a consistent source of inquiries', icon: '🎯' },
+-      { v: 'sales', l: 'Drive sales', d: 'Convert followers and ad traffic into paying customers', icon: '💰' },
+-      { v: 'presence', l: 'Build a professional presence', d: 'Look credible, consistent, and trustworthy online', icon: '✨' },
+-      { v: 'scale', l: "Scale what's already working", d: 'Amplify existing momentum with strategy and ads', icon: '📈' },
++      { v: 'awareness', l: 'Get discovered', d: 'Build brand awareness and reach new audiences', icon: 'megaphone' },
++      { v: 'leads', l: 'Generate leads', d: 'Turn social into a consistent source of inquiries', icon: 'target' },
++      { v: 'sales', l: 'Drive sales', d: 'Convert followers and ad traffic into paying customers', icon: 'dollar' },
++      { v: 'presence', l: 'Build a professional presence', d: 'Look credible, consistent, and trustworthy online', icon: 'sparkle' },
++      { v: 'scale', l: "Scale what's already working", d: 'Amplify existing momentum with strategy and ads', icon: 'chart-up' },
+     ],
+   },
+   {
+@@ -53,10 +54,10 @@ const STEPS: Step[] = [
+     q: 'Where are you with marketing right now?',
+     sub: 'Honest answer helps us give you the right recommendation.',
+     options: [
+-      { v: 'none', l: 'Starting from zero', d: 'No social presence, no strategy — starting fresh', icon: '🔴' },
+-      { v: 'inconsistent', l: 'Posting inconsistently', d: 'Active sometimes, but no real strategy or system', icon: '🟡' },
+-      { v: 'active', l: 'Posting regularly', d: 'Consistent presence but not seeing strong results', icon: '🟢' },
+-      { v: 'scaling', l: 'Already running ads + content', d: 'Want to optimize, scale, or hand off to professionals', icon: '🔵' },
++      { v: 'none', l: 'Starting from zero', d: 'No social presence, no strategy — starting fresh', icon: 'dot-red' },
++      { v: 'inconsistent', l: 'Posting inconsistently', d: 'Active sometimes, but no real strategy or system', icon: 'dot-yellow' },
++      { v: 'active', l: 'Posting regularly', d: 'Consistent presence but not seeing strong results', icon: 'dot-green' },
++      { v: 'scaling', l: 'Already running ads + content', d: 'Want to optimize, scale, or hand off to professionals', icon: 'dot-blue' },
+     ],
+   },
+   {
+@@ -65,14 +66,14 @@ const STEPS: Step[] = [
+     q: 'What services are you looking for?',
+     sub: 'Select all that apply — no pressure to know exactly.',
+     options: [
+-      { v: 'posts', l: '📸 Social Media Posts' },
+-      { v: 'reels', l: '🎬 Reels & Video Content' },
+-      { v: 'ads', l: '📈 Paid Advertising (Meta/TikTok)' },
+-      { v: 'strategy', l: '🎯 Marketing Strategy' },
+-      { v: 'branding', l: '🎨 Branding & Identity' },
+-      { v: 'copy', l: '✍️ Copywriting' },
+-      { v: 'web', l: '🌐 Website Development' },
+-      { v: 'analytics', l: '📊 Analytics & Reports' },
++      { v: 'posts', l: 'Social Media Posts', icon: 'camera' },
++      { v: 'reels', l: 'Reels & Video Content', icon: 'film' },
++      { v: 'ads', l: 'Paid Advertising (Meta/TikTok)', icon: 'chart-up' },
++      { v: 'strategy', l: 'Marketing Strategy', icon: 'target' },
++      { v: 'branding', l: 'Branding & Identity', icon: 'palette' },
++      { v: 'copy', l: 'Copywriting', icon: 'pen' },
++      { v: 'web', l: 'Website Development', icon: 'globe' },
++      { v: 'analytics', l: 'Analytics & Reports', icon: 'bar-chart' },
+     ],
+   },
+   {
+@@ -81,9 +82,9 @@ const STEPS: Step[] = [
+     q: 'How involved do you want to be?',
+     sub: "There's no wrong answer — this helps us set the right expectations.",
+     options: [
+-      { v: 'handoff', l: 'Fully hand it off', d: 'I trust you — just keep me updated monthly', icon: '🙌' },
+-      { v: 'collab', l: 'Collaborate together', d: 'I want to review and approve content before it goes live', icon: '🤝' },
+-      { v: 'guided', l: 'Guide my team', d: 'Strategy and oversight — my team does execution', icon: '🧭' },
++      { v: 'handoff', l: 'Fully hand it off', d: 'I trust you — just keep me updated monthly', icon: 'handshake' },
++      { v: 'collab', l: 'Collaborate together', d: 'I want to review and approve content before it goes live', icon: 'users' },
++      { v: 'guided', l: 'Guide my team', d: 'Strategy and oversight — my team does execution', icon: 'target' },
+     ],
+   },
+   {
+@@ -92,10 +93,10 @@ const STEPS: Step[] = [
+     q: "What's your approximate monthly budget?",
+     sub: 'This is a soft signal — not a commitment. It helps us recommend the right starting point.',
+     options: [
+-      { v: 'low', l: 'Under $200/month', d: 'Starting lean — want maximum value for budget', icon: '💚' },
+-      { v: 'mid', l: '$200 – $400/month', d: 'Ready to invest in consistent, quality marketing', icon: '💛' },
+-      { v: 'high', l: '$400+/month', d: 'Serious about scaling with a full-service approach', icon: '💙' },
+-      { v: 'unsure', l: 'Not sure yet', d: 'Let the recommendation guide me', icon: '🤔' },
++      { v: 'low', l: 'Under $200/month', d: 'Starting lean — want maximum value for budget', icon: 'dot-green' },
++      { v: 'mid', l: '$200 – $400/month', d: 'Ready to invest in consistent, quality marketing', icon: 'dot-yellow' },
++      { v: 'high', l: '$400+/month', d: 'Serious about scaling with a full-service approach', icon: 'dot-blue' },
++      { v: 'unsure', l: 'Not sure yet', d: 'Let the recommendation guide me', icon: 'help' },
+     ],
+   },
+ ]
+@@ -126,14 +127,14 @@ const PLANS: Record<string, { name: string; price: number; feats: string[]; reas
+ }
+ 
+ const ADDONS = [
+-  { id: 'extra_posts', label: '📸 Extra Posts', price: '+$5/post' },
+-  { id: 'extra_reels', label: '🎬 Extra Reels', price: '+$25/reel' },
+-  { id: 'branding', label: '🎨 Branding', price: '+$120/mo' },
+-  { id: 'copy', label: '✍️ Copywriting', price: '+$80/mo' },
+-  { id: 'photography', label: '📷 Photography', price: '+$100/mo' },
+-  { id: 'videography', label: '🎥 Videography', price: '+$150/mo' },
+-  { id: 'seo', label: '🔍 SEO', price: '+$90/mo' },
+-  { id: 'reports', label: '📊 Monthly Reports', price: '+$60/mo' },
++  { id: 'extra_posts', icon: 'camera', label: 'Extra Posts', price: '+$5/post' },
++  { id: 'extra_reels', icon: 'film', label: 'Extra Reels', price: '+$25/reel' },
++  { id: 'branding', icon: 'palette', label: 'Branding', price: '+$120/mo' },
++  { id: 'copy', icon: 'pen', label: 'Copywriting', price: '+$80/mo' },
++  { id: 'photography', icon: 'camera', label: 'Photography', price: '+$100/mo' },
++  { id: 'videography', icon: 'video', label: 'Videography', price: '+$150/mo' },
++  { id: 'seo', icon: 'search', label: 'SEO', price: '+$90/mo' },
++  { id: 'reports', icon: 'bar-chart', label: 'Monthly Reports', price: '+$60/mo' },
+ ]
+ 
+ function recommend(answers: Record<string, string | string[]>): string {
+@@ -154,13 +155,12 @@ function recommend(answers: Record<string, string | string[]>): string {
+ }
+ 
+ export default function QuizPage() {
+-  const [step, setStep] = useState(1) // 1-6 quiz, 7 processing, 8 results, 9 customize, 10 final
++  const [step, setStep] = useState(1)
+   const [answers, setAnswers] = useState<Record<string, string | string[]>>({ services: [] })
+   const [result, setResult] = useState<string | null>(null)
+   const [addons, setAddons] = useState<Record<string, boolean>>({})
+   const [procStep, setProcStep] = useState(0)
+ 
+-  // Processing animation
+   useEffect(() => {
+     if (step === 7) {
+       setProcStep(0)
+@@ -186,7 +186,7 @@ export default function QuizPage() {
+     setAnswers(newAnswers)
+     setTimeout(() => {
+       if (step < 6) setStep(step + 1)
+-      else setStep(7) // trigger processing
++      else setStep(7)
+     }, 250)
+   }
+ 
+@@ -212,13 +212,11 @@ export default function QuizPage() {
+   const plan = result ? PLANS[result] : null
+   const otherPlans = result ? Object.entries(PLANS).filter(([k]) => k !== result) : []
+ 
+-  // Get current step data
+   const currentStepData = step >= 1 && step <= 6 ? STEPS[step - 1] : null
+ 
+   return (
+     <div style={{ minHeight: '100vh', paddingTop: '80px', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '100px 6% 80px' }}>
+ 
+-      {/* Progress bar (only for question steps 1-6) */}
+       {step >= 1 && step <= 6 && (
+         <div style={{ width: '100%', maxWidth: '640px', marginBottom: '40px' }}>
+           <div style={{ height: '3px', background: 'rgba(249,253,254,0.08)', borderRadius: '2px', overflow: 'hidden' }}>
+@@ -236,7 +234,7 @@ export default function QuizPage() {
+ 
+       <div style={{ width: '100%', maxWidth: '640px' }}>
+ 
+-        {/* SINGLE-SELECT STEPS */}
++        {/* SINGLE-SELECT */}
+         {currentStepData && currentStepData.type === 'single' && (
+           <div key={step} style={{ animation: 'pageIn 0.4s cubic-bezier(0.16,1,0.3,1) both' }}>
+             <h1 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: 'clamp(1.4rem,4vw,2rem)', color: 'var(--white)', letterSpacing: '-0.5px', marginBottom: '10px', lineHeight: 1.2 }}>
+@@ -255,8 +253,8 @@ export default function QuizPage() {
+                 }}
+                   onMouseEnter={e => { if (answers[currentStepData.key] !== o.v) e.currentTarget.style.borderColor = 'rgba(16,161,219,0.3)' }}
+                   onMouseLeave={e => { if (answers[currentStepData.key] !== o.v) e.currentTarget.style.borderColor = 'var(--glass-border)' }}>
+-                  <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(16,161,219,0.08)', border: '1px solid rgba(16,161,219,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', flexShrink: 0 }}>
+-                    {o.icon}
++                  <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(16,161,219,0.08)', border: '1px solid rgba(16,161,219,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: 'var(--sky)' }}>
++                    <Icon name={o.icon as any} size={20} />
+                   </div>
+                   <div>
+                     <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--white)', marginBottom: '2px' }}>{o.l}</div>
+@@ -273,7 +271,7 @@ export default function QuizPage() {
+           </div>
+         )}
+ 
+-        {/* MULTI-SELECT (Services) */}
++        {/* MULTI-SELECT */}
+         {currentStepData && currentStepData.type === 'multi' && (
+           <div key={step} style={{ animation: 'pageIn 0.4s cubic-bezier(0.16,1,0.3,1) both' }}>
+             <h1 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: 'clamp(1.4rem,4vw,2rem)', color: 'var(--white)', letterSpacing: '-0.5px', marginBottom: '10px', lineHeight: 1.2 }}>
+@@ -290,9 +288,10 @@ export default function QuizPage() {
+                     borderRadius: '12px', padding: '14px 16px', cursor: 'pointer',
+                     display: 'flex', alignItems: 'center', gap: '10px', transition: 'all 0.2s',
+                   }}>
+-                    <div style={{ width: '20px', height: '20px', borderRadius: '5px', border: `2px solid ${selected ? 'var(--sky)' : 'var(--glass-border)'}`, background: selected ? 'var(--sky)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '0.7rem', color: 'var(--dark)', fontWeight: 800 }}>
+-                      {selected && '✓'}
++                    <div style={{ width: '20px', height: '20px', borderRadius: '5px', border: `2px solid ${selected ? 'var(--sky)' : 'var(--glass-border)'}`, background: selected ? 'var(--sky)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: 'var(--dark)' }}>
++                      {selected && <Icon name="check" size={12} strokeWidth={3} />}
+                     </div>
++                    <Icon name={o.icon as any} size={16} color="var(--sky)" />
+                     <span style={{ fontSize: '0.82rem', color: 'var(--white)', fontWeight: 500 }}>{o.l}</span>
+                   </div>
+                 )
+@@ -307,7 +306,6 @@ export default function QuizPage() {
+           </div>
+         )}
+ 
+-        {/* STEP 6 SKIP TO RESULTS OVERRIDE */}
+         {step === 6 && currentStepData && (
+           <div style={{ textAlign: 'center', marginTop: '20px' }}>
+             <button onClick={goToProcessing} style={{ background: 'none', border: 'none', color: 'var(--text-dim)', fontSize: '0.78rem', cursor: 'pointer', fontFamily: 'Inter,sans-serif' }}>
+@@ -316,7 +314,7 @@ export default function QuizPage() {
+           </div>
+         )}
+ 
+-        {/* STEP 7: PROCESSING */}
++        {/* PROCESSING */}
+         {step === 7 && (
+           <div style={{ animation: 'pageIn 0.4s cubic-bezier(0.16,1,0.3,1) both', textAlign: 'center' }}>
+             <div style={{ width: '60px', height: '60px', margin: '0 auto 32px', border: '3px solid rgba(16,161,219,0.15)', borderTopColor: 'var(--sky)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+@@ -326,8 +324,8 @@ export default function QuizPage() {
+             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxWidth: '340px', margin: '0 auto', textAlign: 'left' }}>
+               {PROC_STEPS.map((s, i) => (
+                 <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px', opacity: procStep > i ? 1 : 0.3, transition: 'opacity 0.4s' }}>
+-                  <div style={{ width: '22px', height: '22px', borderRadius: '50%', background: procStep > i ? 'rgba(16,161,219,0.15)' : 'transparent', border: `1.5px solid ${procStep > i ? 'var(--sky)' : 'var(--glass-border)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--sky)', fontSize: '0.72rem', fontWeight: 800 }}>
+-                    {procStep > i ? '✓' : ''}
++                  <div style={{ width: '22px', height: '22px', borderRadius: '50%', background: procStep > i ? 'rgba(16,161,219,0.15)' : 'transparent', border: `1.5px solid ${procStep > i ? 'var(--sky)' : 'var(--glass-border)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--sky)' }}>
++                    {procStep > i && <Icon name="check" size={12} strokeWidth={3} />}
+                   </div>
+                   <span style={{ fontSize: '0.82rem', color: procStep > i ? 'var(--white)' : 'var(--text-muted)' }}>{s}</span>
+                 </div>
+@@ -336,12 +334,12 @@ export default function QuizPage() {
+           </div>
+         )}
+ 
+-        {/* STEP 8: RESULTS */}
++        {/* RESULTS */}
+         {step === 8 && plan && (
+           <div style={{ animation: 'pageIn 0.4s cubic-bezier(0.16,1,0.3,1) both' }}>
+             <div style={{ background: 'linear-gradient(135deg,rgba(1,32,76,0.5),rgba(16,161,219,0.08))', border: '1px solid rgba(16,161,219,0.25)', borderRadius: '20px', padding: '32px', marginBottom: '16px' }}>
+               <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'linear-gradient(135deg,var(--sky),var(--purple))', color: '#fff', fontSize: '0.6rem', fontWeight: 800, letterSpacing: '1.5px', textTransform: 'uppercase', padding: '4px 12px', borderRadius: '100px', marginBottom: '16px' }}>
+-                ⭐ Best Match
++                <Icon name="star" size={11} /> Best Match
+               </div>
+               <h1 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: '2.5rem', color: 'var(--white)', letterSpacing: '-1px', marginBottom: '4px' }}>{plan.name}</h1>
+               <div style={{ fontSize: '0.9rem', color: 'var(--sky)', fontWeight: 600, marginBottom: '12px' }}>${plan.price} / month</div>
+@@ -355,7 +353,6 @@ export default function QuizPage() {
+               </ul>
+             </div>
+ 
+-            {/* Alt plans */}
+             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '20px' }}>
+               {otherPlans.map(([k, p]) => (
+                 <div key={k} style={{ background: 'rgba(249,253,254,0.02)', border: '1px solid var(--glass-border)', borderRadius: '14px', padding: '18px' }}>
+@@ -376,7 +373,7 @@ export default function QuizPage() {
+           </div>
+         )}
+ 
+-        {/* STEP 9: CUSTOMIZATION */}
++        {/* CUSTOMIZATION */}
+         {step === 9 && plan && (
+           <div style={{ animation: 'pageIn 0.4s cubic-bezier(0.16,1,0.3,1) both' }}>
+             <h1 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: '1.6rem', color: 'var(--white)', letterSpacing: '-0.5px', marginBottom: '10px' }}>
+@@ -385,8 +382,9 @@ export default function QuizPage() {
+             <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '20px', fontWeight: 300 }}>
+               Your recommended plan is already included. Add or remove extras to match exactly what you need.
+             </p>
+-            <div style={{ background: 'rgba(16,161,219,0.05)', border: '1px solid rgba(16,161,219,0.15)', borderRadius: '12px', padding: '14px 16px', marginBottom: '20px', fontSize: '0.8rem', color: 'var(--sky)', fontWeight: 500 }}>
+-              ✓ Base: {plan.name} Plan — ${plan.price}/mo
++            <div style={{ background: 'rgba(16,161,219,0.05)', border: '1px solid rgba(16,161,219,0.15)', borderRadius: '12px', padding: '14px 16px', marginBottom: '20px', fontSize: '0.8rem', color: 'var(--sky)', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px' }}>
++              <Icon name="check" size={14} strokeWidth={2.5} />
++              Base: {plan.name} Plan — ${plan.price}/mo
+             </div>
+             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '24px' }} className="quiz-check-grid">
+               {ADDONS.map(a => (
+@@ -396,9 +394,10 @@ export default function QuizPage() {
+                   borderRadius: '12px', padding: '12px 14px', cursor: 'pointer',
+                   display: 'flex', alignItems: 'center', gap: '10px', transition: 'all 0.2s',
+                 }}>
+-                  <div style={{ width: '20px', height: '20px', borderRadius: '5px', border: `2px solid ${addons[a.id] ? 'var(--sky)' : 'var(--glass-border)'}`, background: addons[a.id] ? 'var(--sky)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '0.7rem', color: 'var(--dark)', fontWeight: 800 }}>
+-                    {addons[a.id] && '✓'}
++                  <div style={{ width: '20px', height: '20px', borderRadius: '5px', border: `2px solid ${addons[a.id] ? 'var(--sky)' : 'var(--glass-border)'}`, background: addons[a.id] ? 'var(--sky)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: 'var(--dark)' }}>
++                    {addons[a.id] && <Icon name="check" size={12} strokeWidth={3} />}
+                   </div>
++                  <Icon name={a.icon as any} size={15} color="var(--sky)" />
+                   <div style={{ flex: 1 }}>
+                     <div style={{ fontSize: '0.78rem', color: 'var(--white)', fontWeight: 500 }}>{a.label}</div>
+                     <div style={{ fontSize: '0.68rem', color: 'var(--sky)', fontWeight: 600 }}>{a.price}</div>
+@@ -413,11 +412,13 @@ export default function QuizPage() {
+           </div>
+         )}
+ 
+-        {/* STEP 10: FINAL CTA */}
++        {/* FINAL CTA */}
+         {step === 10 && plan && (
+           <div style={{ animation: 'pageIn 0.4s cubic-bezier(0.16,1,0.3,1) both' }}>
+             <div style={{ background: 'linear-gradient(135deg,rgba(1,32,76,0.6),rgba(106,70,217,0.15))', border: '1px solid rgba(16,161,219,0.3)', borderRadius: '20px', padding: '40px 32px', textAlign: 'center' }}>
+-              <div style={{ fontSize: '3rem', marginBottom: '20px' }}>🎯</div>
++              <div style={{ color: 'var(--sky)', marginBottom: '20px', display: 'flex', justifyContent: 'center' }}>
++                <Icon name="target" size={56} />
++              </div>
+               <h1 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: 'clamp(1.6rem,4vw,2.2rem)', color: 'var(--white)', letterSpacing: '-1px', marginBottom: '16px' }}>
+                 You&apos;re Ready to Grow
+               </h1>
+diff --git a/src/components/pages/ServicesPage.tsx b/src/components/pages/ServicesPage.tsx
+index 87c2015..5f99eba 100644
+--- a/src/components/pages/ServicesPage.tsx
++++ b/src/components/pages/ServicesPage.tsx
+@@ -1,6 +1,7 @@
+ 'use client'
+ import { useState } from 'react'
+ import Link from 'next/link'
++import { Icon } from '@/components/ui/Icons'
+ 
+ interface Service {
+   id: string
+@@ -17,7 +18,7 @@ interface Service {
+ const SERVICES: Service[] = [
+   {
+     id: 'strategy',
+-    icon: '🎯',
++    icon: 'target',
+     title: 'Marketing Strategy',
+     short: 'Research, positioning, and roadmap.',
+     full: 'Before we create anything, we understand your business, customers, competitors, and goals. Every decision has a purpose — we ask "what will move the business forward?" not "what should we post today?"',
+@@ -34,7 +35,7 @@ const SERVICES: Service[] = [
+   },
+   {
+     id: 'social',
+-    icon: '📱',
++    icon: 'phone',
+     title: 'Social Media Management',
+     short: 'Full account management, done right.',
+     full: 'Full account management across Instagram, Facebook, TikTok and more. Posting, scheduling, community engagement, DM management, and monthly performance tracking.',
+@@ -51,7 +52,7 @@ const SERVICES: Service[] = [
+   },
+   {
+     id: 'ads',
+-    icon: '💰',
++    icon: 'dollar',
+     title: 'Paid Advertising',
+     short: 'Meta & Google campaigns that convert.',
+     full: 'Targeted Meta and Google campaigns built on data — not guesswork. We optimize for conversions, track every dollar, and report on real business outcomes.',
+@@ -68,7 +69,7 @@ const SERVICES: Service[] = [
+   },
+   {
+     id: 'branding',
+-    icon: '🎨',
++    icon: 'palette',
+     title: 'Branding & Identity',
+     short: 'A brand that makes you unforgettable.',
+     full: 'Logo design, visual identity, brand guidelines, typography, and color systems. Everything you need to look premium, consistent, and immediately recognizable.',
+@@ -85,7 +86,7 @@ const SERVICES: Service[] = [
+   },
+   {
+     id: 'content',
+-    icon: '🎬',
++    icon: 'film',
+     title: 'Content Creation',
+     short: 'Reels, carousels, and content that performs.',
+     full: 'Scroll-stopping reels, carousels, stories, and static posts designed to captivate your specific audience. Content that builds a brand, not just a feed.',
+@@ -102,7 +103,7 @@ const SERVICES: Service[] = [
+   },
+   {
+     id: 'copy',
+-    icon: '✍️',
++    icon: 'pen',
+     title: 'Copywriting',
+     short: 'Words that make people take action.',
+     full: 'Hook-focused captions, conversion-optimized ad copy, landing page text, email sequences, and brand messaging that makes people take action.',
+@@ -119,7 +120,7 @@ const SERVICES: Service[] = [
+   },
+   {
+     id: 'web',
+-    icon: '🌐',
++    icon: 'globe',
+     title: 'Website Development',
+     short: 'Fast, beautiful sites that convert.',
+     full: 'Fast, beautiful, mobile-first websites built for conversion. From landing pages to full multi-page sites — designed to turn visitors into leads.',
+@@ -136,7 +137,7 @@ const SERVICES: Service[] = [
+   },
+   {
+     id: 'analytics',
+-    icon: '📊',
++    icon: 'bar-chart',
+     title: 'Analytics & Reporting',
+     short: 'Clear insights, honest reporting.',
+     full: 'Monthly performance reports with clear insights — what\'s working, what\'s not, and the exact actions we\'re taking to improve. Full transparency, always.',
+@@ -153,7 +154,7 @@ const SERVICES: Service[] = [
+   },
+   {
+     id: 'consulting',
+-    icon: '🧠',
++    icon: 'brain',
+     title: 'Consulting',
+     short: 'One-on-one strategy sessions.',
+     full: 'One-on-one sessions to audit your current marketing, identify gaps, build a roadmap, and give you clarity on the fastest path to growth.',
+@@ -209,14 +210,14 @@ export default function ServicesPage() {
+                 className={isExpanded ? 'service-expanded' : ''}
+                 onMouseEnter={e => { if (!isExpanded) { e.currentTarget.style.borderColor = `${s.color}30`; e.currentTarget.style.transform = 'translateY(-4px)' } }}
+                 onMouseLeave={e => { if (!isExpanded) { e.currentTarget.style.borderColor = 'var(--glass-border)'; e.currentTarget.style.transform = 'none' } }}>
+-                
++
+                 {/* Glow effect */}
+                 <div style={{ position: 'absolute', top: 0, right: 0, width: '60%', height: '60%', background: `radial-gradient(circle at top right, ${s.color}15, transparent 70%)`, pointerEvents: 'none' }} />
+-                
++
+                 <div style={{ position: 'relative' }}>
+                   {/* Icon */}
+-                  <div style={{ width: '56px', height: '56px', borderRadius: '14px', background: s.bg, border: `1px solid ${s.color}25`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.6rem', marginBottom: '20px' }}>
+-                    {s.icon}
++                  <div style={{ width: '56px', height: '56px', borderRadius: '14px', background: s.bg, border: `1px solid ${s.color}25`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px', color: s.color }}>
++                    <Icon name={s.icon as any} size={26} />
+                   </div>
+ 
+                   {/* Title */}
+diff --git a/src/components/sections/ServicesSection.tsx b/src/components/sections/ServicesSection.tsx
+index 5e0b18a..aa1ca81 100644
+--- a/src/components/sections/ServicesSection.tsx
++++ b/src/components/sections/ServicesSection.tsx
+@@ -1,13 +1,14 @@
+ 'use client'
+ import Link from 'next/link'
++import { Icon } from '@/components/ui/Icons'
+ 
+ const SERVICES=[
+-  {icon:'🎯',title:'Marketing Strategy',desc:'Deep-dive analysis of your market, competitors, and customers.',href:'/services'},
+-  {icon:'📱',title:'Social Media',desc:'Consistent, strategic content that builds your brand.',href:'/services'},
+-  {icon:'💰',title:'Paid Advertising',desc:'Meta and Google campaigns that turn budget into results.',href:'/services'},
+-  {icon:'🎨',title:'Branding & Identity',desc:'A brand system that makes you instantly recognizable.',href:'/services'},
+-  {icon:'🎬',title:'Content Creation',desc:'Reels, posts, and carousels that stop the scroll.',href:'/services'},
+-  {icon:'🌐',title:'Website Development',desc:'Fast, mobile-first websites designed to convert.',href:'/services'},
++  {icon:'target',title:'Marketing Strategy',desc:'Deep-dive analysis of your market, competitors, and customers.',href:'/services'},
++  {icon:'phone',title:'Social Media',desc:'Consistent, strategic content that builds your brand.',href:'/services'},
++  {icon:'dollar',title:'Paid Advertising',desc:'Meta and Google campaigns that turn budget into results.',href:'/services'},
++  {icon:'palette',title:'Branding & Identity',desc:'A brand system that makes you instantly recognizable.',href:'/services'},
++  {icon:'film',title:'Content Creation',desc:'Reels, posts, and carousels that stop the scroll.',href:'/services'},
++  {icon:'globe',title:'Website Development',desc:'Fast, mobile-first websites designed to convert.',href:'/services'},
+ ]
+ 
+ export default function ServicesSection() {
+@@ -19,11 +20,13 @@ export default function ServicesSection() {
+       </div>
+       <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:'16px',}}>
+         {SERVICES.map(s=>(
+-          <Link key={s.href} href={s.href} style={{textDecoration:'none'}}>
++          <Link key={s.title} href={s.href} style={{textDecoration:'none'}}>
+             <div style={{background:'var(--glass)',border:'1px solid var(--glass-border)',borderRadius:'16px',padding:'28px 24px',transition:'all 0.3s',height:'100%'}}
+               onMouseEnter={e=>{e.currentTarget.style.borderColor='rgba(16,161,219,0.25)';e.currentTarget.style.transform='translateY(-4px)'}}
+               onMouseLeave={e=>{e.currentTarget.style.borderColor='var(--glass-border)';e.currentTarget.style.transform='none'}}>
+-              <div style={{fontSize:'1.8rem',marginBottom:'16px'}}>{s.icon}</div>
++              <div style={{marginBottom:'16px',color:'var(--sky)'}}>
++                <Icon name={s.icon as any} size={28} />
++              </div>
+               <h3 style={{fontFamily:'Syne,sans-serif',fontWeight:700,fontSize:'1rem',color:'var(--white)',marginBottom:'8px'}}>{s.title}</h3>
+               <p style={{fontSize:'0.78rem',color:'var(--text-muted)',lineHeight:1.6,fontWeight:300}}>{s.desc}</p>
+             </div>
+diff --git a/src/components/ui/CookieBanner.tsx b/src/components/ui/CookieBanner.tsx
+index 2822583..ff365f2 100644
+--- a/src/components/ui/CookieBanner.tsx
++++ b/src/components/ui/CookieBanner.tsx
+@@ -1,6 +1,7 @@
+ 'use client'
+ import { useState, useEffect } from 'react'
+ import Link from 'next/link'
++import { Icon } from '@/components/ui/Icons'
+ 
+ export default function CookieBanner() {
+   const [show, setShow] = useState(false)
+@@ -23,9 +24,10 @@ export default function CookieBanner() {
+       zIndex: 9000, display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap',
+       maxWidth: '680px', width: 'calc(100% - 40px)', boxShadow: '0 24px 80px rgba(0,0,0,0.5)',
+     }}>
+-      <p style={{ fontSize: '0.78rem', color: 'rgba(249,253,254,0.65)', lineHeight: 1.6, flex: 1, minWidth: '220px' }}>
+-        🍪 We use cookies to improve your experience. By continuing, you agree to our{' '}
+-        <Link href="/privacy" style={{ color: 'var(--sky)' }}>Privacy Policy</Link>.
++      <p style={{ fontSize: '0.78rem', color: 'rgba(249,253,254,0.65)', lineHeight: 1.6, flex: 1, minWidth: '220px', display: 'flex', alignItems: 'center', gap: '10px' }}>
++        <Icon name="cookie" size={16} color="var(--sky)" style={{ flexShrink: 0 }} />
++        <span>We use cookies to improve your experience. By continuing, you agree to our{' '}
++        <Link href="/privacy" style={{ color: 'var(--sky)' }}>Privacy Policy</Link>.</span>
+       </p>
+       <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
+         <button onClick={decline} style={{ padding: '8px 16px', borderRadius: '8px', fontSize: '0.78rem', fontWeight: 600, border: '1px solid var(--glass-border)', background: 'transparent', color: 'var(--text-muted)', cursor: 'pointer' }}>
+diff --git a/src/components/ui/ExitIntentPopup.tsx b/src/components/ui/ExitIntentPopup.tsx
+index 98d3cc8..f49d3d0 100644
+--- a/src/components/ui/ExitIntentPopup.tsx
++++ b/src/components/ui/ExitIntentPopup.tsx
+@@ -1,6 +1,7 @@
+ 'use client'
+ import { useState, useEffect } from 'react'
+ import NewsletterForm from './NewsletterForm'
++import { Icon } from '@/components/ui/Icons'
+ 
+ export default function ExitIntentPopup() {
+   const [show, setShow] = useState(false)
+@@ -115,7 +116,6 @@ export default function ExitIntentPopup() {
+             display: 'flex',
+             alignItems: 'center',
+             justifyContent: 'center',
+-            fontSize: '1.2rem',
+             transition: 'all 0.2s',
+           }}
+           onMouseEnter={e => {
+@@ -126,7 +126,7 @@ export default function ExitIntentPopup() {
+             e.currentTarget.style.background = 'transparent'
+             e.currentTarget.style.color = 'var(--text-muted)'
+           }}
+-        >✕</button>
++        ><Icon name="close" size={16} /></button>
+ 
+         {/* Icon */}
+         <div style={{
+@@ -134,9 +134,9 @@ export default function ExitIntentPopup() {
+           borderRadius: '16px',
+           background: 'linear-gradient(135deg, var(--sky), var(--purple))',
+           display: 'flex', alignItems: 'center', justifyContent: 'center',
+-          fontSize: '1.8rem',
++          color: '#fff',
+           marginBottom: '20px',
+-        }}>📬</div>
++        }}><Icon name="inbox" size={28} /></div>
+ 
+         {/* Headline */}
+         <h2 style={{
+diff --git a/src/components/ui/NewsletterForm.tsx b/src/components/ui/NewsletterForm.tsx
+index 8481508..f629ce3 100644
+--- a/src/components/ui/NewsletterForm.tsx
++++ b/src/components/ui/NewsletterForm.tsx
+@@ -35,13 +35,13 @@ export default function NewsletterForm({ source = 'footer', compact = false }: N
+       if (error) {
+         if (error.code === '23505') {
+           // Unique constraint - already subscribed
+-          showToast("You're already subscribed! 🎉", 'info')
++          showToast("You're already subscribed!", 'info')
+         } else {
+           showToast('Something went wrong. Please try again.', 'error')
+         }
+       } else {
+         setSubscribed(true)
+-        showToast('Thanks for subscribing! 🎉', 'success')
++        showToast('Thanks for subscribing!', 'success')
+         setEmail('')
+       }
+     } catch {
+diff --git a/src/components/ui/SupportBot.tsx b/src/components/ui/SupportBot.tsx
+index 3fed013..f81fca0 100644
+--- a/src/components/ui/SupportBot.tsx
++++ b/src/components/ui/SupportBot.tsx
+@@ -1,9 +1,10 @@
+ 'use client'
+ import { useState, useRef, useEffect } from 'react'
++import { Icon } from '@/components/ui/Icons'
+ 
+ interface Option {
+   label: string
+-  emoji?: string
++  icon?: string
+   action: 'response' | 'menu' | 'external' | 'input'
+   response?: string
+   submenu?: string
+@@ -21,26 +22,26 @@ interface Menu {
+ // ============================================
+ const MENUS: Record<string, Menu> = {
+   root: {
+-    message: "Hey there! 👋 I'm YallaBot — YallaGrow's assistant.\n\nWhat can I help you with today?",
++    message: "Hey there! I'm YallaBot — YallaGrow's assistant.\n\nWhat can I help you with today?",
+     options: [
+-      { label: 'View pricing', emoji: '💰', action: 'menu', submenu: 'pricing' },
+-      { label: 'Explore services', emoji: '🎯', action: 'menu', submenu: 'services' },
+-      { label: 'Book a strategy call', emoji: '📅', action: 'response', response: "Great! Book your free 30-minute strategy call here:\n\n👉 https://calendar.app.google/3WibM5kWvizhnHJt8\n\nNo commitment, no credit card — just a real conversation about your business." },
+-      { label: 'Affiliate program', emoji: '🤝', action: 'menu', submenu: 'affiliate' },
+-      { label: 'About YallaGrow', emoji: 'ℹ️', action: 'menu', submenu: 'about' },
+-      { label: 'Talk to a human', emoji: '💬', action: 'external', url: 'https://api.whatsapp.com/send/?phone=447376441603&text=Hi%20YallaGrow%2C%20I%20need%20some%20help&type=phone_number&app_absent=0' },
++      { label: 'View pricing', icon: 'dollar', action: 'menu', submenu: 'pricing' },
++      { label: 'Explore services', icon: 'target', action: 'menu', submenu: 'services' },
++      { label: 'Book a strategy call', icon: 'calendar', action: 'response', response: "Great! Book your free 30-minute strategy call here:\n\nhttps://calendar.app.google/3WibM5kWvizhnHJt8\n\nNo commitment, no credit card — just a real conversation about your business." },
++      { label: 'Affiliate program', icon: 'handshake', action: 'menu', submenu: 'affiliate' },
++      { label: 'About YallaGrow', icon: 'info', action: 'menu', submenu: 'about' },
++      { label: 'Talk to a human', icon: 'chat', action: 'external', url: 'https://api.whatsapp.com/send/?phone=447376441603&text=Hi%20YallaGrow%2C%20I%20need%20some%20help&type=phone_number&app_absent=0' },
+     ],
+   },
+ 
+   pricing: {
+-    message: "We have 3 monthly packages plus a Build-Your-Own option:\n\n💚 **Launch** — $149/mo\n⭐ **Grow** — $299/mo (most popular)\n🔥 **Dominate** — $499/mo\n\nWhich one would you like to know more about?",
++    message: "We have 3 monthly packages plus a Build-Your-Own option:\n\n**Launch** — $149/mo\n**Grow** — $299/mo (most popular)\n**Dominate** — $499/mo\n\nWhich one would you like to know more about?",
+     options: [
+-      { label: 'Launch — $149/mo', emoji: '💚', action: 'response', response: "**Launch — $149/mo** includes:\n\n✓ 8 static posts/month\n✓ 2 short-form videos\n✓ Caption writing & hashtag research\n✓ Monthly performance report\n\nPerfect for businesses starting their marketing journey. Ready to book a call?" },
+-      { label: 'Grow — $299/mo', emoji: '⭐', action: 'response', response: "**Grow — $299/mo** (most popular) includes:\n\n✓ 12 static posts/month\n✓ 4 short-form videos\n✓ Meta Ads management\n✓ Monthly strategy call\n\nBalanced content + ads for businesses ready to scale." },
+-      { label: 'Dominate — $499/mo', emoji: '🔥', action: 'response', response: "**Dominate — $499/mo** includes:\n\n✓ 16 static posts/month\n✓ 8 short-form videos\n✓ Full Meta Ads management\n✓ Performance dashboard\n✓ Priority support\n\nFor serious brands ready to scale aggressively." },
+-      { label: 'Build my own package', emoji: '🛠', action: 'response', response: "You can build your own custom package with our interactive builder:\n\n👉 yallagrow.net/packages\n\nMix and match posts, reels, ads, website, and add-ons to fit your exact needs. You'll see live pricing as you build." },
+-      { label: 'Take the plan quiz', emoji: '🎯', action: 'response', response: "Not sure which plan is right? Take our free 2-minute quiz:\n\n👉 yallagrow.net/quiz\n\nWe'll recommend the perfect package based on your business type, goals, and budget." },
+-      { label: 'Performance Partnership', emoji: '🚀', action: 'response', response: "Our **Performance Partnership** is invite-only. Instead of a monthly retainer, we combine a strategic upfront deposit with performance-based compensation. We grow together.\n\nWe offer 2 models:\n1️⃣ Net Profit Share\n2️⃣ Per-Sale Commission\n\nLearn more: yallagrow.net/partnership" },
++      { label: 'Launch — $149/mo', icon: 'rocket', action: 'response', response: "**Launch — $149/mo** includes:\n\n✓ 8 static posts/month\n✓ 2 short-form videos\n✓ Caption writing & hashtag research\n✓ Monthly performance report\n\nPerfect for businesses starting their marketing journey. Ready to book a call?" },
++      { label: 'Grow — $299/mo', icon: 'star', action: 'response', response: "**Grow — $299/mo** (most popular) includes:\n\n✓ 12 static posts/month\n✓ 4 short-form videos\n✓ Meta Ads management\n✓ Monthly strategy call\n\nBalanced content + ads for businesses ready to scale." },
++      { label: 'Dominate — $499/mo', icon: 'bolt', action: 'response', response: "**Dominate — $499/mo** includes:\n\n✓ 16 static posts/month\n✓ 8 short-form videos\n✓ Full Meta Ads management\n✓ Performance dashboard\n✓ Priority support\n\nFor serious brands ready to scale aggressively." },
++      { label: 'Build my own package', icon: 'wrench', action: 'response', response: "You can build your own custom package with our interactive builder:\n\nyallagrow.net/packages\n\nMix and match posts, reels, ads, website, and add-ons to fit your exact needs. You'll see live pricing as you build." },
++      { label: 'Take the plan quiz', icon: 'target', action: 'response', response: "Not sure which plan is right? Take our free 2-minute quiz:\n\nyallagrow.net/quiz\n\nWe'll recommend the perfect package based on your business type, goals, and budget." },
++      { label: 'Performance Partnership', icon: 'chart-up', action: 'response', response: "Our **Performance Partnership** is invite-only. Instead of a monthly retainer, we combine a strategic upfront deposit with performance-based compensation. We grow together.\n\nWe offer 2 models:\n1. Net Profit Share\n2. Per-Sale Commission\n\nLearn more: yallagrow.net/partnership" },
+       { label: '← Back to main menu', action: 'menu', submenu: 'root' },
+     ],
+   },
+@@ -48,15 +49,15 @@ const MENUS: Record<string, Menu> = {
+   services: {
+     message: "We offer 9 core services. Which one interests you?",
+     options: [
+-      { label: 'Marketing Strategy', emoji: '🎯', action: 'response', response: "**Marketing Strategy**\n\nBefore we create anything, we understand your business, customers, competitors, and goals. Every decision has a purpose.\n\nIncludes:\n✓ Competitor & market analysis\n✓ Customer personas\n✓ Content pillars\n✓ 90-day growth roadmap\n\nLearn more: yallagrow.net/services" },
+-      { label: 'Social Media', emoji: '📱', action: 'response', response: "**Social Media Management**\n\nFull account management across Instagram, Facebook, TikTok and more.\n\nIncludes:\n✓ Content calendar planning\n✓ Post scheduling\n✓ Community management\n✓ Weekly performance updates" },
+-      { label: 'Paid Ads', emoji: '💰', action: 'response', response: "**Paid Advertising**\n\nMeta and TikTok ads with a $30/month management fee + your ad spend.\n\n✓ Campaign strategy & audience targeting\n✓ Ad creative (visuals + copy)\n✓ A/B testing & optimization\n✓ Weekly reports\n\nMinimum recommended budget: $50-100/month." },
+-      { label: 'Branding', emoji: '🎨', action: 'response', response: "**Branding & Identity**\n\nLogo design, visual identity, brand guidelines, typography, and color systems.\n\n✓ Logo (primary + variations)\n✓ Color palette & typography\n✓ Brand guidelines document\n✓ Social media brand kit" },
+-      { label: 'Content Creation', emoji: '🎬', action: 'response', response: "**Content Creation**\n\nReels, carousels, stories, and static posts designed to captivate your audience.\n\n✓ Short-form video (Reels, TikToks)\n✓ Carousel posts\n✓ Static posts & graphics\n✓ UGC-style content" },
+-      { label: 'Copywriting', emoji: '✍️', action: 'response', response: "**Copywriting**\n\nWords that make people take action.\n\n✓ Social media captions\n✓ Ad copy & hooks\n✓ Landing page copy\n✓ Email sequences" },
+-      { label: 'Website Development', emoji: '🌐', action: 'menu', submenu: 'website' },
+-      { label: 'Analytics & Reports', emoji: '📊', action: 'response', response: "**Analytics & Reporting**\n\nMonthly performance reports with clear insights.\n\n✓ Google Analytics setup\n✓ Meta Pixel & conversion tracking\n✓ Custom dashboards\n✓ Actionable recommendations" },
+-      { label: 'Consulting', emoji: '🧠', action: 'response', response: "**Consulting**\n\nOne-on-one sessions to audit your marketing and build a growth roadmap.\n\n✓ Full marketing audit\n✓ 60-min strategy session\n✓ Written report with findings\n✓ Follow-up email support (2 weeks)" },
++      { label: 'Marketing Strategy', icon: 'target', action: 'response', response: "**Marketing Strategy**\n\nBefore we create anything, we understand your business, customers, competitors, and goals. Every decision has a purpose.\n\nIncludes:\n✓ Competitor & market analysis\n✓ Customer personas\n✓ Content pillars\n✓ 90-day growth roadmap\n\nLearn more: yallagrow.net/services" },
++      { label: 'Social Media', icon: 'phone', action: 'response', response: "**Social Media Management**\n\nFull account management across Instagram, Facebook, TikTok and more.\n\nIncludes:\n✓ Content calendar planning\n✓ Post scheduling\n✓ Community management\n✓ Weekly performance updates" },
++      { label: 'Paid Ads', icon: 'dollar', action: 'response', response: "**Paid Advertising**\n\nMeta and TikTok ads with a $30/month management fee + your ad spend.\n\n✓ Campaign strategy & audience targeting\n✓ Ad creative (visuals + copy)\n✓ A/B testing & optimization\n✓ Weekly reports\n\nMinimum recommended budget: $50-100/month." },
++      { label: 'Branding', icon: 'palette', action: 'response', response: "**Branding & Identity**\n\nLogo design, visual identity, brand guidelines, typography, and color systems.\n\n✓ Logo (primary + variations)\n✓ Color palette & typography\n✓ Brand guidelines document\n✓ Social media brand kit" },
++      { label: 'Content Creation', icon: 'film', action: 'response', response: "**Content Creation**\n\nReels, carousels, stories, and static posts designed to captivate your audience.\n\n✓ Short-form video (Reels, TikToks)\n✓ Carousel posts\n✓ Static posts & graphics\n✓ UGC-style content" },
++      { label: 'Copywriting', icon: 'pen', action: 'response', response: "**Copywriting**\n\nWords that make people take action.\n\n✓ Social media captions\n✓ Ad copy & hooks\n✓ Landing page copy\n✓ Email sequences" },
++      { label: 'Website Development', icon: 'globe', action: 'menu', submenu: 'website' },
++      { label: 'Analytics & Reports', icon: 'bar-chart', action: 'response', response: "**Analytics & Reporting**\n\nMonthly performance reports with clear insights.\n\n✓ Google Analytics setup\n✓ Meta Pixel & conversion tracking\n✓ Custom dashboards\n✓ Actionable recommendations" },
++      { label: 'Consulting', icon: 'brain', action: 'response', response: "**Consulting**\n\nOne-on-one sessions to audit your marketing and build a growth roadmap.\n\n✓ Full marketing audit\n✓ 60-min strategy session\n✓ Written report with findings\n✓ Follow-up email support (2 weeks)" },
+       { label: '← Back to main menu', action: 'menu', submenu: 'root' },
+     ],
+   },
+@@ -64,11 +65,11 @@ const MENUS: Record<string, Menu> = {
+   website: {
+     message: "We build websites in 3 tiers plus offer consultancy. What are you looking for?",
+     options: [
+-      { label: 'Starter site ($150)', emoji: '🚀', action: 'response', response: "**Starter Site — $150**\n\n✓ Single-page website\n✓ Fully mobile responsive\n✓ 1-2 sections (hero + contact)\n✓ Basic contact form\n✓ Delivered in 3-5 days\n\nPerfect for freelancers or personal brands." },
+-      { label: 'Business site ($151-300)', emoji: '💼', action: 'response', response: "**Business Site — $151-300**\n\n✓ Up to 5 pages\n✓ Mobile responsive\n✓ Contact form + WhatsApp integration\n✓ Basic SEO setup\n✓ Google Analytics\n✓ Delivered in 1-2 weeks\n\nGreat for small businesses and service providers." },
+-      { label: 'Advanced site ($301-600)', emoji: '⚡', action: 'response', response: "**Advanced Site — $301-600**\n\n✓ Up to 10 pages\n✓ Custom animations\n✓ Blog / CMS integration\n✓ Advanced SEO\n✓ Newsletter signup\n✓ Multi-language support\n✓ Delivered in 2-3 weeks\n\nIdeal for growing brands and e-commerce." },
+-      { label: 'Custom site ($600+)', emoji: '💎', action: 'response', response: "**Custom Website ($600+)**\n\nFor bigger budgets, we build fully custom sites tailored to your business. Let's talk on a strategy call to design your project together.\n\n👉 Book a call: yallagrow.net/quiz" },
+-      { label: 'Website Consultancy ($139)', emoji: '🎓', action: 'response', response: "**Website Consultancy + Free Audit — $139**\n\nAlready have a website? Get a full expert review:\n\n✓ Full technical + UX audit\n✓ Conversion rate analysis\n✓ Page speed + SEO review\n✓ Mobile experience audit\n✓ 60-min strategy call\n✓ Written report" },
++      { label: 'Starter site ($150)', icon: 'rocket', action: 'response', response: "**Starter Site — $150**\n\n✓ Single-page website\n✓ Fully mobile responsive\n✓ 1-2 sections (hero + contact)\n✓ Basic contact form\n✓ Delivered in 3-5 days\n\nPerfect for freelancers or personal brands." },
++      { label: 'Business site ($151-300)', icon: 'briefcase', action: 'response', response: "**Business Site — $151-300**\n\n✓ Up to 5 pages\n✓ Mobile responsive\n✓ Contact form + WhatsApp integration\n✓ Basic SEO setup\n✓ Google Analytics\n✓ Delivered in 1-2 weeks\n\nGreat for small businesses and service providers." },
++      { label: 'Advanced site ($301-600)', icon: 'bolt', action: 'response', response: "**Advanced Site — $301-600**\n\n✓ Up to 10 pages\n✓ Custom animations\n✓ Blog / CMS integration\n✓ Advanced SEO\n✓ Newsletter signup\n✓ Multi-language support\n✓ Delivered in 2-3 weeks\n\nIdeal for growing brands and e-commerce." },
++      { label: 'Custom site ($600+)', icon: 'star', action: 'response', response: "**Custom Website ($600+)**\n\nFor bigger budgets, we build fully custom sites tailored to your business. Let's talk on a strategy call to design your project together.\n\nBook a call: yallagrow.net/quiz" },
++      { label: 'Website Consultancy ($139)', icon: 'graduation', action: 'response', response: "**Website Consultancy + Free Audit — $139**\n\nAlready have a website? Get a full expert review:\n\n✓ Full technical + UX audit\n✓ Conversion rate analysis\n✓ Page speed + SEO review\n✓ Mobile experience audit\n✓ 60-min strategy call\n✓ Written report" },
+       { label: '← Back to services', action: 'menu', submenu: 'services' },
+     ],
+   },
+@@ -76,10 +77,10 @@ const MENUS: Record<string, Menu> = {
+   affiliate: {
+     message: "Our affiliate program pays you to refer businesses to YallaGrow.\n\nWhat would you like to know?",
+     options: [
+-      { label: 'How much can I earn?', emoji: '💵', action: 'response', response: "You earn:\n\n💰 **20% commission** on invoices $179-$999\n💎 **35% commission** on invoices $1,000+\n♾️ **No cap** on how many referrals you can bring\n\nCommissions paid via WhatsApp coordination once your balance reaches $50." },
+-      { label: 'How does tracking work?', emoji: '🔗', action: 'response', response: "Each affiliate gets a unique referral code. When someone signs up mentioning your code (during signup or their consultation call), it's credited to your account. Simple!" },
+-      { label: 'How do I apply?', emoji: '📝', action: 'response', response: "Apply here to become an affiliate:\n\n👉 yallagrow.net/affiliate\n\nApplications are reviewed within 24-48 hours. Once approved, you'll get your unique code and access to the dashboard." },
+-      { label: 'Existing affiliate login', emoji: '🔐', action: 'response', response: "Sign in to your affiliate dashboard here:\n\n👉 yallagrow.net/affiliate-dashboard.html\n\nUse your email + referral code to access earnings, referrals, and marketing resources." },
++      { label: 'How much can I earn?', icon: 'dollar', action: 'response', response: "You earn:\n\n- **20% commission** on invoices $179-$999\n- **35% commission** on invoices $1,000+\n- **No cap** on how many referrals you can bring\n\nCommissions paid via WhatsApp coordination once your balance reaches $50." },
++      { label: 'How does tracking work?', icon: 'link', action: 'response', response: "Each affiliate gets a unique referral code. When someone signs up mentioning your code (during signup or their consultation call), it's credited to your account. Simple!" },
++      { label: 'How do I apply?', icon: 'edit', action: 'response', response: "Apply here to become an affiliate:\n\nyallagrow.net/affiliate\n\nApplications are reviewed within 24-48 hours. Once approved, you'll get your unique code and access to the dashboard." },
++      { label: 'Existing affiliate login', icon: 'lock', action: 'response', response: "Sign in to your affiliate dashboard here:\n\nyallagrow.net/affiliate-dashboard.html\n\nUse your email + referral code to access earnings, referrals, and marketing resources." },
+       { label: '← Back to main menu', action: 'menu', submenu: 'root' },
+     ],
+   },
+@@ -87,12 +88,12 @@ const MENUS: Record<string, Menu> = {
+   about: {
+     message: "What would you like to know about us?",
+     options: [
+-      { label: 'Where are you based?', emoji: '📍', action: 'response', response: "We're based in **Lebanon** 🇱🇧 and work with clients globally — small businesses, startups, and personal brands anywhere in the world." },
+-      { label: 'Who is on the team?', emoji: '👥', action: 'response', response: "We're a lean, specialized team:\n\n🎯 **Founder/CEO** — Strategy & sales\n🎨 **Designer** — Content & brand\n✍️ **Copywriter** — Words that convert\n📈 **Media Buyer** (freelance) — Paid ads\n\nEvery person touches your work directly — no agency middlemen." },
+-      { label: 'How fast do you deliver?', emoji: '⚡', action: 'response', response: "Timelines by project:\n\n📱 Monthly packages: Content starts within 1 week\n🌐 Websites: 3 days (Starter) to 3 weeks (Advanced)\n🎨 Branding: 1-2 weeks\n📊 Ad campaigns: Live within 5-7 days\n\nWe move fast without cutting corners." },
+-      { label: 'Do you have any guarantees?', emoji: '🤝', action: 'response', response: "Every partnership starts with a free strategy call to confirm we're the right fit.\n\nWe don't do refunds after work has started, but we're transparent and communicative — if something isn't right, we work with you to fix it. Most clients stay 6+ months." },
+-      { label: 'How to contact you?', emoji: '📞', action: 'response', response: "Reach us via:\n\n💬 **WhatsApp:** +44 7376 441603 (fastest)\n📧 **Email:** info@yallagrow.net\n📞 **Book a call:** yallagrow.net/quiz" },
+-      { label: 'Are you hiring?', emoji: '💼', action: 'response', response: "Yes! Currently open positions:\n\n🎨 Designer / Content Creator\n✍️ Copywriter / Content Specialist\n📈 Freelance Media Buyer\n\nApply at yallagrow.net/careers" },
++      { label: 'Where are you based?', icon: 'map-pin', action: 'response', response: "We're based in **Lebanon** and work with clients globally — small businesses, startups, and personal brands anywhere in the world." },
++      { label: 'Who is on the team?', icon: 'users', action: 'response', response: "We're a lean, specialized team:\n\n- **Founder/CEO** — Strategy & sales\n- **Designer** — Content & brand\n- **Copywriter** — Words that convert\n- **Media Buyer** (freelance) — Paid ads\n\nEvery person touches your work directly — no agency middlemen." },
++      { label: 'How fast do you deliver?', icon: 'bolt', action: 'response', response: "Timelines by project:\n\n- Monthly packages: Content starts within 1 week\n- Websites: 3 days (Starter) to 3 weeks (Advanced)\n- Branding: 1-2 weeks\n- Ad campaigns: Live within 5-7 days\n\nWe move fast without cutting corners." },
++      { label: 'Do you have any guarantees?', icon: 'handshake', action: 'response', response: "Every partnership starts with a free strategy call to confirm we're the right fit.\n\nWe don't do refunds after work has started, but we're transparent and communicative — if something isn't right, we work with you to fix it. Most clients stay 6+ months." },
++      { label: 'How to contact you?', icon: 'phone', action: 'response', response: "Reach us via:\n\n- **WhatsApp:** +44 7376 441603 (fastest)\n- **Email:** info@yallagrow.net\n- **Book a call:** yallagrow.net/quiz" },
++      { label: 'Are you hiring?', icon: 'briefcase', action: 'response', response: "Yes! Currently open positions:\n\n- Designer / Content Creator\n- Copywriter / Content Specialist\n- Freelance Media Buyer\n\nApply at yallagrow.net/careers" },
+       { label: '← Back to main menu', action: 'menu', submenu: 'root' },
+     ],
+   },
+@@ -143,14 +144,12 @@ export default function SupportBot() {
+   }, [open])
+ 
+   const handleOptionClick = (option: Option) => {
+-    // Add user message
+-    const userText = `${option.emoji ? option.emoji + ' ' : ''}${option.label}`
++    // Add user message (label only, no icon prefix)
+     setMessages(prev => {
+-      // Remove options from the last bot message so buttons disappear
+       const updated = prev.map((msg, i) =>
+         i === prev.length - 1 && msg.from === 'bot' ? { ...msg, options: undefined } : msg
+       )
+-      return [...updated, { from: 'user', text: userText, time: getTime() }]
++      return [...updated, { from: 'user', text: option.label, time: getTime() }]
+     })
+ 
+     if (option.action === 'external' && option.url) {
+@@ -158,9 +157,9 @@ export default function SupportBot() {
+       setTimeout(() => {
+         setMessages(prev => [...prev, {
+           from: 'bot',
+-          text: "I've opened WhatsApp for you. Karim will get back to you soon! 👋\n\nAnything else I can help with?",
++          text: "I've opened WhatsApp for you. Karim will get back to you soon!\n\nAnything else I can help with?",
+           time: getTime(),
+-          options: [{ label: 'Back to main menu', emoji: '🏠', action: 'menu', submenu: 'root' }],
++          options: [{ label: 'Back to main menu', icon: 'home', action: 'menu', submenu: 'root' }],
+         }])
+       }, 500)
+       return
+@@ -174,9 +173,9 @@ export default function SupportBot() {
+           text: option.response!,
+           time: getTime(),
+           options: [
+-            { label: 'Book a strategy call', emoji: '📅', action: 'response', response: "Book your free 30-minute strategy call:\n\n👉 https://calendar.app.google/3WibM5kWvizhnHJt8" },
+-            { label: 'Ask something else', emoji: '💬', action: 'menu', submenu: 'root' },
+-            { label: 'Talk to human', emoji: '👋', action: 'external', url: WHATSAPP_URL },
++            { label: 'Book a strategy call', icon: 'calendar', action: 'response', response: "Book your free 30-minute strategy call:\n\nhttps://calendar.app.google/3WibM5kWvizhnHJt8" },
++            { label: 'Ask something else', icon: 'chat', action: 'menu', submenu: 'root' },
++            { label: 'Talk to human', icon: 'user', action: 'external', url: WHATSAPP_URL },
+           ],
+         }])
+       } else if (option.action === 'menu' && option.submenu && MENUS[option.submenu]) {
+@@ -213,7 +212,6 @@ export default function SupportBot() {
+             display: 'flex',
+             alignItems: 'center',
+             justifyContent: 'center',
+-            fontSize: '1.6rem',
+             color: '#fff',
+             transition: 'transform 0.2s',
+             animation: 'botPulse 2s ease-in-out infinite',
+@@ -222,7 +220,7 @@ export default function SupportBot() {
+           onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+           aria-label="Open support chat"
+         >
+-          💬
++          <Icon name="chat" size={26} />
+           {notification && (
+             <span style={{
+               position: 'absolute',
+@@ -276,9 +274,10 @@ export default function SupportBot() {
+                 borderRadius: '50%',
+                 background: 'linear-gradient(135deg, var(--sky), var(--purple))',
+                 display: 'flex', alignItems: 'center', justifyContent: 'center',
+-                fontSize: '1.2rem',
++                fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: '0.85rem', color: '#fff',
+                 border: '2px solid rgba(16,161,219,0.25)',
+-              }}>🤖</div>
++                letterSpacing: '-0.5px',
++              }}>YB</div>
+               <div>
+                 <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '0.95rem', color: 'var(--white)' }}>YallaBot</div>
+                 <div style={{ fontSize: '0.68rem', color: '#16db64', display: 'flex', alignItems: 'center', gap: '5px' }}>
+@@ -300,13 +299,12 @@ export default function SupportBot() {
+                 display: 'flex',
+                 alignItems: 'center',
+                 justifyContent: 'center',
+-                fontSize: '1.2rem',
+                 transition: 'all 0.2s',
+               }}
+               onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = 'var(--white)' }}
+               onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-muted)' }}
+               aria-label="Close chat"
+-            >✕</button>
++            ><Icon name="close" size={16} /></button>
+           </div>
+ 
+           {/* MESSAGES */}
+@@ -370,7 +368,7 @@ export default function SupportBot() {
+                           textAlign: 'left',
+                           display: 'flex',
+                           alignItems: 'center',
+-                          gap: '8px',
++                          gap: '10px',
+                         }}
+                         onMouseEnter={e => {
+                           e.currentTarget.style.background = 'rgba(16,161,219,0.15)'
+@@ -381,7 +379,7 @@ export default function SupportBot() {
+                           e.currentTarget.style.borderColor = 'rgba(16,161,219,0.2)'
+                         }}
+                       >
+-                        {opt.emoji && <span>{opt.emoji}</span>}
++                        {opt.icon && <Icon name={opt.icon as 'target'} size={15} color="var(--sky)" />}
+                         <span style={{ flex: 1 }}>{opt.label}</span>
+                       </button>
+                     ))}
