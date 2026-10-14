@@ -2,12 +2,13 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { Icon } from '@/components/ui/Icons'
 
 const NAV_LINKS = [
   { href: '/', label: 'Home' },
   { href: '/services', label: 'Services', hasDropdown: true },
   { href: '/packages', label: 'Packages' },
-  { href: '/quiz', label: 'Find My Plan ✦', highlight: true },
+  { href: '/quiz', label: 'Find My Plan', highlight: true },
   { href: '/about', label: 'About', hideMd: true },
   { href: '/blog', label: 'Blog', hideMd: true },
   { href: '/careers', label: 'Careers', hideMd: true },
@@ -15,15 +16,15 @@ const NAV_LINKS = [
 ]
 
 const SERVICES = [
-  { href: '/services', label: 'Marketing Strategy', desc: 'Research, positioning & roadmap', icon: '🎯' },
-  { href: '/services', label: 'Social Media', desc: 'Full account management', icon: '📱' },
-  { href: '/services', label: 'Paid Advertising', desc: 'Meta & Google campaigns', icon: '💰' },
-  { href: '/services', label: 'Branding', desc: 'Identity & visual design', icon: '🎨' },
-  { href: '/services', label: 'Content Creation', desc: 'Reels, posts & carousels', icon: '🎬' },
-  { href: '/services', label: 'Copywriting', desc: 'Captions, ads & landing pages', icon: '✍️' },
-  { href: '/services', label: 'Website Development', desc: 'Fast, conversion-focused sites', icon: '🌐' },
-  { href: '/services', label: 'Analytics & Reporting', desc: 'Performance & insights', icon: '📊' },
-  { href: '/services', label: 'Consulting', desc: '1-on-1 strategy sessions', icon: '🧠' },
+  { href: '/services', label: 'Marketing Strategy', desc: 'Research, positioning & roadmap', icon: 'target' },
+  { href: '/services', label: 'Social Media', desc: 'Full account management', icon: 'phone' },
+  { href: '/services', label: 'Paid Advertising', desc: 'Meta & Google campaigns', icon: 'dollar' },
+  { href: '/services', label: 'Branding', desc: 'Identity & visual design', icon: 'palette' },
+  { href: '/services', label: 'Content Creation', desc: 'Reels, posts & carousels', icon: 'film' },
+  { href: '/services', label: 'Copywriting', desc: 'Captions, ads & landing pages', icon: 'pen' },
+  { href: '/services', label: 'Website Development', desc: 'Fast, conversion-focused sites', icon: 'globe' },
+  { href: '/services', label: 'Analytics & Reporting', desc: 'Performance & insights', icon: 'bar-chart' },
+  { href: '/services', label: 'Consulting', desc: '1-on-1 strategy sessions', icon: 'brain' },
 ]
 
 const SERVICES_WITH_KEYS = SERVICES.map((s, i) => ({ ...s, key: `service-${i}` }))
@@ -94,7 +95,9 @@ if (hideNavbar) return null
                     }}
                     onMouseEnter={e => (e.currentTarget.style.background = 'var(--glass)')}
                     onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
-                      <span style={{ fontSize: '1.1rem', width: '28px', textAlign: 'center' }}>{s.icon}</span>
+                      <span style={{ width: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--sky)' }}>
+                        <Icon name={s.icon as any} size={18} />
+                      </span>
                       <div>
                         <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--white)' }}>{s.label}</div>
                         <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)' }}>{s.desc}</div>
@@ -132,7 +135,7 @@ if (hideNavbar) return null
           display: 'flex', flexDirection: 'column', padding: '80px 6% 40px',
         }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', marginBottom: '32px' }}>
-            {[...NAV_LINKS, { href: '/affiliate', label: 'Affiliates ✦', highlight: true }].map(link => (
+            {[...NAV_LINKS, { href: '/affiliate', label: 'Affiliates', highlight: true }].map(link => (
               <Link key={link.href} href={link.href}
                 style={{
                   fontFamily: 'Syne, sans-serif', fontSize: '1.6rem', fontWeight: 800,

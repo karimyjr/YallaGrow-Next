@@ -1,6 +1,7 @@
 'use client'
 import Link from 'next/link'
 import NewsletterForm from '@/components/ui/NewsletterForm'
+import { Icon } from '@/components/ui/Icons'
 
 export default function Footer() {
   return (
@@ -39,11 +40,12 @@ export default function Footer() {
               </a>
             ))}
           </div>
-          
+
           {/* Newsletter signup */}
           <div style={{ maxWidth: '320px' }}>
-            <div style={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase', color: 'var(--sky)', marginBottom: '10px' }}>
-              📬 Newsletter
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase', color: 'var(--sky)', marginBottom: '10px' }}>
+              <Icon name="inbox" size={14} />
+              Newsletter
             </div>
             <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: 1.5, marginBottom: '12px' }}>
               Monthly marketing tips + real case studies. No spam.

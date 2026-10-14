@@ -104,6 +104,7 @@ input:focus { border-color: rgba(16,161,219,0.4); }
   background: rgba(16,161,219,0.08); color: var(--sky); font-weight: 600;
   border-left: 2px solid var(--sky);
 }
+.nav-btn svg { width: 18px; height: 18px; flex-shrink: 0; stroke-width: 1.75; }
 .user-info {
   border-top: 1px solid var(--glass-border); padding-top: 14px; margin-top: 14px;
 }
@@ -360,8 +361,7 @@ td {
     <a href="/affiliate" class="btn-secondary" style="font-size:0.72rem;padding:7px 14px;">← Back</a>
   </div>
   <div class="login-wrap">
-    <div style="font-size:2.5rem;margin-bottom:20px;">🔐</div>
-    <h2>Affiliate Login</h2>
+    <h2 style="margin-top:40px;">Affiliate Login</h2>
     <p>Enter your email and referral code.</p>
     <input type="email" id="loginEmail" placeholder="Email Address" />
     <input type="text" id="loginCode" placeholder="Referral Code" style="margin-top:12px;text-transform:uppercase;" />
@@ -379,7 +379,10 @@ td {
 <div id="dashView" class="dash hidden">
 
   <div class="mobile-header">
-    <button class="menu-btn" id="openMenu">☰ Menu</button>
+    <button class="menu-btn" id="openMenu">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      Menu
+    </button>
     <div class="logo" style="font-size:0.95rem;">Yalla<em>Grow</em></div>
     <div style="width:70px;"></div>
   </div>
@@ -398,7 +401,7 @@ td {
         <div id="userName" style="font-size:0.82rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
         <div id="userCode" style="font-size:0.68rem;color:var(--sky);font-weight:600;margin-top:2px;"></div>
       </div>
-      <button class="sign-out" id="signOut">🚪 Sign Out</button>
+      <button class="sign-out" id="signOut">Sign Out</button>
     </div>
   </aside>
 
@@ -412,7 +415,9 @@ td {
 <!-- Resource detail modal -->
 <div class="modal-backdrop" id="resourceModal">
   <div class="modal" id="resourceModalInner">
-    <button class="modal-close" id="resourceModalClose" aria-label="Close">✕</button>
+    <button class="modal-close" id="resourceModalClose" aria-label="Close">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
     <div id="resourceModalBody"></div>
   </div>
 </div>
@@ -422,14 +427,25 @@ td {
 const SUPABASE_URL = 'https://hsalmqrrrtaccjufkslg.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzYWxtcXJycnRhY2NqdWZrc2xnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI1NTQ0NDYsImV4cCI6MjA5ODEzMDQ0Nn0.l9-1wk2ymwUqtuKz83oQfWZ9fJJKVF-otYVtLzNxbck';
 
+// Minimal line icons (24x24, currentColor, stroke-based)
+const ICON = {
+  dashboard: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/></svg>',
+  link:      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a5 5 0 007.07 0l3-3a5 5 0 00-7.07-7.07l-1.5 1.5"/><path d="M14 10a5 5 0 00-7.07 0l-3 3a5 5 0 007.07 7.07l1.5-1.5"/></svg>',
+  referrals: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20V10"/><path d="M9 20V4"/><path d="M15 20v-7"/><path d="M21 20V8"/></svg>',
+  earnings:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M17 7H9.5a2.5 2.5 0 000 5h5a2.5 2.5 0 010 5H6"/></svg>',
+  resources: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/></svg>',
+  faqs:      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 015.8 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+  support:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>',
+};
+
 const NAV_ITEMS = [
-  { id: 'dashboard', icon: '🏠', label: 'Dashboard' },
-  { id: 'link', icon: '🔗', label: 'My Referral Code' },
-  { id: 'referrals', icon: '📊', label: 'Referrals' },
-  { id: 'earnings', icon: '💰', label: 'Earnings' },
-  { id: 'resources', icon: '📁', label: 'Resources' },
-  { id: 'faqs', icon: '❓', label: 'FAQs' },
-  { id: 'support', icon: '📞', label: 'Support' },
+  { id: 'dashboard', label: 'Dashboard' },
+  { id: 'link', label: 'My Referral Code' },
+  { id: 'referrals', label: 'Referrals' },
+  { id: 'earnings', label: 'Earnings' },
+  { id: 'resources', label: 'Resources' },
+  { id: 'faqs', label: 'FAQs' },
+  { id: 'support', label: 'Support' },
 ];
 
 const FAQS = [
@@ -520,7 +536,7 @@ function showDashboard() {
 function renderNav() {
   navEl.innerHTML = NAV_ITEMS.map(item => `
     <button class="nav-btn ${activeNav === item.id ? 'active' : ''}" data-nav="${item.id}">
-      <span style="font-size:1.1rem;width:22px;text-align:center;">${item.icon}</span>
+      ${ICON[item.id] || ''}
       ${item.label}
     </button>
   `).join('');
@@ -569,7 +585,7 @@ function renderDashboardTab() {
   mainEl.innerHTML = `
     <div class="hero-card">
       <div class="eyebrow">Affiliate Dashboard</div>
-      <h1>Welcome back, ${session.full_name.split(' ')[0]} 👋</h1>
+      <h1>Welcome back, ${session.full_name.split(' ')[0]}</h1>
       <p>Track your referrals, earnings, and resources.</p>
       <button class="hero-cta" id="viewCodeBtn">View My Referral Code →</button>
     </div>
@@ -606,7 +622,7 @@ function renderDashboardTab() {
 
 function referralsTable() {
   if (referrals.length === 0) {
-    return `<div class="card"><div class="card-head"><div class="card-title">Referrals</div></div><div class="empty"><div style="font-size:2rem;margin-bottom:10px;opacity:0.4;">📊</div><div style="font-size:0.88rem;color:var(--white);margin-bottom:4px;font-weight:600;">No referrals yet</div><div style="font-size:0.75rem;">Share your code to get started.</div></div></div>`;
+    return `<div class="card"><div class="card-head"><div class="card-title">Referrals</div></div><div class="empty"><div style="font-size:0.88rem;color:var(--white);margin-bottom:4px;font-weight:600;">No referrals yet</div><div style="font-size:0.75rem;">Share your code to get started.</div></div></div>`;
   }
   return `
     <div class="card">
@@ -647,8 +663,8 @@ function renderLinkTab() {
       <div class="eyebrow">Your code</div>
       <div class="code-box"><div class="ref-code">${session.ref_code}</div></div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;">
-        <button class="btn-primary" id="copyBtn">📋 Copy Code</button>
-        <a href="https://wa.me/?text=${shareText}" target="_blank" rel="noopener" class="btn-secondary" style="display:inline-flex;align-items:center;">💬 Share on WhatsApp</a>
+        <button class="btn-primary" id="copyBtn">Copy Code</button>
+        <a href="https://wa.me/?text=${shareText}" target="_blank" rel="noopener" class="btn-secondary" style="display:inline-flex;align-items:center;">Share on WhatsApp</a>
       </div>
     </div>
   `;
@@ -676,9 +692,9 @@ function renderEarningsTab() {
       <div class="stat"><div class="stat-label">Paid Out</div><div class="stat-value" style="color:#16db64;">$${s.totalPaid.toFixed(2)}</div></div>
     </div>
     <div class="card" style="padding:20px;">
-      <div class="card-title" style="margin-bottom:10px;">💰 Payout Information</div>
+      <div class="card-title" style="margin-bottom:10px;">Payout Information</div>
       <p style="font-size:0.85rem;color:rgba(249,253,254,0.7);line-height:1.7;margin-bottom:12px;">Minimum $50 to withdraw. Payouts via WhatsApp coordination.</p>
-      <a href="https://wa.me/96176302159?text=Request+Payout" target="_blank" rel="noopener" class="btn-primary" style="display:inline-flex;align-items:center;">💬 Request Payout</a>
+      <a href="https://wa.me/447376441603?text=Request+Payout" target="_blank" rel="noopener" class="btn-primary" style="display:inline-flex;align-items:center;">Request Payout</a>
     </div>
   `;
 }
@@ -687,31 +703,25 @@ function renderResourcesTab() {
   const cards = resources.length === 0 ? `
     <div class="card">
       <div class="empty">
-        <div style="font-size:2rem;margin-bottom:10px;opacity:0.4;">📁</div>
         <div style="font-size:0.88rem;color:var(--white);margin-bottom:4px;font-weight:600;">No resources yet</div>
         <div style="font-size:0.75rem;">Marketing assets will appear here once published.</div>
       </div>
     </div>
   ` : `
     <div class="grid-2">
-      ${resources.map(r => {
+      ${resources.map((r, i) => {
         const title = r.title || 'Untitled';
         const desc = r.description || '';
-        const icon = r.icon || '📁';
-        const cta = r.cta_text || 'Request Access';
-        const waMsg = encodeURIComponent("Hi! I'm a YallaGrow affiliate. I'd like access to: " + title + " (code: " + session.ref_code + ")");
+        const cta = r.cta_text || 'View';
         return `
-          <a href="https://wa.me/96176302159?text=${waMsg}" target="_blank" rel="noopener" class="card" style="padding:22px;display:block;">
-            <div style="font-size:1.8rem;margin-bottom:12px;">${icon}</div>
+          <button type="button" class="resource-card" data-resource-idx="${i}">
+            <div class="eyebrow" style="margin-bottom:10px;">Resource</div>
             <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;color:var(--white);margin-bottom:6px;line-height:1.3;">${title}</div>
             ${desc ? `<div style="font-size:0.8rem;color:var(--text-muted);line-height:1.6;margin-bottom:14px;">${desc}</div>` : ''}
-            <div style="display:inline-flex;align-items:center;gap:6px;font-size:0.78rem;color:var(--sky);font-weight:600;">💬 ${cta} →</div>
-          </a>
+            <div style="display:inline-flex;align-items:center;gap:6px;font-size:0.78rem;color:var(--sky);font-weight:600;">${cta} →</div>
+          </button>
         `;
       }).join('')}
-    </div>
-    <div style="margin-top:20px;padding:14px 16px;background:rgba(16,161,219,0.06);border:1px solid rgba(16,161,219,0.15);border-radius:12px;font-size:0.78rem;color:var(--text-muted);line-height:1.6;">
-      💡 Tap any resource to request it on WhatsApp — we'll send the files directly.
     </div>
   `;
   mainEl.innerHTML = `
@@ -719,6 +729,37 @@ function renderResourcesTab() {
     <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:20px;">Assets, templates, and content to help you promote YallaGrow.</p>
     ${cards}
   `;
+  mainEl.querySelectorAll('.resource-card').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const idx = Number(btn.dataset.resourceIdx);
+      openResourceModal(resources[idx]);
+    });
+  });
+}
+
+function openResourceModal(r) {
+  if (!r) return;
+  const title = r.title || 'Untitled';
+  const desc = r.description || '';
+  const waMsg = encodeURIComponent("Hi, I'm a YallaGrow affiliate. I'd like access to: " + title + " (code: " + (session ? session.ref_code : '') + ")");
+  const body = document.getElementById('resourceModalBody');
+  body.innerHTML = `
+    <div class="eyebrow" style="margin-bottom:12px;">Marketing Resource</div>
+    <h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.35rem;color:var(--white);margin-bottom:10px;letter-spacing:-0.5px;">${title}</h2>
+    ${desc ? `<p style="font-size:0.9rem;color:rgba(249,253,254,0.75);line-height:1.65;margin-bottom:20px;">${desc}</p>` : ''}
+    <div style="padding:14px 16px;background:rgba(16,161,219,0.08);border:1px solid rgba(16,161,219,0.2);border-radius:10px;font-size:0.8rem;color:rgba(249,253,254,0.8);line-height:1.6;margin-bottom:18px;">
+      Message us on WhatsApp to receive this resource. We'll send the files directly within an hour.
+    </div>
+    <a href="https://wa.me/447376441603?text=${waMsg}" target="_blank" rel="noopener" class="btn-primary" style="display:inline-flex;align-items:center;gap:8px;justify-content:center;width:100%;">
+      Request on WhatsApp
+    </a>
+  `;
+  document.getElementById('resourceModal').classList.add('open');
+}
+
+function closeResourceModal() {
+  document.getElementById('resourceModal').classList.remove('open');
 }
 
 function renderFaqsTab() {
@@ -748,14 +789,14 @@ function renderSupportTab() {
     <h1 style="font-size:1.5rem;margin-bottom:8px;font-weight:800;letter-spacing:-0.5px;">Support</h1>
     <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:20px;">Need help? Reach out.</p>
     <div class="grid-2">
-      <a href="https://wa.me/96176302159" target="_blank" rel="noopener" class="card" style="padding:22px;display:block;">
-        <div style="font-size:1.6rem;margin-bottom:10px;">💬</div>
+      <a href="https://wa.me/447376441603" target="_blank" rel="noopener" class="card" style="padding:22px;display:block;">
+        <div class="eyebrow" style="margin-bottom:10px;">Instant</div>
         <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;color:var(--white);margin-bottom:6px;">WhatsApp</div>
         <div style="font-size:0.78rem;color:var(--text-muted);line-height:1.6;margin-bottom:12px;">Fastest response — usually within an hour.</div>
         <div style="font-size:0.78rem;color:var(--sky);font-weight:600;">Open WhatsApp →</div>
       </a>
       <a href="mailto:info@yallagrow.net" class="card" style="padding:22px;display:block;">
-        <div style="font-size:1.6rem;margin-bottom:10px;">📧</div>
+        <div class="eyebrow" style="margin-bottom:10px;">Within 24h</div>
         <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;color:var(--white);margin-bottom:6px;">Email</div>
         <div style="font-size:0.78rem;color:var(--text-muted);line-height:1.6;margin-bottom:12px;">We respond within 24 hours.</div>
         <div style="font-size:0.78rem;color:var(--sky);font-weight:600;">Send Email →</div>
@@ -765,7 +806,7 @@ function renderSupportTab() {
 }
 
 function toast(msg) {
-  toastEl.textContent = '✓ ' + msg;
+  toastEl.textContent = msg;
   toastEl.classList.add('show');
   setTimeout(() => toastEl.classList.remove('show'), 2500);
 }
@@ -835,6 +876,15 @@ openMenuBtn.addEventListener('click', () => {
 backdrop.addEventListener('click', () => {
   sidebar.classList.remove('open');
   backdrop.classList.add('hidden');
+});
+
+// Resource modal close handlers
+document.getElementById('resourceModalClose').addEventListener('click', closeResourceModal);
+document.getElementById('resourceModal').addEventListener('click', (e) => {
+  if (e.target.id === 'resourceModal') closeResourceModal();
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeResourceModal();
 });
 
 // ======== INIT ========

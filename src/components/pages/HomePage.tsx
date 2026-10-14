@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useRef } from 'react'
 import Link from 'next/link'
+import { Icon } from '@/components/ui/Icons'
 
 // Small counter component
 function Counter({ target, suffix = '' }: { target: number; suffix?: string }) {
@@ -36,12 +37,12 @@ const PHILOSOPHY = [
 ]
 
 const SERVICES_PREVIEW = [
-  { icon: '🎯', title: 'Marketing Strategy', desc: 'Deep-dive analysis of your market, competitors, and customers — before a single post is created.', arrow: 'Enter the war room →', color: 'rgba(16,161,219,0.08)' },
-  { icon: '📱', title: 'Social Media Management', desc: 'Full account management, content scheduling, and community engagement across all major platforms.', arrow: 'Step into the studio →', color: 'rgba(106,70,217,0.08)' },
-  { icon: '💰', title: 'Paid Advertising', desc: 'Meta and Google campaigns targeted with precision, optimized for real ROI — not just reach.', arrow: 'Enter the control room →', color: 'rgba(37,135,197,0.08)' },
-  { icon: '🎨', title: 'Branding', desc: 'Logo, identity, visual guidelines — a consistent brand that makes you instantly recognizable.', arrow: 'Visit the design studio →', color: 'rgba(16,161,219,0.06)' },
-  { icon: '🎬', title: 'Content Creation', desc: 'Reels, carousels, stories, and visuals designed to stop the scroll and drive real engagement.', arrow: 'Enter the studio →', color: 'rgba(106,70,217,0.07)' },
-  { icon: '🌐', title: 'Website Development', desc: 'Fast, conversion-optimized websites that turn visitors into leads and leads into customers.', arrow: 'See the tech floor →', color: 'rgba(24,96,146,0.08)' },
+  { icon: 'target', title: 'Marketing Strategy', desc: 'Deep-dive analysis of your market, competitors, and customers — before a single post is created.', arrow: 'Enter the war room →', color: 'rgba(16,161,219,0.08)' },
+  { icon: 'phone', title: 'Social Media Management', desc: 'Full account management, content scheduling, and community engagement across all major platforms.', arrow: 'Step into the studio →', color: 'rgba(106,70,217,0.08)' },
+  { icon: 'dollar', title: 'Paid Advertising', desc: 'Meta and Google campaigns targeted with precision, optimized for real ROI — not just reach.', arrow: 'Enter the control room →', color: 'rgba(37,135,197,0.08)' },
+  { icon: 'palette', title: 'Branding', desc: 'Logo, identity, visual guidelines — a consistent brand that makes you instantly recognizable.', arrow: 'Visit the design studio →', color: 'rgba(16,161,219,0.06)' },
+  { icon: 'film', title: 'Content Creation', desc: 'Reels, carousels, stories, and visuals designed to stop the scroll and drive real engagement.', arrow: 'Enter the studio →', color: 'rgba(106,70,217,0.07)' },
+  { icon: 'globe', title: 'Website Development', desc: 'Fast, conversion-optimized websites that turn visitors into leads and leads into customers.', arrow: 'See the tech floor →', color: 'rgba(24,96,146,0.08)' },
 ]
 
 const PROCESS = [
@@ -121,7 +122,9 @@ export default function HomePage() {
               onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(16,161,219,0.25)'; e.currentTarget.style.transform = 'translateY(-4px)' }}
               onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--glass-border)'; e.currentTarget.style.transform = 'none' }}>
               <div style={{ position: 'absolute', top: 0, right: 0, width: '60%', height: '60%', background: `radial-gradient(circle at top right, ${s.color}, transparent 70%)`, pointerEvents: 'none' }} />
-              <div style={{ width: '56px', height: '56px', borderRadius: '14px', background: 'rgba(16,161,219,0.08)', border: '1px solid rgba(16,161,219,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.6rem', marginBottom: '20px', position: 'relative' }}>{s.icon}</div>
+              <div style={{ width: '56px', height: '56px', borderRadius: '14px', background: 'rgba(16,161,219,0.08)', border: '1px solid rgba(16,161,219,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px', position: 'relative', color: 'var(--sky)' }}>
+                <Icon name={s.icon as any} size={26} />
+              </div>
               <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1.1rem', color: 'var(--white)', marginBottom: '10px', position: 'relative' }}>{s.title}</h3>
               <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', lineHeight: 1.65, fontWeight: 300, marginBottom: '16px', position: 'relative' }}>{s.desc}</p>
               <span style={{ fontSize: '0.75rem', color: 'var(--sky)', fontWeight: 600, position: 'relative' }}>{s.arrow}</span>

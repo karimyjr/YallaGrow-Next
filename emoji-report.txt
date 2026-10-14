@@ -1,0 +1,446 @@
+======================================================================
+EMOJI REPORT — YallaGrow codebase
+======================================================================
+Files with emojis: 39
+Total emoji occurrences: 308
+Unique emojis used: 85
+
+----------------------------------------------------------------------
+UNIQUE EMOJIS (by frequency):
+----------------------------------------------------------------------
+  💬  ×14
+  🎯  ×14
+  💰  ×13
+  🎨  ×13
+  🌐  ×11
+  ✍  ×10
+  🔍  ×9
+  🎬  ×9
+  📊  ×9
+  🤝  ×8
+  📈  ×8
+  🎉  ×8
+  📱  ×8
+  💼  ×7
+  📝  ×7
+  🗑  ×7
+  👉  ×7
+  📬  ×6
+  🔧  ×6
+  📧  ×6
+  📅  ×6
+  🚀  ×6
+  📍  ×6
+  ⚠  ×5
+  📦  ×5
+  ⚡  ×5
+  🔗  ×4
+  📸  ×4
+  🎓  ×4
+  📄  ×3
+  🔒  ×3
+  👋  ×3
+  💚  ×3
+  🧠  ×3
+  💎  ×3
+  📞  ×3
+  ✅  ×3
+  📋  ×2
+  🎵  ×2
+  💵  ×2
+  📁  ×2
+  👥  ×2
+  🔴  ×2
+  🟢  ×2
+  🔐  ×2
+  🔥  ×2
+  ✦  ×2
+  ✂  ×2
+  🖼  ×1
+  ❝  ×1
+  💡  ×1
+  📎  ×1
+  📥  ×1
+  ❌  ×1
+  ❓  ×1
+  🛠  ×1
+  ♾  ×1
+  🇱  ×1
+  🇧  ×1
+  🏠  ×1
+  🤖  ×1
+  🍪  ×1
+  ⏳  ×1
+  🏪  ×1
+  🛒  ×1
+  🎤  ×1
+  📣  ×1
+  ✨  ×1
+  🟡  ×1
+  🔵  ×1
+  🙌  ×1
+  🧭  ×1
+  💛  ×1
+  💙  ×1
+  🤔  ×1
+  📷  ×1
+  🎥  ×1
+  🎛  ×1
+  🌱  ×1
+  📘  ×1
+  👤  ×1
+  🏢  ×1
+  🚫  ×1
+  🔓  ×1
+  🏷  ×1
+
+----------------------------------------------------------------------
+PER-FILE BREAKDOWN:
+----------------------------------------------------------------------
+
+src/components/ui/SupportBot.tsx  (43 emojis):
+  L  24  👋   message: "Hey there! 👋 I'm YallaBot — YallaGrow's assistant.\n\nWhat can I help you with today?",
+  L  26  💰   { label: 'View pricing', emoji: '💰', action: 'menu', submenu: 'pricing' },
+  L  27  🎯   { label: 'Explore services', emoji: '🎯', action: 'menu', submenu: 'services' },
+  L  28  📅👉   … label: 'Book a strategy call', emoji: '📅', action: 'response', response: "Great! Book your free 30-minute strategy call…
+  L  29  🤝   { label: 'Affiliate program', emoji: '🤝', action: 'menu', submenu: 'affiliate' },
+  L  31  💬   …    { label: 'Talk to a human', emoji: '💬', action: 'external', url: 'https://api.whatsapp.com/send/?phone=447376441603&…
+  L  36  💚🔥   …ckages plus a Build-Your-Own option:\n\n💚 **Launch** — $149/mo\n⭐ **Grow** — $299/mo (most popular)\n🔥 **Dominate** — $4…
+  L  38  💚   …   { label: 'Launch — $149/mo', emoji: '💚', action: 'response', response: "**Launch — $149/mo** includes:\n\n✓ 8 static …
+  L  40  🔥   … { label: 'Dominate — $499/mo', emoji: '🔥', action: 'response', response: "**Dominate — $499/mo** includes:\n\n✓ 16 stat…
+  L  41  🛠👉   … label: 'Build my own package', emoji: '🛠', action: 'response', response: "You can build your own custom package with ou…
+  L  42  🎯👉   … { label: 'Take the plan quiz', emoji: '🎯', action: 'response', response: "Not sure which plan is right? Take our free 2…
+  L  43  🚀   …bel: 'Performance Partnership', emoji: '🚀', action: 'response', response: "Our **Performance Partnership** is invite-onl…
+  L  51  🎯   … { label: 'Marketing Strategy', emoji: '🎯', action: 'response', response: "**Marketing Strategy**\n\nBefore we create an…
+  L  52  📱   { label: 'Social Media', emoji: '📱', action: 'response', response: "**Social Media Management**\n\nFull account m…
+  L  53  💰   { label: 'Paid Ads', emoji: '💰', action: 'response', response: "**Paid Advertising**\n\nMeta and TikTok ads w…
+  L  54  🎨   { label: 'Branding', emoji: '🎨', action: 'response', response: "**Branding & Identity**\n\nLogo design, visua…
+  L  55  🎬   …   { label: 'Content Creation', emoji: '🎬', action: 'response', response: "**Content Creation**\n\nReels, carousels, sto…
+  L  56  ✍   { label: 'Copywriting', emoji: '✍️', action: 'response', response: "**Copywriting**\n\nWords that make people ta…
+  L  57  🌐   { label: 'Website Development', emoji: '🌐', action: 'menu', submenu: 'website' },
+  L  58  📊   …{ label: 'Analytics & Reports', emoji: '📊', action: 'response', response: "**Analytics & Reporting**\n\nMonthly performa…
+  L  59  🧠   { label: 'Consulting', emoji: '🧠', action: 'response', response: "**Consulting**\n\nOne-on-one sessions to audi…
+  L  67  🚀   …{ label: 'Starter site ($150)', emoji: '🚀', action: 'response', response: "**Starter Site — $150**\n\n✓ Single-page webs…
+  L  68  💼   …el: 'Business site ($151-300)', emoji: '💼', action: 'response', response: "**Business Site — $151-300**\n\n✓ Up to 5 pag…
+  L  69  ⚡   …el: 'Advanced site ($301-600)', emoji: '⚡', action: 'response', response: "**Advanced Site — $301-600**\n\n✓ Up to 10 pa…
+  L  70  💎👉   …{ label: 'Custom site ($600+)', emoji: '💎', action: 'response', response: "**Custom Website ($600+)**\n\nFor bigger budg…
+  L  71  🎓   …: 'Website Consultancy ($139)', emoji: '🎓', action: 'response', response: "**Website Consultancy + Free Audit — $139**\n…
+  L  79  💵💰💎♾   … label: 'How much can I earn?', emoji: '💵', action: 'response', response: "You earn:\n\n💰 **20% commission** on invoices…
+  L  80  🔗   …bel: 'How does tracking work?', emoji: '🔗', action: 'response', response: "Each affiliate gets a unique referral code. W…
+  L  81  📝👉   …    { label: 'How do I apply?', emoji: '📝', action: 'response', response: "Apply here to become an affiliate:\n\n👉 yalla…
+  L  82  🔐👉   …el: 'Existing affiliate login', emoji: '🔐', action: 'response', response: "Sign in to your affiliate dashboard here:\n\n…
+  L  90  📍🇱🇧   … label: 'Where are you based?', emoji: '📍', action: 'response', response: "We're based in **Lebanon** 🇱🇧 and work with c…
+  L  91  👥🎯🎨✍📈   …{ label: 'Who is on the team?', emoji: '👥', action: 'response', response: "We're a lean, specialized team:\n\n🎯 **Founde…
+  L  92  ⚡📱🌐🎨📊   …el: 'How fast do you deliver?', emoji: '⚡', action: 'response', response: "Timelines by project:\n\n📱 Monthly packages: …
+  L  93  🤝   … 'Do you have any guarantees?', emoji: '🤝', action: 'response', response: "Every partnership starts with a free strategy…
+  L  94  📞💬📧📞   …{ label: 'How to contact you?', emoji: '📞', action: 'response', response: "Reach us via:\n\n💬 **WhatsApp:** +44 7376 441…
+  L  95  💼🎨✍📈   …    { label: 'Are you hiring?', emoji: '💼', action: 'response', response: "Yes! Currently open positions:\n\n🎨 Designer …
+  L 161  👋   text: "I've opened WhatsApp for you. Karim will get back to you soon! 👋\n\nAnything else I can help with?",
+  L 163  🏠   options: [{ label: 'Back to main menu', emoji: '🏠', action: 'menu', submenu: 'root' }],
+  L 177  📅👉   … label: 'Book a strategy call', emoji: '📅', action: 'response', response: "Book your free 30-minute strategy call:\n\n👉 …
+  L 178  💬   { label: 'Ask something else', emoji: '💬', action: 'menu', submenu: 'root' },
+  L 179  👋   { label: 'Talk to human', emoji: '👋', action: 'external', url: WHATSAPP_URL },
+  L 225  💬   💬
+  L 281  🤖   }}>🤖</div>
+
+src/components/pages/QuizPage.tsx  (38 emojis):
+  L  30  🏪   { v: 'local', l: 'Local Business', d: 'Restaurant, salon, clinic, shop — serving your community', icon: '🏪' },
+  L  31  🚀   { v: 'startup', l: 'Startup', d: 'Early-stage, building a product or service from scratch', icon: '🚀' },
+  L  32  🛒   { v: 'ecommerce', l: 'E-commerce', d: 'Selling products online', icon: '🛒' },
+  L  33  💼   { v: 'service', l: 'Service Business', d: 'Freelancer, agency, consultant, B2B', icon: '💼' },
+  L  34  🎤   { v: 'personal', l: 'Personal Brand', d: 'Creator, influencer, coach, speaker', icon: '🎤' },
+  L  43  📣   { v: 'awareness', l: 'Get discovered', d: 'Build brand awareness and reach new audiences', icon: '📣' },
+  L  44  🎯   { v: 'leads', l: 'Generate leads', d: 'Turn social into a consistent source of inquiries', icon: '🎯' },
+  L  45  💰   { v: 'sales', l: 'Drive sales', d: 'Convert followers and ad traffic into paying customers', icon: '💰' },
+  L  46  ✨   …istent, and trustworthy online', icon: '✨' },
+  L  47  📈   …momentum with strategy and ads', icon: '📈' },
+  L  56  🔴   { v: 'none', l: 'Starting from zero', d: 'No social presence, no strategy — starting fresh', icon: '🔴' },
+  L  57  🟡   …but no real strategy or system', icon: '🟡' },
+  L  58  🟢   { v: 'active', l: 'Posting regularly', d: 'Consistent presence but not seeing strong results', icon: '🟢' },
+  L  59  🔵   …, or hand off to professionals', icon: '🔵' },
+  L  68  📸   { v: 'posts', l: '📸 Social Media Posts' },
+  L  69  🎬   { v: 'reels', l: '🎬 Reels & Video Content' },
+  L  70  📈   { v: 'ads', l: '📈 Paid Advertising (Meta/TikTok)' },
+  L  71  🎯   { v: 'strategy', l: '🎯 Marketing Strategy' },
+  L  72  🎨   { v: 'branding', l: '🎨 Branding & Identity' },
+  L  73  ✍   { v: 'copy', l: '✍️ Copywriting' },
+  L  74  🌐   { v: 'web', l: '🌐 Website Development' },
+  L  75  📊   { v: 'analytics', l: '📊 Analytics & Reports' },
+  L  84  🙌   { v: 'handoff', l: 'Fully hand it off', d: 'I trust you — just keep me updated monthly', icon: '🙌' },
+  L  85  🤝   …ve content before it goes live', icon: '🤝' },
+  L  86  🧭   { v: 'guided', l: 'Guide my team', d: 'Strategy and oversight — my team does execution', icon: '🧭' },
+  L  95  💚   { v: 'low', l: 'Under $200/month', d: 'Starting lean — want maximum value for budget', icon: '💚' },
+  L  96  💛   { v: 'mid', l: '$200 – $400/month', d: 'Ready to invest in consistent, quality marketing', icon: '💛' },
+  L  97  💙   { v: 'high', l: '$400+/month', d: 'Serious about scaling with a full-service approach', icon: '💙' },
+  L  98  🤔   { v: 'unsure', l: 'Not sure yet', d: 'Let the recommendation guide me', icon: '🤔' },
+  L 129  📸   { id: 'extra_posts', label: '📸 Extra Posts', price: '+$5/post' },
+  L 130  🎬   { id: 'extra_reels', label: '🎬 Extra Reels', price: '+$25/reel' },
+  L 131  🎨   { id: 'branding', label: '🎨 Branding', price: '+$120/mo' },
+  L 132  ✍   { id: 'copy', label: '✍️ Copywriting', price: '+$80/mo' },
+  L 133  📷   { id: 'photography', label: '📷 Photography', price: '+$100/mo' },
+  L 134  🎥   { id: 'videography', label: '🎥 Videography', price: '+$150/mo' },
+  L 135  🔍   { id: 'seo', label: '🔍 SEO', price: '+$90/mo' },
+  L 136  📊   { id: 'reports', label: '📊 Monthly Reports', price: '+$60/mo' },
+  L 420  🎯   <div style={{ fontSize: '3rem', marginBottom: '20px' }}>🎯</div>
+
+src/components/pages/PackageBuilder.tsx  (29 emojis):
+  L  65  🚀   icon: '🚀',
+  L  78  💼   icon: '💼',
+  L  92  ⚡   icon: '⚡',
+  L 245  📝   …ustifyContent: 'space-between' }}><span>📝 Script writing</span><span style={{ color: 'var(--sky)', fontWeight: 600 }}>${…
+  L 246  ✂   …ustifyContent: 'space-between' }}><span>✂️ Editing</span><span style={{ color: 'var(--sky)', fontWeight: 600 }}>${s.reel…
+  L 249  🎛   …'var(--white)', marginBottom: '12px' }}>🎛 Optional: Upgrade production quality</div>
+  L 252  📝   <span>📝 Script writing budget per reel</span>
+  L 259  ✂   <span>✂️ Editing budget per reel</span>
+  L 280  🌱   { v: 'organic', l: 'Organic Only', icon: '🌱' },
+  L 281  🚀   { v: 'paid', l: 'Paid Advertising', icon: '🚀' },
+  L 282  ⚡   { v: 'both', l: 'Organic + Paid', icon: '⚡' },
+  L 299  📘   …eta Ads (Facebook + Instagram)', icon: '📘', cpm: 3, ctr: 0.02, conv: 0.045 },
+  L 300  🎵   { k: 'tiktok', label: 'TikTok Ads', icon: '🎵', cpm: 2.5, ctr: 0.015, conv: 0.035 },
+  L 330  ⚠   …n market averages. Actual results vary. ⚠️ Leads ≠ guaranteed sales.</div>
+  L 364  🌐   <div style={{ fontSize: '1.6rem', marginBottom: '8px' }}>🌐</div>
+  L 374  🎓   <div style={{ fontSize: '1.6rem', marginBottom: '8px' }}>🎓</div>
+  L 384  🎓   <span style={{ fontSize: '1.4rem' }}>🎓</span>
+  L 395  🔍   '🔍 Full technical + UX audit of your current site',
+  L 396  📊   '📊 Conversion rate analysis with real fixes',
+  L 397  ⚡   '⚡ Page speed + SEO review',
+  L 398  📱   '📱 Mobile experience audit',
+  L 399  💬   '💬 60-min strategy call with actionable roadmap',
+  L 400  📄   '📄 Written report you can share with your team',
+  L 410  🌐   🌐 Your website URL *
+  L 457  💎   …: '16px', textTransform: 'uppercase' }}>💎 Custom Project</div>
+  L 471  📞   📞 Book a Free Strategy Call →
+  L 558  🎉   <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🎉</div>
+  L 568  📅   <div style={{ fontSize: '2rem', marginBottom: '12px' }}>📅</div>
+  L 590  📅   📅 Pick a Time →
+
+src/app/admin/submissions/page.tsx  (24 emojis):
+  L 110  📋   … 'var(--white)', marginBottom: '4px' }}>📋 Form Submissions</h2>
+  L 117  📦   { id: 'packages', label: '📦 Package Requests', count: packages.length, newCount: counts.packages },
+  L 118  💼   { id: 'jobs', label: '💼 Job Applications', count: jobs.length, newCount: counts.jobs },
+  L 119  💬   { id: 'contacts', label: '💬 Contact Messages', count: contacts.length, newCount: counts.contacts },
+  L 139  🔍   placeholder="🔍 Search by name or email..."
+  L 178  📧   📧 <a href={`mailto:${p.email}`} style={{ color: 'var(--sky)' }}>{p.email}</a><br />
+  L 179  💬   {p.whatsapp && <>💬 <a href={`https://wa.me/${p.whatsapp.replace(/[^\d]/g, '')}`} target="_blank" …
+  L 186  📸   {p.static_posts > 0 && <div>📸 Static posts: <strong>{p.static_posts}/mo</strong></div>}
+  L 187  🎨   {p.carousels > 0 && <div>🎨 Carousels: <strong>{p.carousels}/mo</strong></div>}
+  L 188  🎬   {p.reels > 0 && <div>🎬 Reels: <strong>{p.reels}/mo</strong></div>}
+  L 189  📈   {p.marketing_type && <div>📈 Marketing: <strong>{p.marketing_type}</strong></div>}
+  L 190  💰   {p.meta_budget > 0 && <div>💰 Meta ad budget: <strong>${p.meta_budget}/mo</strong></div>}
+  L 191  🎵   {p.tiktok_budget > 0 && <div>🎵 TikTok ad budget: <strong>${p.tiktok_budget}/mo</strong></div>}
+  L 192  🌐   …er && p.website_tier !== 'none' && <div>🌐 Website: <strong>{p.website_tier}</strong>{p.website_budget > 0 && ` ($${p.web…
+  L 193  🔍   …             {p.consultancy_url && <div>🔍 Audit URL: <a href={p.consultancy_url} target="_blank" rel="noopener" style={{…
+  L 196  💵   💵 Total: <strong style={{ color: 'var(--sky)' }}>${p.estimated_monthly}/mo</strong>
+  L 212  🗑   …ntSize: '0.72rem', cursor: 'pointer' }}>🗑 Delete</button>
+  L 247  📧   📧 <a href={`mailto:${j.email}`} style={{ color: 'var(--sky)' }}>{j.email}</a><br />
+  L 248  💬   {j.phone && <>💬 <a href={`https://wa.me/${j.phone.replace(/[^\d]/g, '')}`} target="_blank" rel…
+  L 249  📁   {j.portfolio && <>📁 Portfolio: <a href={j.portfolio} target="_blank" rel="noopener" style={{ color…
+  L 250  🔗   {j.linkedin && <>🔗 LinkedIn: <a href={j.linkedin} target="_blank" rel="noopener" style={{ color: …
+  L 271  🗑   …ntSize: '0.72rem', cursor: 'pointer' }}>🗑 Delete</button>
+  L 310  📧   …tWeight: 700, textDecoration: 'none' }}>📧 Reply</a>
+  L 321  🗑   …ntSize: '0.72rem', cursor: 'pointer' }}>🗑 Delete</button>
+
+src/components/pages/CareersPage.tsx  (16 emojis):
+  L   7  🚀   { icon: '🚀', title: 'Move fast', desc: "No bureaucracy. You'll ship real work for real clients from day one." },
+  L   8  🎯   { icon: '🎯', title: 'Own your work', desc: 'We give you responsibility, not micromanageme…
+  L   9  📈   { icon: '📈', title: 'Grow with us', desc: "We're building something real. The earlier you…
+  L  10  🤝   { icon: '🤝', title: 'Honest environment', desc: 'Direct feedback, transparent decisions, no corporate politics.' },
+  L  31  👤   icon: '👤',
+  L  36  🏢   location: '🏢 YallaGrow HQ',
+  L  49  🎨   icon: '🎨',
+  L  54  📍   location: '📍 Lebanon / Remote',
+  L  72  ✍   icon: '✍️',
+  L  77  📍   location: '📍 Lebanon / Remote',
+  L  95  📈   icon: '📈',
+  L 100  📍   location: '📍 Remote',
+  L 284  📁   { icon: '📁', text: 'Portfolio or work samples' },
+  L 285  🔗   { icon: '🔗', text: 'Instagram / Behance / LinkedIn' },
+  L 286  💬   { icon: '💬', text: "Which role you want & why you'd be a good fit" },
+  L 300  ✅   <div style={{ fontSize: '3rem', marginBottom: '16px' }}>✅</div>
+
+src/components/pages/PackagesPage.tsx  (12 emojis):
+  L  32  🚫   { icon: '🚫', title: 'No price inflation', desc: "We charge what's fair. Not what the mark…
+  L  33  🔓   { icon: '🔓', title: 'No lock-in contracts', desc: "Month-to-month. Stay because we delive…
+  L  34  🎯   { icon: '🎯', title: 'No unnecessary upsells', desc: 'We only recommend services that genu…
+  L  35  📈   { icon: '📈', title: 'We grow with you', desc: "Start small. Scale up when you're ready. Y…
+  L  36  💬   { icon: '💬', title: 'Marketing made accessible', desc: "Professional marketing shouldn't …
+  L  61  🎨🏷🌐📄   '🎨 Logo Design', '🏷️ Brand Identity', '🌐 Website Design', '📄 Landing Pages',
+  L  62  📸🎬📝✍   '📸 Product Photography', '🎬 Extra Reels', '📝 Extra Posts', '✍️ Copywriting',
+  L  63  📧💬🔍📍   '📧 Email Marketing', '💬 WhatsApp Automation', '🔍 SEO', '📍 Google Business Profile',
+  L  64  🤝   '🤝 Influencer Outreach',
+  L 100  🎯   …ondary" style={{ fontSize: '0.82rem' }}>🎯 Not sure which plan? Find yours in 2 min →</Link>
+  L 222  🤝   <div style={{ fontSize: '3rem', marginBottom: '20px' }}>🤝</div>
+  L 248  🔒   🔒 Invite-Only
+
+src/components/layout/Navbar.tsx  (11 emojis):
+  L  10  ✦   { href: '/quiz', label: 'Find My Plan ✦', highlight: true },
+  L  18  🎯   { href: '/services', label: 'Marketing Strategy', desc: 'Research, positioning & roadmap', icon: '🎯' },
+  L  19  📱   { href: '/services', label: 'Social Media', desc: 'Full account management', icon: '📱' },
+  L  20  💰   { href: '/services', label: 'Paid Advertising', desc: 'Meta & Google campaigns', icon: '💰' },
+  L  21  🎨   { href: '/services', label: 'Branding', desc: 'Identity & visual design', icon: '🎨' },
+  L  22  🎬   { href: '/services', label: 'Content Creation', desc: 'Reels, posts & carousels', icon: '🎬' },
+  L  23  ✍   { href: '/services', label: 'Copywriting', desc: 'Captions, ads & landing pages', icon: '✍️' },
+  L  24  🌐   { href: '/services', label: 'Website Development', desc: 'Fast, conversion-focused sites', icon: '🌐' },
+  L  25  📊   { href: '/services', label: 'Analytics & Reporting', desc: 'Performance & insights', icon: '📊' },
+  L  26  🧠   { href: '/services', label: 'Consulting', desc: '1-on-1 strategy sessions', icon: '🧠' },
+  L 135  ✦   {[...NAV_LINKS, { href: '/affiliate', label: 'Affiliates ✦', highlight: true }].map(link => (
+
+src/app/admin/affiliates/page.tsx  (9 emojis):
+  L 120  📊📄   const icon = prompt('Emoji icon (e.g. 📊):') || '📄'
+  L 147  🤝   … 'var(--white)', marginBottom: '8px' }}>🤝 Affiliate Program</h2>
+  L 153  👥   { id: 'members', label: '👥 Members', count: affiliates.length },
+  L 154  📊   { id: 'referrals', label: '📊 Referrals', count: referrals.length },
+  L 155  🎓   { id: 'resources', label: '🎓 Marketing Resources', count: resources.length },
+  L 174  🔍   <input placeholder="🔍 Search by name, email, or code..." value={search} onChange={e => setSearch(e.t…
+  L 203  🗑   <button onClick={() => deleteAffiliate(a.id)} style={btnDelete}>🗑</button>
+  L 425  🗑   <button onClick={() => deleteItem(item.id)} style={btnDelete}>🗑</button>
+  L 433  📎   📎 <a href={item.url} target="_blank" rel="noopener" style={{ color: 'var(--sky)' }}>{item.url}</a>
+
+src/components/pages/ServicesPage.tsx  (9 emojis):
+  L  20  🎯   icon: '🎯',
+  L  37  📱   icon: '📱',
+  L  54  💰   icon: '💰',
+  L  71  🎨   icon: '🎨',
+  L  88  🎬   icon: '🎬',
+  L 105  ✍   icon: '✍️',
+  L 122  🌐   icon: '🌐',
+  L 139  📊   icon: '📊',
+  L 156  🧠   icon: '🧠',
+
+src/app/admin/page.tsx  (7 emojis):
+  L  12  📝   { id: 'blog', label: '📝 Blog', component: AdminBlogPage },
+  L  13  📦   { id: 'packages', label: '📦 Packages', component: AdminPackagesPage },
+  L  14  💰   { id: 'pricing', label: '💰 Pricing', component: AdminPricingPage },
+  L  15  🤝   { id: 'affiliates', label: '🤝 Affiliate Program', component: AdminAffiliatesPage },
+  L  16  📬   { id: 'newsletter', label: '📬 Newsletter', component: AdminNewsletterPage },
+  L  17  🔧   { id: 'maintenance', label: '🔧 Maintenance', component: AdminMaintenancePage },
+  L  18  📋   { id: 'submissions', label: '📋 Submissions', component: AdminSubmissionsPage },
+
+src/app/admin/blog/page.tsx  (7 emojis):
+  L 235  🔗   <ToolbarBtn onClick={() => insertMarkdown('[', '](url)')}>🔗 Link</ToolbarBtn>
+  L 236  🖼   <ToolbarBtn onClick={() => insertMarkdown('![alt](', ')')}>🖼 Image</ToolbarBtn>
+  L 239  ❝   <ToolbarBtn onClick={() => insertMarkdown('\n> ')}>❝ Quote</ToolbarBtn>
+  L 282  💡   💡 <strong>Tip:</strong> Highlight text first, then click the toolbar buttons to …
+  L 315  📝   … 'var(--white)', marginBottom: '4px' }}>📝 Blog Posts</h2>
+  L 322  🔍   placeholder="🔍 Search posts..."
+  L 351  🗑   <button onClick={() => del(p)} style={btnDelete}>🗑</button>
+
+src/components/sections/ServicesSection.tsx  (6 emojis):
+  L   5  🎯   {icon:'🎯',title:'Marketing Strategy',desc:'Deep-dive analysis of your market, competito…
+  L   6  📱   {icon:'📱',title:'Social Media',desc:'Consistent, strategic content that builds your brand.',href:'/services'},
+  L   7  💰   {icon:'💰',title:'Paid Advertising',desc:'Meta and Google campaigns that turn budget into results.',href:'/services'},
+  L   8  🎨   {icon:'🎨',title:'Branding & Identity',desc:'A brand system that makes you instantly recognizable.',href:'/services'},
+  L   9  🎬   {icon:'🎬',title:'Content Creation',desc:'Reels, posts, and carousels that stop the scroll.',href:'/services'},
+  L  10  🌐   {icon:'🌐',title:'Website Development',desc:'Fast, mobile-first websites designed to convert.',href:'/services'},
+
+src/components/pages/HomePage.tsx  (6 emojis):
+  L  39  🎯   { icon: '🎯', title: 'Marketing Strategy', desc: 'Deep-dive analysis of your market, compe…
+  L  40  📱   { icon: '📱', title: 'Social Media Management', desc: 'Full account management, content sc…
+  L  41  💰   { icon: '💰', title: 'Paid Advertising', desc: 'Meta and Google campaigns targeted with pr…
+  L  42  🎨   { icon: '🎨', title: 'Branding', desc: 'Logo, identity, visual guidelines — a consistent b…
+  L  43  🎬   { icon: '🎬', title: 'Content Creation', desc: 'Reels, carousels, stories, and visuals des…
+  L  44  🌐   { icon: '🌐', title: 'Website Development', desc: 'Fast, conversion-optimized websites tha…
+
+src/app/admin/maintenance/page.tsx  (5 emojis):
+  L   9  🔧   const [icon, setIcon] = useState('🔧')
+  L  18  🔧   …setMessage(s.msg||''); setIcon(s.icon||'🔧')
+  L  39  🔧   …:'var(--white)', marginBottom:'24px' }}>🔧 Maintenance Mode</h2>
+  L  48  🔴🟢   {active ? '🔴 MAINTENANCE ON — SITE IS DOWN FOR VISITORS' : '🟢 WEBSITE LIVE'}
+  L  81  ⚠   ⚠️ <strong style={{ color:'rgba(249,253,254,0.7)' }}>Important:</strong> When ma…
+
+src/components/pages/ContactPage.tsx  (5 emojis):
+  L  81  💬   { icon: '💬', title: 'WhatsApp', desc: 'Fastest reply — usually within the hour', href: 'h…
+  L  82  📧   { icon: '📧', title: 'Email', desc: 'We respond to all emails within 24 hours', href: 'mai…
+  L  83  📅   { icon: '📅', title: 'Book a call', desc: 'Free 30-min strategy session — no commitment', …
+  L 112  📍   <div style={{ fontSize: '1.4rem', flexShrink: 0, marginTop: '2px' }}>📍</div>
+  L 132  ✅   <div style={{ fontSize: '3rem', marginBottom: '16px' }}>✅</div>
+
+src/app/thank-you/thank-you-page-fixed.tsx  (4 emojis):
+  L  29  📦   icon: '📦',
+  L  37  💬   icon: '💬',
+  L  45  💼   icon: '💼',
+  L  53  📬   icon: '📬',
+
+src/app/admin/newsletter/page.tsx  (4 emojis):
+  L  61  📬   … 'var(--white)', marginBottom: '4px' }}>📬 Newsletter Subscribers</h2>
+  L  64  📥   <button onClick={exportCSV} className="btn-primary">📥 Export CSV</button>
+  L  82  🔍   placeholder="🔍 Search by email or source..."
+  L 115  🗑   …ntSize: '0.72rem', cursor: 'pointer' }}>🗑</button>
+
+src/app/newsletter/confirmed/page.tsx  (4 emojis):
+  L  12  🎉   icon: '🎉',
+  L  24  ⚠   icon: '⚠️',
+  L  30  ❌   icon: '❌',
+  L  36  ❓   icon: '❓',
+
+src/components/pages/BlogPage.tsx  (4 emojis):
+  L  15  📱   …y:'Social Media',date:'Jun 2025',emoji:'📱',readtime:'5 min'},
+  L  16  💰   …egory:'Paid Ads',date:'May 2025',emoji:'💰',readtime:'7 min'},
+  L  17  📅   …tegory:'Content',date:'Apr 2025',emoji:'📅',readtime:'4 min'},
+  L  33  📝   …2.5rem',textAlign:'center'}}>{p.emoji||'📝'}</div>
+
+src/app/api/newsletter/confirm/route.ts  (2 emojis):
+  L  64  🎉   subject: 'Welcome to YallaGrow 🎉',
+  L  94  🎉   <div style="text-align:center;font-size:3rem;margin-bottom:16px;">🎉</div>
+
+src/app/api/newsletter/subscribe/route.ts  (2 emojis):
+  L  48  🎉   message: "You're already subscribed! 🎉",
+  L 135  📬   <div style="text-align:center;font-size:2.5rem;margin-bottom:16px;">📬</div>
+
+src/components/MaintenanceGate.tsx  (2 emojis):
+  L   8  🔧   … website. This won't take long.", icon:'🔧' })
+  L  22  🔧   setSettings({ title: s.title || "We'll Be Right Back", msg: s.msg || '', icon: s.icon || '🔧' })
+
+src/components/ui/NewsletterForm.tsx  (2 emojis):
+  L  38  🎉   showToast("You're already subscribed! 🎉", 'info')
+  L  44  🎉   showToast('Thanks for subscribing! 🎉', 'success')
+
+src/components/pages/AffiliatePage.tsx  (2 emojis):
+  L  35  💰   …acing:'1px',textTransform:'uppercase'}}>💰 Affiliate Program</div>
+  L 114  🎉   <div style={{fontSize:'3rem',marginBottom:'16px'}}>🎉</div>
+
+src/components/pages/PerformancePartnership.tsx  (2 emojis):
+  L  92  🔒   🔒 Invite-Only
+  L 185  ⚠   ⚠️ Your business is currently operating at a loss. We recommend improving profit…
+
+src/app/global-error.tsx  (1 emoji):
+  L  34  ⚠   <div style={{ fontSize: '3rem', marginBottom: '20px' }}>⚠️</div>
+
+src/app/admin/packages/page.tsx  (1 emoji):
+  L  59  📦   …tSize:'1.3rem', color:'var(--white)' }}>📦 Packages</h2>
+
+src/app/admin/pricing/page.tsx  (1 emoji):
+  L  42  💰   …tSize:'1.3rem', color:'var(--white)' }}>💰 Builder Pricing</h2>
+
+src/app/admin/login/page.tsx  (1 emoji):
+  L 112  🔐   🔐
+
+src/app/blog/page.tsx  (1 emoji):
+  L  62  ✍   <div style={{ fontSize: '3rem', marginBottom: '16px' }}>✍️</div>
+
+src/app/blog/[slug]/BlogPostClient.tsx  (1 emoji):
+  L 133  🔍   <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🔍</div>
+
+src/app/api/submissions/career/route.ts  (1 emoji):
+  L  54  💼   subject: `💼 New Job Application: ${role} — ${name}`,
+
+src/app/api/submissions/contact/route.ts  (1 emoji):
+  L  51  💬   subject: `💬 Contact Form: ${subject || 'New message'} — ${name}`,
+
+src/app/api/submissions/package/route.ts  (1 emoji):
+  L  72  📦   subject: `📦 New Package Request from ${name} — $${estimatedMonthly}/mo`,
+
+src/app/partnership/page.tsx  (1 emoji):
+  L  11  🔒   🔒 Invite-Only
+
+src/components/ui/ExitIntentPopup.tsx  (1 emoji):
+  L 139  📬   }}>📬</div>
+
+src/components/ui/CookieBanner.tsx  (1 emoji):
+  L  27  🍪   🍪 We use cookies to improve your experience. By continuing, you agree to our{' '}
+
+src/components/layout/Footer.tsx  (1 emoji):
+  L  46  📬   📬 Newsletter
+
+src/components/pages/AffiliateDashboard.tsx  (1 emoji):
+  L  29  ✅⏳   {mounted ? '✅ Component mounted successfully' : '⏳ Mounting...'}
