@@ -1,14 +1,23 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
+  const pathname = usePathname()
   const [authed, setAuthed] = useState(false)
   const [checking, setChecking] = useState(true)
 
+  // Login route must bypass the auth gate — otherwise the gate renders null
+  // on the very page the user needs to see to sign in.
+  const isLoginRoute = pathname === '/admin/login'
+
   useEffect(() => {
+    if (isLoginRoute) {
+      setChecking(false)
+      return
+    }
     const session = sessionStorage.getItem('yg_admin')
     if (session === 'true') {
       setAuthed(true)
@@ -16,12 +25,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       router.push('/admin/login')
     }
     setChecking(false)
-  }, [router])
+  }, [router, isLoginRoute])
 
   const logout = () => {
     sessionStorage.removeItem('yg_admin')
     router.push('/admin/login')
   }
+
+  // Login page renders standalone — no admin topbar, no auth gate.
+  if (isLoginRoute) return <>{children}</>
 
   if (checking) return null
   if (!authed) return null
