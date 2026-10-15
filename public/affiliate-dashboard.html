@@ -694,7 +694,7 @@ function renderEarningsTab() {
     <div class="card" style="padding:20px;">
       <div class="card-title" style="margin-bottom:10px;">Payout Information</div>
       <p style="font-size:0.85rem;color:rgba(249,253,254,0.7);line-height:1.7;margin-bottom:12px;">Minimum $50 to withdraw. Payouts via WhatsApp coordination.</p>
-      <a href="https://wa.me/447376441603?text=Request+Payout" target="_blank" rel="noopener" class="btn-primary" style="display:inline-flex;align-items:center;">Request Payout</a>
+      <a href="https://wa.me/96176302159?text=Request+Payout" target="_blank" rel="noopener" class="btn-primary" style="display:inline-flex;align-items:center;">Request Payout</a>
     </div>
   `;
 }
@@ -738,24 +738,105 @@ function renderResourcesTab() {
   });
 }
 
-function openResourceModal(r) {
+function escapeHtml(s) {
+  return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function renderResourceItem(item) {
+  if (item.type === 'text') {
+    const title = item.title ? `<div style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.95rem;color:var(--white);margin-bottom:10px;letter-spacing:-0.3px;">${escapeHtml(item.title)}</div>` : '';
+    const content = escapeHtml(item.content || '').replace(/\n/g, '<br>');
+    return `
+      <div style="background:rgba(249,253,254,0.02);border:1px solid var(--glass-border);border-radius:12px;padding:16px 18px;margin-bottom:12px;">
+        ${title}
+        <div style="font-size:0.84rem;color:rgba(249,253,254,0.78);line-height:1.75;white-space:pre-wrap;">${content}</div>
+        ${item.content ? `<button class="copy-text-btn" data-text="${encodeURIComponent(item.content)}" style="margin-top:12px;background:rgba(16,161,219,0.08);border:1px solid rgba(16,161,219,0.2);color:var(--sky);padding:6px 12px;border-radius:7px;font-size:0.72rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">Copy text</button>` : ''}
+      </div>
+    `;
+  }
+  if (item.type === 'file') {
+    const size = item.file_size ? ` <span style="opacity:0.6;">(${escapeHtml(item.file_size)})</span>` : '';
+    return `
+      <a href="${escapeHtml(item.url || '#')}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,rgba(16,161,219,0.08),rgba(106,70,217,0.04));border:1px solid rgba(16,161,219,0.25);border-radius:12px;padding:16px 18px;margin-bottom:12px;text-decoration:none;transition:all 0.2s;">
+        <div style="width:40px;height:40px;border-radius:10px;background:rgba(16,161,219,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10a1db" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </div>
+        <div style="flex:1;">
+          <div style="font-weight:600;color:var(--white);font-size:0.9rem;">${escapeHtml(item.title || 'Download')}${size}</div>
+          <div style="font-size:0.72rem;color:var(--sky);margin-top:2px;">Click to download →</div>
+        </div>
+      </a>
+    `;
+  }
+  if (item.type === 'link') {
+    return `
+      <a href="${escapeHtml(item.url || '#')}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:14px;background:rgba(249,253,254,0.02);border:1px solid var(--glass-border);border-radius:12px;padding:16px 18px;margin-bottom:12px;text-decoration:none;transition:all 0.2s;">
+        <div style="width:40px;height:40px;border-radius:10px;background:rgba(16,161,219,0.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10a1db" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a5 5 0 007.07 0l3-3a5 5 0 00-7.07-7.07l-1.5 1.5"/><path d="M14 10a5 5 0 00-7.07 0l-3 3a5 5 0 007.07 7.07l1.5-1.5"/></svg>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:600;color:var(--white);font-size:0.9rem;">${escapeHtml(item.title || 'Open link')}</div>
+          <div style="font-size:0.72rem;color:var(--sky);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(item.url || '')}</div>
+        </div>
+      </a>
+    `;
+  }
+  return '';
+}
+
+async function openResourceModal(r) {
   if (!r) return;
   const title = r.title || 'Untitled';
   const desc = r.description || '';
-  const waMsg = encodeURIComponent("Hi, I'm a YallaGrow affiliate. I'd like access to: " + title + " (code: " + (session ? session.ref_code : '') + ")");
   const body = document.getElementById('resourceModalBody');
+
+  // Show loading state immediately
   body.innerHTML = `
     <div class="eyebrow" style="margin-bottom:12px;">Marketing Resource</div>
-    <h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.35rem;color:var(--white);margin-bottom:10px;letter-spacing:-0.5px;">${title}</h2>
-    ${desc ? `<p style="font-size:0.9rem;color:rgba(249,253,254,0.75);line-height:1.65;margin-bottom:20px;">${desc}</p>` : ''}
-    <div style="padding:14px 16px;background:rgba(16,161,219,0.08);border:1px solid rgba(16,161,219,0.2);border-radius:10px;font-size:0.8rem;color:rgba(249,253,254,0.8);line-height:1.6;margin-bottom:18px;">
-      Message us on WhatsApp to receive this resource. We'll send the files directly within an hour.
-    </div>
-    <a href="https://wa.me/447376441603?text=${waMsg}" target="_blank" rel="noopener" class="btn-primary" style="display:inline-flex;align-items:center;gap:8px;justify-content:center;width:100%;">
-      Request on WhatsApp
-    </a>
+    <h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.35rem;color:var(--white);margin-bottom:10px;letter-spacing:-0.5px;">${escapeHtml(title)}</h2>
+    ${desc ? `<p style="font-size:0.9rem;color:rgba(249,253,254,0.75);line-height:1.65;margin-bottom:20px;">${escapeHtml(desc)}</p>` : ''}
+    <div style="text-align:center;padding:30px 0;color:var(--text-dim);font-size:0.82rem;">Loading content…</div>
   `;
   document.getElementById('resourceModal').classList.add('open');
+
+  // Fetch content items for this resource
+  const items = await supaGet('affiliate_resource_items', 'resource_id=eq.' + encodeURIComponent(r.id) + '&order=sort_order.asc') || [];
+
+  const waMsg = encodeURIComponent("Hi, I'm a YallaGrow affiliate. I'd like help with: " + title + " (code: " + (session ? session.ref_code : '') + ")");
+
+  const contentHtml = items.length === 0
+    ? `<div style="padding:20px;background:rgba(16,161,219,0.06);border:1px solid rgba(16,161,219,0.15);border-radius:10px;font-size:0.82rem;color:rgba(249,253,254,0.75);line-height:1.6;text-align:center;">Content coming soon. For now, message us on WhatsApp and we'll send it over.</div>`
+    : items.map(renderResourceItem).join('');
+
+  body.innerHTML = `
+    <div class="eyebrow" style="margin-bottom:12px;">Marketing Resource</div>
+    <h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.35rem;color:var(--white);margin-bottom:10px;letter-spacing:-0.5px;">${escapeHtml(title)}</h2>
+    ${desc ? `<p style="font-size:0.88rem;color:rgba(249,253,254,0.65);line-height:1.65;margin-bottom:18px;">${escapeHtml(desc)}</p>` : ''}
+    ${contentHtml}
+    <div style="margin-top:18px;padding-top:16px;border-top:1px solid var(--glass-border);">
+      <a href="https://wa.me/96176302159?text=${waMsg}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;font-size:0.78rem;color:var(--sky);text-decoration:none;font-weight:600;">
+        Need help with this? Message us on WhatsApp →
+      </a>
+    </div>
+  `;
+
+  // Wire copy buttons
+  body.querySelectorAll('.copy-text-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const text = decodeURIComponent(btn.dataset.text || '');
+      navigator.clipboard.writeText(text).then(() => {
+        const orig = btn.textContent;
+        btn.textContent = 'Copied!';
+        btn.style.color = '#16db64';
+        btn.style.borderColor = 'rgba(16,219,100,0.4)';
+        setTimeout(() => {
+          btn.textContent = orig;
+          btn.style.color = 'var(--sky)';
+          btn.style.borderColor = 'rgba(16,161,219,0.2)';
+        }, 1500);
+      });
+    });
+  });
 }
 
 function closeResourceModal() {
@@ -789,7 +870,7 @@ function renderSupportTab() {
     <h1 style="font-size:1.5rem;margin-bottom:8px;font-weight:800;letter-spacing:-0.5px;">Support</h1>
     <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:20px;">Need help? Reach out.</p>
     <div class="grid-2">
-      <a href="https://wa.me/447376441603" target="_blank" rel="noopener" class="card" style="padding:22px;display:block;">
+      <a href="https://wa.me/96176302159" target="_blank" rel="noopener" class="card" style="padding:22px;display:block;">
         <div class="eyebrow" style="margin-bottom:10px;">Instant</div>
         <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;color:var(--white);margin-bottom:6px;">WhatsApp</div>
         <div style="font-size:0.78rem;color:var(--text-muted);line-height:1.6;margin-bottom:12px;">Fastest response — usually within an hour.</div>
