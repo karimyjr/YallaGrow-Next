@@ -1,10 +1,13 @@
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
+import { Icon } from '@/components/ui/Icons'
+
+type ServiceIcon = 'target' | 'phone' | 'dollar' | 'palette' | 'film' | 'pen' | 'globe' | 'bar-chart' | 'brain'
 
 interface Service {
   id: string
-  icon: string
+  icon: ServiceIcon
   title: string
   short: string
   full: string
@@ -17,7 +20,7 @@ interface Service {
 const SERVICES: Service[] = [
   {
     id: 'strategy',
-    icon: '🎯',
+    icon: 'target',
     title: 'Marketing Strategy',
     short: 'Research, positioning, and roadmap.',
     full: 'Before we create anything, we understand your business, customers, competitors, and goals. Every decision has a purpose — we ask "what will move the business forward?" not "what should we post today?"',
@@ -34,7 +37,7 @@ const SERVICES: Service[] = [
   },
   {
     id: 'social',
-    icon: '📱',
+    icon: 'phone',
     title: 'Social Media Management',
     short: 'Full account management, done right.',
     full: 'Full account management across Instagram, Facebook, TikTok and more. Posting, scheduling, community engagement, DM management, and monthly performance tracking.',
@@ -51,7 +54,7 @@ const SERVICES: Service[] = [
   },
   {
     id: 'ads',
-    icon: '💰',
+    icon: 'dollar',
     title: 'Paid Advertising',
     short: 'Meta & Google campaigns that convert.',
     full: 'Targeted Meta and Google campaigns built on data — not guesswork. We optimize for conversions, track every dollar, and report on real business outcomes.',
@@ -68,7 +71,7 @@ const SERVICES: Service[] = [
   },
   {
     id: 'branding',
-    icon: '🎨',
+    icon: 'palette',
     title: 'Branding & Identity',
     short: 'A brand that makes you unforgettable.',
     full: 'Logo design, visual identity, brand guidelines, typography, and color systems. Everything you need to look premium, consistent, and immediately recognizable.',
@@ -85,7 +88,7 @@ const SERVICES: Service[] = [
   },
   {
     id: 'content',
-    icon: '🎬',
+    icon: 'film',
     title: 'Content Creation',
     short: 'Reels, carousels, and content that performs.',
     full: 'Scroll-stopping reels, carousels, stories, and static posts designed to captivate your specific audience. Content that builds a brand, not just a feed.',
@@ -102,7 +105,7 @@ const SERVICES: Service[] = [
   },
   {
     id: 'copy',
-    icon: '✍️',
+    icon: 'pen',
     title: 'Copywriting',
     short: 'Words that make people take action.',
     full: 'Hook-focused captions, conversion-optimized ad copy, landing page text, email sequences, and brand messaging that makes people take action.',
@@ -119,7 +122,7 @@ const SERVICES: Service[] = [
   },
   {
     id: 'web',
-    icon: '🌐',
+    icon: 'globe',
     title: 'Website Development',
     short: 'Fast, beautiful sites that convert.',
     full: 'Fast, beautiful, mobile-first websites built for conversion. From landing pages to full multi-page sites — designed to turn visitors into leads.',
@@ -136,7 +139,7 @@ const SERVICES: Service[] = [
   },
   {
     id: 'analytics',
-    icon: '📊',
+    icon: 'bar-chart',
     title: 'Analytics & Reporting',
     short: 'Clear insights, honest reporting.',
     full: 'Monthly performance reports with clear insights — what\'s working, what\'s not, and the exact actions we\'re taking to improve. Full transparency, always.',
@@ -153,7 +156,7 @@ const SERVICES: Service[] = [
   },
   {
     id: 'consulting',
-    icon: '🧠',
+    icon: 'brain',
     title: 'Consulting',
     short: 'One-on-one strategy sessions.',
     full: 'One-on-one sessions to audit your current marketing, identify gaps, build a roadmap, and give you clarity on the fastest path to growth.',
@@ -215,8 +218,8 @@ export default function ServicesPage() {
                 
                 <div style={{ position: 'relative' }}>
                   {/* Icon */}
-                  <div style={{ width: '56px', height: '56px', borderRadius: '14px', background: s.bg, border: `1px solid ${s.color}25`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.6rem', marginBottom: '20px' }}>
-                    {s.icon}
+                  <div style={{ width: '56px', height: '56px', borderRadius: '14px', background: s.bg, border: `1px solid ${s.color}25`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: s.color, marginBottom: '20px' }}>
+                    <Icon name={s.icon} size={26} />
                   </div>
 
                   {/* Title */}

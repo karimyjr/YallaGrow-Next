@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useState, createContext, useContext } from 'react'
+import { Icon } from './Icons'
 
 type ToastType = 'success' | 'error' | 'info'
 interface Toast {
@@ -54,9 +55,9 @@ function ToastItem({ toast }: { toast: Toast }) {
   }, [])
 
   const config = {
-    success: { icon: '✓', color: '#16db64', bg: 'rgba(16,219,100,0.1)', border: 'rgba(16,219,100,0.3)' },
-    error: { icon: '✕', color: '#ff4d4d', bg: 'rgba(255,77,77,0.1)', border: 'rgba(255,77,77,0.3)' },
-    info: { icon: 'i', color: '#10a1db', bg: 'rgba(16,161,219,0.1)', border: 'rgba(16,161,219,0.3)' },
+    success: { iconName: 'check' as const, color: '#16db64', bg: 'rgba(16,219,100,0.1)', border: 'rgba(16,219,100,0.3)' },
+    error: { iconName: 'close' as const, color: '#ff4d4d', bg: 'rgba(255,77,77,0.1)', border: 'rgba(255,77,77,0.3)' },
+    info: { iconName: 'info' as const, color: '#10a1db', bg: 'rgba(16,161,219,0.1)', border: 'rgba(16,161,219,0.3)' },
   }[toast.type]
 
   return (
@@ -86,12 +87,8 @@ function ToastItem({ toast }: { toast: Toast }) {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        fontWeight: 800,
-        fontSize: '0.9rem',
         flexShrink: 0,
-        fontFamily: toast.type === 'info' ? 'serif' : 'inherit',
-        fontStyle: toast.type === 'info' ? 'italic' : 'normal',
-      }}>{config.icon}</div>
+      }}><Icon name={config.iconName} size={16} /></div>
       <div style={{
         fontSize: '0.85rem',
         color: 'var(--white)',

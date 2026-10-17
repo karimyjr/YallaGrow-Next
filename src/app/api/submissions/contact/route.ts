@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
             from: FROM_EMAIL,
             to: TO_EMAIL,
             reply_to: email,
-            subject: `💬 Contact Form: ${subject || 'New message'} — ${name}`,
+            subject: `Contact Form: ${subject || 'New message'} — ${name}`,
             html: buildContactEmail({ name, email, subject, message }, saved.id),
           }),
         })

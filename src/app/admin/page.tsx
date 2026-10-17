@@ -7,15 +7,17 @@ import AdminAffiliatesPage from './affiliates/page'
 import AdminMaintenancePage from './maintenance/page'
 import AdminNewsletterPage from './newsletter/page'
 import AdminSubmissionsPage from './submissions/page'
+import { Icon } from '@/components/ui/Icons'
 
-const TABS = [
-  { id: 'blog', label: '📝 Blog', component: AdminBlogPage },
-  { id: 'packages', label: '📦 Packages', component: AdminPackagesPage },
-  { id: 'pricing', label: '💰 Pricing', component: AdminPricingPage },
-  { id: 'affiliates', label: '🤝 Affiliate Program', component: AdminAffiliatesPage },
-  { id: 'newsletter', label: '📬 Newsletter', component: AdminNewsletterPage },
-  { id: 'maintenance', label: '🔧 Maintenance', component: AdminMaintenancePage },
-  { id: 'submissions', label: '📋 Submissions', component: AdminSubmissionsPage },
+type IconName = 'edit' | 'package' | 'dollar' | 'handshake' | 'mail' | 'wrench' | 'clipboard'
+const TABS: { id: string; icon: IconName; label: string; component: React.ComponentType }[] = [
+  { id: 'blog', icon: 'edit', label: 'Blog', component: AdminBlogPage },
+  { id: 'packages', icon: 'package', label: 'Packages', component: AdminPackagesPage },
+  { id: 'pricing', icon: 'dollar', label: 'Pricing', component: AdminPricingPage },
+  { id: 'affiliates', icon: 'handshake', label: 'Affiliate Program', component: AdminAffiliatesPage },
+  { id: 'newsletter', icon: 'mail', label: 'Newsletter', component: AdminNewsletterPage },
+  { id: 'maintenance', icon: 'wrench', label: 'Maintenance', component: AdminMaintenancePage },
+  { id: 'submissions', icon: 'clipboard', label: 'Submissions', component: AdminSubmissionsPage },
 ]
 
 export default function AdminPage() {
@@ -51,6 +53,9 @@ export default function AdminPage() {
               marginBottom: '-1px',
               whiteSpace: 'nowrap',
               transition: 'all 0.15s',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
             }}
             onMouseEnter={e => {
               if (activeTab !== tab.id) e.currentTarget.style.color = 'var(--white)'
@@ -59,6 +64,7 @@ export default function AdminPage() {
               if (activeTab !== tab.id) e.currentTarget.style.color = 'var(--text-muted)'
             }}
           >
+            <Icon name={tab.icon} size={14} />
             {tab.label}
           </button>
         ))}

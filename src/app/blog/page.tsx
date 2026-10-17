@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import { Icon } from '@/components/ui/Icons'
 
 interface Post {
   id: string
@@ -59,7 +60,7 @@ export default function BlogPage() {
           </div>
         ) : posts.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-dim)' }}>
-            <div style={{ fontSize: '3rem', marginBottom: '16px' }}>✍️</div>
+            <div style={{ color: 'var(--sky)', marginBottom: '16px', display: 'inline-flex' }}><Icon name="pen" size={44} /></div>
             <h3 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 700, fontSize: '1.2rem', color: 'var(--white)', marginBottom: '8px' }}>Coming Soon</h3>
             <p style={{ fontSize: '0.9rem' }}>We&apos;re working on some great content. Check back soon!</p>
           </div>

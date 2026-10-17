@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import NewsletterForm from './NewsletterForm'
+import { Icon } from './Icons'
 
 export default function ExitIntentPopup() {
   const [show, setShow] = useState(false)
@@ -126,7 +127,7 @@ export default function ExitIntentPopup() {
             e.currentTarget.style.background = 'transparent'
             e.currentTarget.style.color = 'var(--text-muted)'
           }}
-        >✕</button>
+        ><Icon name="close" size={18} /></button>
 
         {/* Icon */}
         <div style={{
@@ -134,9 +135,9 @@ export default function ExitIntentPopup() {
           borderRadius: '16px',
           background: 'linear-gradient(135deg, var(--sky), var(--purple))',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: '1.8rem',
+          color: '#fff',
           marginBottom: '20px',
-        }}>📬</div>
+        }}><Icon name="mail" size={28} /></div>
 
         {/* Headline */}
         <h2 style={{
@@ -183,7 +184,7 @@ export default function ExitIntentPopup() {
               color: 'rgba(249,253,254,0.75)',
               padding: '4px 0',
             }}>
-              <span style={{ color: 'var(--sky)', fontWeight: 700 }}>✓</span>
+              <span style={{ color: 'var(--sky)', display: 'inline-flex' }}><Icon name="check" size={14} /></span>
               {b}
             </div>
           ))}

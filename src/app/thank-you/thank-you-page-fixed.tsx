@@ -3,11 +3,14 @@
 import Link from 'next/link'
 import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
+import { Icon } from '@/components/ui/Icons'
 
 const BOOKING_URL = 'https://calendar.app.google/3WibM5kWvizhnHJt8'
 
+type IconKey = 'package' | 'chat' | 'briefcase' | 'mail' | 'check'
+
 interface ContentConfig {
-  icon: string
+  icon: IconKey
   title: string
   message: string
   cta: string
@@ -26,7 +29,7 @@ function ThankYouContent() {
 
   const configs: Record<string, ContentConfig> = {
     package: {
-      icon: '📦',
+      icon: 'package',
       title: 'Package request received!',
       message: "We got the details of your custom package. We'll review it and reach out within 24 hours to lock in your free strategy call.",
       cta: 'Book Your Strategy Call Now',
@@ -34,7 +37,7 @@ function ThankYouContent() {
       ctaHref: BOOKING_URL,
     },
     contact: {
-      icon: '💬',
+      icon: 'chat',
       title: 'Message received!',
       message: "Thanks for reaching out. We respond to every message within 24 hours — usually much faster. Keep an eye on your inbox.",
       cta: 'Explore Our Packages',
@@ -42,7 +45,7 @@ function ThankYouContent() {
       ctaHref: '/packages',
     },
     career: {
-      icon: '💼',
+      icon: 'briefcase',
       title: 'Application received!',
       message: "Thanks for applying to join the YallaGrow team. We review every application personally and will get back to you within 3-5 business days.",
       cta: 'Learn More About Us',
@@ -50,7 +53,7 @@ function ThankYouContent() {
       ctaHref: '/about',
     },
     newsletter: {
-      icon: '📬',
+      icon: 'mail',
       title: "You're on the list!",
       message: "Check your inbox for a confirmation email. Click the link inside to officially join the YallaGrow newsletter.",
       cta: 'Read Our Blog',
@@ -58,7 +61,7 @@ function ThankYouContent() {
       ctaHref: '/blog',
     },
     default: {
-      icon: '✓',
+      icon: 'check',
       title: 'All done!',
       message: "We've received your submission and will get back to you soon.",
       cta: 'Back to Home',
@@ -118,12 +121,12 @@ function ThankYouContent() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontSize: '2.6rem',
+          color: 'var(--sky)',
           margin: '0 auto 28px',
           animation: 'bounceIn 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
           boxShadow: '0 10px 40px rgba(16,161,219,0.15)',
         }}>
-          {content.icon}
+          <Icon name={content.icon} size={42} />
         </div>
 
         <span className="eyebrow" style={{ marginBottom: '14px' }}>Success</span>

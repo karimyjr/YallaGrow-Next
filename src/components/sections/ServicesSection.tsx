@@ -1,13 +1,16 @@
 'use client'
 import Link from 'next/link'
+import { Icon } from '@/components/ui/Icons'
 
-const SERVICES=[
-  {icon:'🎯',title:'Marketing Strategy',desc:'Deep-dive analysis of your market, competitors, and customers.',href:'/services'},
-  {icon:'📱',title:'Social Media',desc:'Consistent, strategic content that builds your brand.',href:'/services'},
-  {icon:'💰',title:'Paid Advertising',desc:'Meta and Google campaigns that turn budget into results.',href:'/services'},
-  {icon:'🎨',title:'Branding & Identity',desc:'A brand system that makes you instantly recognizable.',href:'/services'},
-  {icon:'🎬',title:'Content Creation',desc:'Reels, posts, and carousels that stop the scroll.',href:'/services'},
-  {icon:'🌐',title:'Website Development',desc:'Fast, mobile-first websites designed to convert.',href:'/services'},
+type Svc = { icon: 'target' | 'phone' | 'dollar' | 'palette' | 'film' | 'globe'; title: string; desc: string; href: string }
+
+const SERVICES: Svc[] = [
+  {icon:'target',title:'Marketing Strategy',desc:'Deep-dive analysis of your market, competitors, and customers.',href:'/services'},
+  {icon:'phone',title:'Social Media',desc:'Consistent, strategic content that builds your brand.',href:'/services'},
+  {icon:'dollar',title:'Paid Advertising',desc:'Meta and Google campaigns that turn budget into results.',href:'/services'},
+  {icon:'palette',title:'Branding & Identity',desc:'A brand system that makes you instantly recognizable.',href:'/services'},
+  {icon:'film',title:'Content Creation',desc:'Reels, posts, and carousels that stop the scroll.',href:'/services'},
+  {icon:'globe',title:'Website Development',desc:'Fast, mobile-first websites designed to convert.',href:'/services'},
 ]
 
 export default function ServicesSection() {
@@ -19,11 +22,11 @@ export default function ServicesSection() {
       </div>
       <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:'16px',}}>
         {SERVICES.map(s=>(
-          <Link key={s.href} href={s.href} style={{textDecoration:'none'}}>
+          <Link key={s.href+s.title} href={s.href} style={{textDecoration:'none'}}>
             <div style={{background:'var(--glass)',border:'1px solid var(--glass-border)',borderRadius:'16px',padding:'28px 24px',transition:'all 0.3s',height:'100%'}}
               onMouseEnter={e=>{e.currentTarget.style.borderColor='rgba(16,161,219,0.25)';e.currentTarget.style.transform='translateY(-4px)'}}
               onMouseLeave={e=>{e.currentTarget.style.borderColor='var(--glass-border)';e.currentTarget.style.transform='none'}}>
-              <div style={{fontSize:'1.8rem',marginBottom:'16px'}}>{s.icon}</div>
+              <div style={{color:'var(--sky)',marginBottom:'16px',display:'inline-flex'}}><Icon name={s.icon} size={28} /></div>
               <h3 style={{fontFamily:'Syne,sans-serif',fontWeight:700,fontSize:'1rem',color:'var(--white)',marginBottom:'8px'}}>{s.title}</h3>
               <p style={{fontSize:'0.78rem',color:'var(--text-muted)',lineHeight:1.6,fontWeight:300}}>{s.desc}</p>
             </div>

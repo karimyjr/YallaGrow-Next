@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { Icon } from './Icons'
 
 export default function CookieBanner() {
   const [show, setShow] = useState(false)
@@ -23,9 +24,10 @@ export default function CookieBanner() {
       zIndex: 9000, display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap',
       maxWidth: '680px', width: 'calc(100% - 40px)', boxShadow: '0 24px 80px rgba(0,0,0,0.5)',
     }}>
-      <p style={{ fontSize: '0.78rem', color: 'rgba(249,253,254,0.65)', lineHeight: 1.6, flex: 1, minWidth: '220px' }}>
-        🍪 We use cookies to improve your experience. By continuing, you agree to our{' '}
-        <Link href="/privacy" style={{ color: 'var(--sky)' }}>Privacy Policy</Link>.
+      <p style={{ fontSize: '0.78rem', color: 'rgba(249,253,254,0.65)', lineHeight: 1.6, flex: 1, minWidth: '220px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <span style={{ color: 'var(--sky)', flexShrink: 0, display: 'inline-flex' }}><Icon name="cookie" size={18} /></span>
+        <span>We use cookies to improve your experience. By continuing, you agree to our{' '}
+        <Link href="/privacy" style={{ color: 'var(--sky)' }}>Privacy Policy</Link>.</span>
       </p>
       <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
         <button onClick={decline} style={{ padding: '8px 16px', borderRadius: '8px', fontSize: '0.78rem', fontWeight: 600, border: '1px solid var(--glass-border)', background: 'transparent', color: 'var(--text-muted)', cursor: 'pointer' }}>

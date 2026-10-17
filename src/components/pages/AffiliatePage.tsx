@@ -48,7 +48,7 @@ export default function AffiliatePage() {
           </div>
           <div style={{display:'flex',justifyContent:'center',flexWrap:'wrap',gap:'8px 32px',marginTop:'32px'}}>
             {['Up to 35% commission','60-day cookie tracking','Monthly payouts','No cap on earnings'].map(t=>(
-              <div key={t} style={{display:'flex',alignItems:'center',gap:'6px',fontSize:'0.75rem',color:'var(--text-muted)'}}><span style={{color:'var(--sky)',fontWeight:700}}>✓</span>{t}</div>
+              <div key={t} style={{display:'flex',alignItems:'center',gap:'6px',fontSize:'0.75rem',color:'var(--text-muted)'}}><span style={{color:'var(--sky)',display:'inline-flex'}}><Icon name="check" size={14} /></span>{t}</div>
             ))}
           </div>
         </div>

@@ -61,7 +61,7 @@ export async function GET(req: NextRequest) {
         body: JSON.stringify({
           from: FROM_EMAIL,
           to: subscriber.email,
-          subject: 'Welcome to YallaGrow 🎉',
+          subject: 'Welcome to YallaGrow',
           html: getWelcomeEmailHtml(),
         }),
       })
@@ -91,7 +91,9 @@ function getWelcomeEmailHtml(): string {
     </div>
 
     <div style="background:linear-gradient(135deg,rgba(1,32,76,0.4),rgba(16,161,219,0.06));border:1px solid rgba(16,161,219,0.2);border-radius:20px;padding:36px 32px;">
-      <div style="text-align:center;font-size:3rem;margin-bottom:16px;">🎉</div>
+      <div style="text-align:center;margin-bottom:16px;color:#10a1db;">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      </div>
       <h2 style="font-family:'Syne',Georgia,serif;font-weight:800;font-size:1.5rem;color:#ffffff;margin:0 0 16px;letter-spacing:-0.3px;text-align:center;line-height:1.2;">
         Welcome to YallaGrow!
       </h2>
@@ -107,10 +109,10 @@ function getWelcomeEmailHtml(): string {
 
       <div style="background:rgba(16,161,219,0.05);border:1px solid rgba(16,161,219,0.15);border-radius:12px;padding:16px 20px;margin-bottom:28px;">
         <div style="color:rgba(249,253,254,0.8);font-size:0.88rem;line-height:1.9;">
-          <div>✓ Monthly marketing insights tailored for growing businesses</div>
-          <div>✓ Real client case studies (with real numbers)</div>
-          <div>✓ Free templates & resources</div>
-          <div>✓ No spam — unsubscribe anytime</div>
+          <div>&bull; Monthly marketing insights tailored for growing businesses</div>
+          <div>&bull; Real client case studies (with real numbers)</div>
+          <div>&bull; Free templates &amp; resources</div>
+          <div>&bull; No spam — unsubscribe anytime</div>
         </div>
       </div>
 

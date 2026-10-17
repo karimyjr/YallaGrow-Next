@@ -462,7 +462,7 @@ export default function PackageBuilder() {
                           <div style={{ display: 'grid', gap: '7px' }}>
                             {currentTier.features.map(f => (
                               <div key={f} style={{ display: 'flex', gap: '10px', fontSize: '0.8rem', color: 'rgba(249,253,254,0.7)' }}>
-                                <span style={{ color: currentTier.color, fontWeight: 700, flexShrink: 0 }}>✓</span>{f}
+                                <span style={{ color: currentTier.color, flexShrink: 0, display: 'inline-flex' }}><Icon name="check" size={14} /></span>{f}
                               </div>
                             ))}
                           </div>

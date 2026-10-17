@@ -1,6 +1,7 @@
 'use client'
 import PerformancePartnership from '@/components/pages/PerformancePartnership'
 import Link from 'next/link'
+import { Icon } from '@/components/ui/Icons'
 
 export default function PartnershipPage() {
   return (
@@ -8,7 +9,7 @@ export default function PartnershipPage() {
       {/* HERO */}
       <section style={{ padding: '80px 6% 40px', textAlign: 'center' }}>
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'linear-gradient(135deg,var(--sky),var(--purple))', color: '#fff', fontSize: '0.65rem', fontWeight: 800, letterSpacing: '1.5px', padding: '6px 16px', borderRadius: '100px', textTransform: 'uppercase', marginBottom: '20px' }}>
-          🔒 Invite-Only
+          <Icon name="lock" size={11} /> Invite-Only
         </span>
         <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 'clamp(2.4rem, 5vw, 4rem)', letterSpacing: '-2px', lineHeight: 1.05, color: 'var(--white)', marginBottom: '20px' }}>
           Performance<br /><span className="grad">Partnership</span>

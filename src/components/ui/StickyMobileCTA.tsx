@@ -2,6 +2,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
+import { Icon } from './Icons'
 
 const BOOKING_URL = 'https://calendar.app.google/3WibM5kWvizhnHJt8'
 
@@ -119,7 +120,7 @@ export default function StickyMobileCTA() {
           justifyContent: 'center',
         }}
       >
-        ✕
+        <Icon name="close" size={14} />
       </button>
 
       <style>{`

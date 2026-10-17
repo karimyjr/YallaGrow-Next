@@ -2,38 +2,41 @@
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
+import { Icon } from '@/components/ui/Icons'
+
+type IconKey = 'check' | 'alert' | 'close' | 'help'
 
 function ConfirmedContent() {
   const params = useSearchParams()
   const status = params.get('status')
 
-  const config = {
+  const config: { icon: IconKey; title: string; message: string; color: string } = ({
     success: {
-      icon: '🎉',
+      icon: 'check' as const,
       title: 'Subscription confirmed!',
       message: "You're all set. Check your inbox — we just sent you a welcome email with everything you need to know.",
       color: '#16db64',
     },
     already: {
-      icon: '✓',
+      icon: 'check' as const,
       title: "You're already subscribed",
-      message: 'Your email is already confirmed and on our list. Nothing more to do!',
+      message: 'Your email is already confirmed and on our list. Nothing more to do.',
       color: '#10a1db',
     },
     invalid: {
-      icon: '⚠️',
+      icon: 'alert' as const,
       title: 'Invalid or expired link',
       message: 'This confirmation link is invalid or has already been used. Try subscribing again.',
       color: '#ffc107',
     },
     error: {
-      icon: '❌',
+      icon: 'close' as const,
       title: 'Something went wrong',
       message: "We couldn't process your confirmation. Please try again or contact us.",
       color: '#ff4d4d',
     },
-  }[status || 'success'] || {
-    icon: '❓',
+  } as Record<string, { icon: IconKey; title: string; message: string; color: string }>)[status || 'success'] || {
+    icon: 'help' as const,
     title: 'Unknown status',
     message: "We're not sure what happened. Please try again.",
     color: '#ff4d4d',
@@ -43,9 +46,10 @@ function ConfirmedContent() {
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '80px 20px' }}>
       <div style={{ maxWidth: '480px', textAlign: 'center' }}>
         <div style={{
-          fontSize: '4rem',
+          color: config.color,
           marginBottom: '20px',
-        }}>{config.icon}</div>
+          display: 'inline-flex',
+        }}><Icon name={config.icon} size={64} /></div>
 
         <h1 style={{
           fontFamily: 'Syne, sans-serif',

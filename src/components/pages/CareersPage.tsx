@@ -266,7 +266,7 @@ export default function CareersPage() {
                       <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
                         {j.requirements.map(r => (
                           <li key={r} style={{ display: 'flex', gap: '10px', fontSize: '0.82rem', color: 'rgba(249,253,254,0.65)', lineHeight: 1.5, fontWeight: 300 }}>
-                            <span style={{ color: '#16db64', flexShrink: 0, fontWeight: 700 }}>✓</span>{r}
+                            <span style={{ color: '#16db64', flexShrink: 0, display: 'inline-flex' }}><Icon name="check" size={14} /></span>{r}
                           </li>
                         ))}
                       </ul>

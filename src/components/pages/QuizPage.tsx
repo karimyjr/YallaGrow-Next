@@ -347,7 +347,7 @@ export default function QuizPage() {
               <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '8px', padding: 0 }}>
                 {plan.feats.map(f => (
                   <li key={f} style={{ display: 'flex', gap: '10px', fontSize: '0.82rem', color: 'rgba(249,253,254,0.7)', fontWeight: 300 }}>
-                    <span style={{ color: 'var(--sky)', fontWeight: 700 }}>✓</span>{f}
+                    <span style={{ color: 'var(--sky)', display: 'inline-flex' }}><Icon name="check" size={14} /></span>{f}
                   </li>
                 ))}
               </ul>

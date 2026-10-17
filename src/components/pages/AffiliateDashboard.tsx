@@ -26,7 +26,7 @@ export default function AffiliateDashboard() {
         Dashboard Diagnostic
       </h1>
       <p style={{ color: 'rgba(255,255,255,0.7)', marginBottom: '20px' }}>
-        {mounted ? '✅ Component mounted successfully' : '⏳ Mounting...'}
+        {mounted ? 'Component mounted successfully' : 'Mounting...'}
       </p>
       <a href="/" style={{
         color: '#10a1db',

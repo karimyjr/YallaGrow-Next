@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
             from: FROM_EMAIL,
             to: TO_EMAIL,
             reply_to: email,
-            subject: `💼 New Job Application: ${role} — ${name}`,
+            subject: `New Job Application: ${role} — ${name}`,
             html: buildJobEmail({ name, email, phone, role, portfolio, linkedin, message }, saved.id),
           }),
         })

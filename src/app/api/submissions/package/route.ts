@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
             from: FROM_EMAIL,
             to: TO_EMAIL,
             reply_to: email,
-            subject: `📦 New Package Request from ${name} — $${estimatedMonthly}/mo`,
+            subject: `New Package Request from ${name} — $${estimatedMonthly}/mo`,
             html: buildPackageEmail(body, saved.id),
           }),
         })

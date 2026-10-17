@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import { Icon } from '@/components/ui/Icons'
 
 interface Post {
   id: string
@@ -130,7 +131,7 @@ export default function BlogPostClient({ slug }: { slug: string }) {
   if (!post) {
     return (
       <div style={{ paddingTop: '80px', padding: '120px 20px', textAlign: 'center' }}>
-        <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🔍</div>
+        <div style={{ color: 'var(--sky)', marginBottom: '16px', display: 'inline-flex' }}><Icon name="search" size={44} /></div>
         <h1 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: '1.6rem', color: 'var(--white)', marginBottom: '10px' }}>Post not found</h1>
         <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '20px' }}>This post doesn&apos;t exist or has been unpublished.</p>
         <Link href="/blog" className="btn-primary">← Back to Blog</Link>

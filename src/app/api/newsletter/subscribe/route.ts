@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
     if (existing?.confirmed) {
       return NextResponse.json({
         success: true,
-        message: "You're already subscribed! 🎉",
+        message: "You're already subscribed!",
         alreadySubscribed: true,
       })
     }
@@ -132,7 +132,9 @@ function getConfirmationEmailHtml(confirmUrl: string): string {
 
     <!-- Card -->
     <div style="background:linear-gradient(135deg,rgba(1,32,76,0.4),rgba(16,161,219,0.06));border:1px solid rgba(16,161,219,0.2);border-radius:20px;padding:36px 32px;">
-      <div style="text-align:center;font-size:2.5rem;margin-bottom:16px;">📬</div>
+      <div style="text-align:center;margin-bottom:16px;color:#10a1db;">
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      </div>
       <h2 style="font-family:'Syne',Georgia,serif;font-weight:800;font-size:1.4rem;color:#ffffff;margin:0 0 16px;letter-spacing:-0.3px;text-align:center;line-height:1.2;">
         Confirm your subscription
       </h2>

@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 import PackageBuilder from './PackageBuilder'
+import { Icon } from '@/components/ui/Icons'
 
 interface Pkg {
   tier: string
@@ -28,40 +29,42 @@ const DEFAULT_PKGS: Pkg[] = [
   },
 ]
 
-const PHILOSOPHY = [
-  { icon: '🚫', title: 'No price inflation', desc: "We charge what's fair. Not what the market allows us to get away with." },
-  { icon: '🔓', title: 'No lock-in contracts', desc: "Month-to-month. Stay because we deliver results, not because you're trapped." },
-  { icon: '🎯', title: 'No unnecessary upsells', desc: 'We only recommend services that genuinely move the needle for your business.' },
-  { icon: '📈', title: 'We grow with you', desc: "Start small. Scale up when you're ready. Your plan grows as your business does." },
-  { icon: '💬', title: 'Marketing made accessible', desc: "Professional marketing shouldn't require a $1,000+/month budget. We built this for you." },
+const PHILOSOPHY: { icon: 'close' | 'unlock' | 'target' | 'chart-up' | 'chat'; title: string; desc: string }[] = [
+  { icon: 'close', title: 'No price inflation', desc: "We charge what's fair. Not what the market allows us to get away with." },
+  { icon: 'unlock', title: 'No lock-in contracts', desc: "Month-to-month. Stay because we deliver results, not because you're trapped." },
+  { icon: 'target', title: 'No unnecessary upsells', desc: 'We only recommend services that genuinely move the needle for your business.' },
+  { icon: 'chart-up', title: 'We grow with you', desc: "Start small. Scale up when you're ready. Your plan grows as your business does." },
+  { icon: 'chat', title: 'Marketing made accessible', desc: "Professional marketing shouldn't require a $1,000+/month budget. We built this for you." },
 ]
 
-const COMPARISON_ROWS = [
-  ['Marketing Strategy', '✓', '✓', '✓'],
-  ['Brand Direction', '✓', '✓', '✓'],
+// true = included, false/'' = not included, string = quantity/note
+type Cell = true | string
+const COMPARISON_ROWS: [string, Cell, Cell, Cell][] = [
+  ['Marketing Strategy', true, true, true],
+  ['Brand Direction', true, true, true],
   ['Static Posts', '8/mo', '12/mo', '16/mo'],
   ['Short-form Videos', '2/mo', '4/mo', '8/mo'],
-  ['Caption Writing', '✓', '✓', '✓'],
-  ['Hashtag Research', '✓', '✓', '✓'],
-  ['Content Scheduling', '✓', '✓', '✓'],
-  ['Monthly Report', '✓', '✓', '✓'],
-  ['Story Content', '—', '✓', '✓'],
-  ['Community Management', '—', 'Basic', '✓'],
-  ['Competitor Analysis', '—', '✓', '✓'],
-  ['Monthly Strategy Call', '—', '✓', '✓'],
-  ['Meta Ads Management', '—', '✓', '✓'],
-  ['Advanced Growth Strategy', '—', '—', '✓'],
-  ['Conversion Optimization', '—', '—', '✓'],
-  ['Landing Page Review', '—', '—', '✓'],
-  ['Performance Dashboard', '—', '—', '✓'],
-  ['Priority Support', '—', '—', '✓'],
+  ['Caption Writing', true, true, true],
+  ['Hashtag Research', true, true, true],
+  ['Content Scheduling', true, true, true],
+  ['Monthly Report', true, true, true],
+  ['Story Content', '—', true, true],
+  ['Community Management', '—', 'Basic', true],
+  ['Competitor Analysis', '—', true, true],
+  ['Monthly Strategy Call', '—', true, true],
+  ['Meta Ads Management', '—', true, true],
+  ['Advanced Growth Strategy', '—', '—', true],
+  ['Conversion Optimization', '—', '—', true],
+  ['Landing Page Review', '—', '—', true],
+  ['Performance Dashboard', '—', '—', true],
+  ['Priority Support', '—', '—', true],
 ]
 
 const ADD_ON_CHIPS = [
-  '🎨 Logo Design', '🏷️ Brand Identity', '🌐 Website Design', '📄 Landing Pages',
-  '📸 Product Photography', '🎬 Extra Reels', '📝 Extra Posts', '✍️ Copywriting',
-  '📧 Email Marketing', '💬 WhatsApp Automation', '🔍 SEO', '📍 Google Business Profile',
-  '🤝 Influencer Outreach',
+  'Logo Design', 'Brand Identity', 'Website Design', 'Landing Pages',
+  'Product Photography', 'Extra Reels', 'Extra Posts', 'Copywriting',
+  'Email Marketing', 'WhatsApp Automation', 'SEO', 'Google Business Profile',
+  'Influencer Outreach',
 ]
 
 export default function PackagesPage() {
@@ -79,6 +82,7 @@ export default function PackagesPage() {
   }, [])
 
   const cellStyle = { padding: '14px 16px', borderBottom: '1px solid var(--glass-border)', textAlign: 'center' as const, color: 'rgba(249,253,254,0.7)', fontSize: '0.82rem' }
+  const renderCell = (c: Cell) => c === true ? <Icon name="check" size={16} /> : c
 
   const scrollToBuilder = () => document.getElementById('builderSection')?.scrollIntoView({ behavior: 'smooth' })
 
@@ -92,12 +96,14 @@ export default function PackagesPage() {
         <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '8px 24px' }}>
           {['No contracts', 'Cancel anytime', 'Free strategy call', '2-week promise'].map(t => (
             <div key={t} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-              <span style={{ color: 'var(--sky)', fontWeight: 700 }}>✓</span>{t}
+              <span style={{ color: 'var(--sky)', display: 'inline-flex' }}><Icon name="check" size={14} /></span>{t}
             </div>
           ))}
         </div>
         <div style={{ marginTop: '28px' }}>
-          <Link href="/quiz" className="btn-secondary" style={{ fontSize: '0.82rem' }}>🎯 Not sure which plan? Find yours in 2 min →</Link>
+          <Link href="/quiz" className="btn-secondary" style={{ fontSize: '0.82rem', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+            <Icon name="target" size={14} /> Not sure which plan? Find yours in 2 min →
+          </Link>
         </div>
       </div>
 
@@ -113,7 +119,9 @@ export default function PackagesPage() {
               onMouseEnter={e => { if (!p.featured) e.currentTarget.style.borderColor = 'rgba(16,161,219,0.2)'; e.currentTarget.style.transform = 'translateY(-4px)' }}
               onMouseLeave={e => { if (!p.featured) e.currentTarget.style.borderColor = 'var(--glass-border)'; e.currentTarget.style.transform = 'none' }}>
               {p.featured && (
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: 'linear-gradient(135deg, var(--sky), var(--purple))', color: '#fff', fontSize: '0.62rem', fontWeight: 800, letterSpacing: '1px', textTransform: 'uppercase', padding: '4px 12px', borderRadius: '100px', marginBottom: '16px', width: 'fit-content' }}>⭐ Most Popular</div>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'linear-gradient(135deg, var(--sky), var(--purple))', color: '#fff', fontSize: '0.62rem', fontWeight: 800, letterSpacing: '1px', textTransform: 'uppercase', padding: '4px 12px', borderRadius: '100px', marginBottom: '16px', width: 'fit-content' }}>
+                  <Icon name="star" size={11} /> Most Popular
+                </div>
               )}
               <div style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase', color: 'var(--sky)', marginBottom: '6px' }}>{p.tier}</div>
               <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: '1.5rem', color: 'var(--white)', marginBottom: '4px' }}>{p.tier}</div>
@@ -127,7 +135,7 @@ export default function PackagesPage() {
               <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px', flex: 1, marginBottom: '28px', padding: 0 }}>
                 {p.feats.map((f, fi) => (
                   <li key={fi} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', fontSize: '0.82rem', color: 'rgba(249,253,254,0.65)', lineHeight: 1.5, fontWeight: 300 }}>
-                    <span style={{ color: 'var(--sky)', flexShrink: 0, fontWeight: 700, marginTop: '1px' }}>✓</span>{f}
+                    <span style={{ color: 'var(--sky)', flexShrink: 0, marginTop: '3px', display: 'inline-flex' }}><Icon name="check" size={14} /></span>{f}
                   </li>
                 ))}
               </ul>
@@ -150,7 +158,7 @@ export default function PackagesPage() {
             <div key={p.title} style={{ background: 'var(--glass)', border: '1px solid var(--glass-border)', borderRadius: '16px', padding: '24px 20px', transition: 'all 0.3s' }}
               onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(16,161,219,0.2)'; e.currentTarget.style.transform = 'translateY(-4px)' }}
               onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--glass-border)'; e.currentTarget.style.transform = 'none' }}>
-              <div style={{ fontSize: '1.6rem', marginBottom: '12px' }}>{p.icon}</div>
+              <div style={{ color: 'var(--sky)', marginBottom: '12px', display: 'inline-flex' }}><Icon name={p.icon} size={28} /></div>
               <h4 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '0.9rem', color: 'var(--white)', marginBottom: '8px' }}>{p.title}</h4>
               <p style={{ fontSize: '0.74rem', color: 'var(--text-muted)', lineHeight: 1.6, fontWeight: 300 }}>{p.desc}</p>
             </div>
@@ -178,9 +186,9 @@ export default function PackagesPage() {
               {COMPARISON_ROWS.map((row, i) => (
                 <tr key={i}>
                   <td style={{ padding: '14px 16px', borderBottom: '1px solid var(--glass-border)', color: 'rgba(249,253,254,0.8)', fontSize: '0.82rem', fontWeight: 500 }}>{row[0]}</td>
-                  <td style={cellStyle}>{row[1]}</td>
-                  <td style={{ ...cellStyle, background: 'rgba(16,161,219,0.04)' }}>{row[2]}</td>
-                  <td style={cellStyle}>{row[3]}</td>
+                  <td style={{ ...cellStyle, color: row[1] === true ? 'var(--sky)' : cellStyle.color }}>{renderCell(row[1])}</td>
+                  <td style={{ ...cellStyle, background: 'rgba(16,161,219,0.04)', color: row[2] === true ? 'var(--sky)' : cellStyle.color }}>{renderCell(row[2])}</td>
+                  <td style={{ ...cellStyle, color: row[3] === true ? 'var(--sky)' : cellStyle.color }}>{renderCell(row[3])}</td>
                 </tr>
               ))}
               <tr>
@@ -219,7 +227,7 @@ export default function PackagesPage() {
       {/* STARTUP PROMISE */}
       <section style={{ padding: '100px 6%' }}>
         <div style={{ maxWidth: '760px', margin: '0 auto', background: 'linear-gradient(135deg, rgba(1,32,76,0.4), rgba(106,70,217,0.08))', border: '1px solid rgba(16,161,219,0.2)', borderRadius: '24px', padding: '48px 40px', textAlign: 'center' }}>
-          <div style={{ fontSize: '3rem', marginBottom: '20px' }}>🤝</div>
+          <div style={{ color: 'var(--sky)', marginBottom: '20px', display: 'inline-flex' }}><Icon name="handshake" size={48} /></div>
           <div style={{ display: 'inline-flex', alignItems: 'center', background: 'rgba(16,161,219,0.1)', border: '1px solid rgba(16,161,219,0.2)', color: 'var(--sky)', fontSize: '0.65rem', fontWeight: 700, letterSpacing: '1.5px', textTransform: 'uppercase', padding: '5px 14px', borderRadius: '100px', marginBottom: '20px' }}>The YallaGrow Startup Promise</div>
           <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 'clamp(1.6rem, 4vw, 2.4rem)', color: 'var(--white)', marginBottom: '20px', letterSpacing: '-1px' }}>We Stand Behind Our Work</h2>
           <p style={{ fontSize: '0.95rem', color: 'rgba(249,253,254,0.6)', lineHeight: 1.75, fontWeight: 300, marginBottom: '16px' }}>We know investing in marketing can feel risky — especially for a growing business.</p>
@@ -229,7 +237,7 @@ export default function PackagesPage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxWidth: '400px', margin: '0 auto', textAlign: 'left' }}>
             {['No unrealistic guarantees', 'No promises of overnight success', 'Just a commitment to exceptional value'].map(n => (
               <div key={n} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.82rem', color: 'rgba(249,253,254,0.7)' }}>
-                <span style={{ color: 'var(--sky)', fontWeight: 700 }}>✓</span>{n}
+                <span style={{ color: 'var(--sky)', display: 'inline-flex' }}><Icon name="check" size={14} /></span>{n}
               </div>
             ))}
           </div>
@@ -245,7 +253,7 @@ export default function PackagesPage() {
           <div style={{ position: 'absolute', top: '-50%', right: '-10%', width: '400px', height: '400px', background: 'radial-gradient(circle, rgba(16,161,219,0.2), transparent 60%)', pointerEvents: 'none' }} />
           <div style={{ position: 'relative', zIndex: 1 }}>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'linear-gradient(135deg, var(--sky), var(--purple))', color: '#fff', fontSize: '0.62rem', fontWeight: 800, letterSpacing: '1.5px', padding: '5px 14px', borderRadius: '100px', textTransform: 'uppercase', marginBottom: '20px' }}>
-              🔒 Invite-Only
+              <Icon name="lock" size={11} /> Invite-Only
             </span>
             <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 'clamp(1.6rem, 4vw, 2.4rem)', color: 'var(--white)', letterSpacing: '-1px', marginBottom: '16px', lineHeight: 1.15 }}>
               Ready for Something Bigger?<br />Meet Our <span className="grad">Performance Partnership</span>

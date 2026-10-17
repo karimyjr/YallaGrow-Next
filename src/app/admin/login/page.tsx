@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useToast } from '@/components/ui/Toast'
+import { Icon } from '@/components/ui/Icons'
 
 export default function AdminLoginPage() {
   const router = useRouter()
@@ -106,10 +107,10 @@ export default function AdminLoginPage() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontSize: '2rem',
+          color: 'var(--sky)',
           margin: '0 auto 20px',
         }}>
-          🔐
+          <Icon name="lock" size={30} />
         </div>
 
         <h1 style={{

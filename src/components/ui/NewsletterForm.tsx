@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useToast } from './Toast'
+import { Icon } from './Icons'
 
 interface NewsletterFormProps {
   source?: string
@@ -35,13 +36,13 @@ export default function NewsletterForm({ source = 'footer', compact = false }: N
       if (error) {
         if (error.code === '23505') {
           // Unique constraint - already subscribed
-          showToast("You're already subscribed! 🎉", 'info')
+          showToast("You're already subscribed!", 'info')
         } else {
           showToast('Something went wrong. Please try again.', 'error')
         }
       } else {
         setSubscribed(true)
-        showToast('Thanks for subscribing! 🎉', 'success')
+        showToast('Thanks for subscribing!', 'success')
         setEmail('')
       }
     } catch {
@@ -61,7 +62,7 @@ export default function NewsletterForm({ source = 'footer', compact = false }: N
         alignItems: 'center',
         gap: '10px',
       }}>
-        <span style={{ fontSize: '1.2rem' }}>✓</span>
+        <span style={{ color: '#16db64', display: 'inline-flex' }}><Icon name="check" size={18} /></span>
         <span style={{ fontSize: '0.82rem', color: '#16db64', fontWeight: 500 }}>
           You&apos;re on the list! Check your inbox soon.
         </span>

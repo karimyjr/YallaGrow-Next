@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
+import { Icon } from '@/components/ui/Icons'
 
 interface Affiliate {
   id: string
@@ -117,7 +118,7 @@ export default function AdminAffiliatesPage() {
     const title = prompt('Resource title (e.g. "Case Studies"):')
     if (!title) return
     const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
-    const icon = prompt('Emoji icon (e.g. 📊):') || '📄'
+    const icon = prompt('Icon name (e.g. "bar-chart", "document"):') || 'document'
     const { data } = await supabase.from('affiliate_resources').insert({
       title, slug, icon, sort_order: resources.length + 1,
     }).select().single()
@@ -144,16 +145,16 @@ export default function AdminAffiliatesPage() {
 
   return (
     <div style={{ padding: '32px 24px', maxWidth: '1200px', margin: '0 auto' }}>
-      <h2 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: '1.6rem', color: 'var(--white)', marginBottom: '8px' }}>🤝 Affiliate Program</h2>
+      <h2 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: '1.6rem', color: 'var(--white)', marginBottom: '8px', display: 'inline-flex', alignItems: 'center', gap: '10px' }}><Icon name="handshake" size={22} /> Affiliate Program</h2>
       <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '24px' }}>Manage members, referrals, and marketing resources.</p>
 
       {/* Sub-tabs */}
       <div style={{ display: 'flex', gap: '6px', borderBottom: '1px solid var(--glass-border)', marginBottom: '32px', flexWrap: 'wrap' }}>
-        {[
-          { id: 'members', label: '👥 Members', count: affiliates.length },
-          { id: 'referrals', label: '📊 Referrals', count: referrals.length },
-          { id: 'resources', label: '🎓 Marketing Resources', count: resources.length },
-        ].map(t => (
+        {([
+          { id: 'members', icon: 'users' as const, label: 'Members', count: affiliates.length },
+          { id: 'referrals', icon: 'bar-chart' as const, label: 'Referrals', count: referrals.length },
+          { id: 'resources', icon: 'graduation' as const, label: 'Marketing Resources', count: resources.length },
+        ]).map(t => (
           <button key={t.id} onClick={() => setTab(t.id as 'members' | 'referrals' | 'resources')} style={{
             background: tab === t.id ? 'rgba(16,161,219,0.08)' : 'transparent',
             border: 'none',
@@ -162,7 +163,9 @@ export default function AdminAffiliatesPage() {
             color: tab === t.id ? 'var(--sky)' : 'var(--text-muted)',
             fontSize: '0.88rem', fontWeight: 600, fontFamily: 'Inter,sans-serif',
             marginBottom: '-1px',
+            display: 'inline-flex', alignItems: 'center', gap: '8px',
           }}>
+            <Icon name={t.icon} size={14} />
             {t.label} <span style={{ opacity: 0.6, fontSize: '0.75rem' }}>({t.count})</span>
           </button>
         ))}
@@ -171,7 +174,7 @@ export default function AdminAffiliatesPage() {
       {/* MEMBERS TAB */}
       {tab === 'members' && (
         <>
-          <input placeholder="🔍 Search by name, email, or code..." value={search} onChange={e => setSearch(e.target.value)}
+          <input placeholder="Search by name, email, or code..." value={search} onChange={e => setSearch(e.target.value)}
             style={{ background: 'var(--glass)', border: '1px solid var(--glass-border)', borderRadius: '10px', padding: '11px 16px', color: 'var(--white)', width: '100%', maxWidth: '400px', marginBottom: '20px', fontFamily: 'Inter,sans-serif', fontSize: '0.85rem', outline: 'none' }} />
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -200,7 +203,7 @@ export default function AdminAffiliatesPage() {
                   {a.status === 'active' && <><span style={statusActive}>active</span><button onClick={() => updateAffiliateStatus(a.id, 'suspended')} style={btnRed}>Suspend</button></>}
                   {a.status === 'suspended' && <><span style={statusSuspended}>suspended</span><button onClick={() => updateAffiliateStatus(a.id, 'active')} style={btnGreen}>Reactivate</button></>}
                   {a.status === 'rejected' && <span style={statusRejected}>rejected</span>}
-                  <button onClick={() => deleteAffiliate(a.id)} style={btnDelete}>🗑</button>
+                  <button onClick={() => deleteAffiliate(a.id)} style={btnDelete}><Icon name="trash" size={14} /></button>
                 </div>
               </div>
             ))}
@@ -422,15 +425,16 @@ function ResourceEditor({ resource, onClose, onDelete }: { resource: Resource; o
                   <div style={{ display: 'flex', gap: '4px' }}>
                     <button onClick={() => moveItem(item.id, -1)} disabled={idx === 0} style={{ ...btnSmall, opacity: idx === 0 ? 0.4 : 1 }}>↑</button>
                     <button onClick={() => moveItem(item.id, 1)} disabled={idx === items.length - 1} style={{ ...btnSmall, opacity: idx === items.length - 1 ? 0.4 : 1 }}>↓</button>
-                    <button onClick={() => deleteItem(item.id)} style={btnDelete}>🗑</button>
+                    <button onClick={() => deleteItem(item.id)} style={btnDelete}><Icon name="trash" size={14} /></button>
                   </div>
                 </div>
                 {item.type === 'text' && (
                   <textarea value={item.content || ''} onChange={e => updateItem(item.id, { content: e.target.value })} rows={4} placeholder="Content..." style={{ ...inputStyle, resize: 'vertical' }} />
                 )}
                 {item.type === 'file' && (
-                  <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', wordBreak: 'break-all' }}>
-                    📎 <a href={item.url} target="_blank" rel="noopener" style={{ color: 'var(--sky)' }}>{item.url}</a>
+                  <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', wordBreak: 'break-all', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Icon name="paperclip" size={14} />
+                    <a href={item.url} target="_blank" rel="noopener" style={{ color: 'var(--sky)' }}>{item.url}</a>
                     {item.file_size && <span style={{ marginLeft: '10px', color: 'var(--text-dim)' }}>({item.file_size})</span>}
                   </div>
                 )}
