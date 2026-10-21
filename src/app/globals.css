@@ -213,6 +213,70 @@ main {
   }
 }
 
+/* ────────── MOBILE LAYOUT FIXES (Wave 6) ────────── */
+
+/* Collapse hard-coded multi-column grids on narrow phones.
+   Many pages set grid-template-columns inline, which bypasses the
+   component-local @media rules in each file. These overrides handle
+   the common ones so content doesn't overflow or get cut off. */
+@media (max-width: 640px) {
+  /* 4-column inline grids → 2 columns (affiliate "How It Works" was clipping) */
+  div[style*="repeat(4,1fr)"],
+  div[style*="repeat(4, 1fr)"] {
+    grid-template-columns: repeat(2, 1fr) !important;
+    row-gap: 32px !important;
+  }
+  /* Decorative connector lines between step circles don't survive
+     a 2-column wrap — hide them so they don't jump into the middle. */
+  div[style*="repeat(4,1fr)"] > div[style*="position:absolute"],
+  div[style*="repeat(4, 1fr)"] > div[style*="position:absolute"],
+  div[style*="repeat(4,1fr)"] > div[style*="position: absolute"],
+  div[style*="repeat(4, 1fr)"] > div[style*="position: absolute"] {
+    display: none !important;
+  }
+  /* 3-column inline grids → 1 column stack (service lists, stat tiles) */
+  div[style*="repeat(3,1fr)"],
+  div[style*="repeat(3, 1fr)"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Any table set to overflow-x: auto gets a visible scroll affordance
+   so the user knows there's more to swipe to. */
+@media (max-width: 640px) {
+  div[style*="overflowX"] > table,
+  div[style*="overflow-x"] > table {
+    min-width: 540px; /* forces horizontal scroll so the hint matters */
+  }
+  /* Soft right-edge shadow on scrollable table containers */
+  div[style*="overflowX: 'auto'"],
+  div[style*="overflowX:'auto'"],
+  div[style*="overflow-x: auto"],
+  div[style*="overflow-x:auto"] {
+    background-image: linear-gradient(to right, transparent 85%, rgba(16,161,219,0.08) 100%);
+    background-attachment: local;
+  }
+}
+
+/* Keep the floating chatbot bubble + sticky CTA from covering the last
+   line of content on every page. Pad the page bottom at mobile. */
+@media (max-width: 768px) {
+  body {
+    padding-bottom: 100px;
+  }
+}
+
+/* Shrink the floating chatbot bubble on narrow phones so it eats less
+   content area. The bubble itself is 60x60 by default, bottom:24 right:24. */
+@media (max-width: 480px) {
+  button[aria-label="Open support chat"] {
+    width: 48px !important;
+    height: 48px !important;
+    bottom: 16px !important;
+    right: 16px !important;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   main, section {
     animation: none !important;
