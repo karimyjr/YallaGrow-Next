@@ -81,7 +81,7 @@ const structuredData = {
       ],
       contactPoint: {
         '@type': 'ContactPoint',
-        telephone: '+44-7376-441603',
+        telephone: '+961-76-302-159',
         contactType: 'customer service',
         email: 'info@yallagrow.net',
         availableLanguage: ['English', 'Arabic'],
@@ -93,7 +93,7 @@ const structuredData = {
       name: 'YallaGrow Marketing Agency',
       image: 'https://yallagrow.net/apple-touch-icon.png',
       url: 'https://yallagrow.net',
-      telephone: '+44-7376-441603',
+      telephone: '+961-76-302-159',
       email: 'info@yallagrow.net',
       priceRange: '$$',
       address: {

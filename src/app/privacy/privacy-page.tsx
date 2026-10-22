@@ -137,7 +137,7 @@ export default function PrivacyPage() {
           <p>Questions about this policy? Reach out:</p>
           <ul>
             <li><strong>Email:</strong> <a href="mailto:info@yallagrow.net">info@yallagrow.net</a></li>
-            <li><strong>WhatsApp:</strong> <a href="https://wa.me/447376441603" target="_blank" rel="noopener">+44 7376 441603</a></li>
+            <li><strong>WhatsApp:</strong> <a href="https://wa.me/96176302159" target="_blank" rel="noopener">+961 76 302 159</a></li>
             <li><strong>Address:</strong> Baabda, Beirut, Lebanon</li>
           </ul>
         </div>

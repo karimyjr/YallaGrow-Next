@@ -42,7 +42,7 @@ export default function MaintenanceGate({ children }: { children: React.ReactNod
         </div>
         <h1 style={{ fontFamily:'Syne,sans-serif', fontWeight:800, fontSize:'clamp(1.8rem,5vw,3rem)', color:'#f9fdfe', letterSpacing:'-1px', marginBottom:'16px', lineHeight:1.1 }}>{settings.title}</h1>
         <p style={{ fontSize:'1rem', color:'rgba(249,253,254,0.5)', maxWidth:'480px', lineHeight:1.7, fontWeight:300, marginBottom:'32px' }}>{settings.msg}</p>
-        <a href="https://wa.me/447376441603" target="_blank" rel="noopener" style={{ color:'#10a1db', fontSize:'0.82rem', textDecoration:'none' }}>Need help? WhatsApp us →</a>
+        <a href="https://wa.me/96176302159" target="_blank" rel="noopener" style={{ color:'#10a1db', fontSize:'0.82rem', textDecoration:'none' }}>Need help? WhatsApp us →</a>
         <style>{`@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(16,161,219,0.3)}50%{box-shadow:0 0 0 20px rgba(16,161,219,0)}}`}</style>
       </div>
     )

@@ -132,7 +132,7 @@ export default function GlobalError({
             color: 'rgba(249,253,254,0.3)',
             marginTop: '24px',
           }}>
-            Need help? <a href="https://wa.me/447376441603" target="_blank" rel="noopener" style={{ color: '#10a1db' }}>WhatsApp us →</a>
+            Need help? <a href="https://wa.me/96176302159" target="_blank" rel="noopener" style={{ color: '#10a1db' }}>WhatsApp us →</a>
           </p>
         </div>
       </body>

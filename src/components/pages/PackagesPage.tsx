@@ -84,8 +84,6 @@ export default function PackagesPage() {
   const cellStyle = { padding: '14px 16px', borderBottom: '1px solid var(--glass-border)', textAlign: 'center' as const, color: 'rgba(249,253,254,0.7)', fontSize: '0.82rem' }
   const renderCell = (c: Cell) => c === true ? <Icon name="check" size={16} /> : c
 
-  const scrollToBuilder = () => document.getElementById('builderSection')?.scrollIntoView({ behavior: 'smooth' })
-
   return (
     <div style={{ paddingTop: '80px' }}>
       {/* HERO */}
@@ -367,7 +365,7 @@ export default function PackagesPage() {
               <div key={chip} style={{ background: 'var(--glass)', border: '1px solid var(--glass-border)', borderRadius: '100px', padding: '10px 18px', fontSize: '0.82rem', color: 'rgba(249,253,254,0.75)' }}>{chip}</div>
             ))}
           </div>
-          <button onClick={scrollToBuilder} className="btn-primary" style={{ fontSize: '1rem', padding: '16px 40px' }}>Build My Package →</button>
+          <a href="#builderSection" className="btn-primary" style={{ fontSize: '1rem', padding: '16px 40px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>Build My Package →</a>
           <p style={{ fontSize: '0.72rem', color: 'var(--text-dim)', marginTop: '10px' }}>You&apos;ll get a live price estimate instantly. No commitment required.</p>
         </div>
       </section>

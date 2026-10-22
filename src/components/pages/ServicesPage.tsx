@@ -197,6 +197,7 @@ export default function ServicesPage() {
             return (
               <div
                 key={s.id}
+                id={s.id}
                 onClick={() => setExpandedId(isExpanded ? null : s.id)}
                 style={{
                   background: 'var(--glass)',

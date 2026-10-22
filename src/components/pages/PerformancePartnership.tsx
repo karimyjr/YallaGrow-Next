@@ -166,10 +166,11 @@ export default function PerformancePartnership() {
               </div>
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                  <label style={{ ...labelStyle, marginBottom: 0 }}>EXPECTED MONTHLY GROWTH</label>
+                  <label style={{ ...labelStyle, marginBottom: 0 }}>YOUR GROWTH ASSUMPTION (%)</label>
                   <span style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: '1rem', color: 'var(--sky)' }}>{m1.growth}%</span>
                 </div>
                 <input type="range" min={0} max={100} value={m1.growth} onChange={e => setM1({ ...m1, growth: Number(e.target.value) })} style={{ width: '100%', height: '4px', accentColor: 'var(--sky)' }} />
+                <div style={{ fontSize: '0.68rem', color: 'var(--text-dim)', marginTop: '6px', fontStyle: 'italic', lineHeight: 1.5 }}>Your projection for modelling, not a YallaGrow guarantee. Real results depend on your market, product, and execution.</div>
               </div>
             </div>
 
@@ -251,10 +252,11 @@ export default function PerformancePartnership() {
               </div>
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                  <label style={{ ...labelStyle, marginBottom: 0 }}>EXPECTED SALES INCREASE</label>
+                  <label style={{ ...labelStyle, marginBottom: 0 }}>YOUR SALES-INCREASE ASSUMPTION (%)</label>
                   <span style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: '1rem', color: 'var(--sky)' }}>{m2.growth}%</span>
                 </div>
                 <input type="range" min={0} max={100} value={m2.growth} onChange={e => setM2({ ...m2, growth: Number(e.target.value) })} style={{ width: '100%', height: '4px', accentColor: 'var(--sky)' }} />
+                <div style={{ fontSize: '0.68rem', color: 'var(--text-dim)', marginTop: '6px', fontStyle: 'italic', lineHeight: 1.5 }}>Your projection for modelling, not a YallaGrow guarantee. Real results depend on your market, product, and execution.</div>
               </div>
             </div>
 

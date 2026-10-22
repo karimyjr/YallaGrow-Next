@@ -58,13 +58,13 @@ export default function Footer() {
         <div>
           <h4 style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase', color: 'var(--sky)', marginBottom: '16px' }}>Services</h4>
           {[
-            ['Marketing Strategy', '/services/strategy'],
-            ['Social Media', '/services/social'],
-            ['Paid Advertising', '/services/ads'],
-            ['Branding', '/services/branding'],
-            ['Content Creation', '/services/content'],
-            ['Copywriting', '/services/copy'],
-            ['Web Development', '/services/web'],
+            ['Marketing Strategy', '/services#strategy'],
+            ['Social Media', '/services#social'],
+            ['Paid Advertising', '/services#ads'],
+            ['Branding', '/services#branding'],
+            ['Content Creation', '/services#content'],
+            ['Copywriting', '/services#copy'],
+            ['Web Development', '/services#web'],
           ].map(([label, href]) => (
             <Link
               key={href}
@@ -112,7 +112,7 @@ export default function Footer() {
         <div>
           <h4 style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase', color: 'var(--sky)', marginBottom: '16px' }}>Contact</h4>
           <a
-            href="https://wa.me/447376441603"
+            href="https://wa.me/96176302159"
             target="_blank"
             rel="noopener"
             style={{

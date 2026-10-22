@@ -36,7 +36,7 @@ const MENUS: Record<string, Menu> = {
       { label: 'Book a strategy call', icon: 'calendar', action: 'response', response: "Great! Book your free 30-minute strategy call here:\n\nhttps://calendar.app.google/3WibM5kWvizhnHJt8\n\nNo commitment, no credit card — just a real conversation about your business." },
       { label: 'Affiliate program', icon: 'handshake', action: 'menu', submenu: 'affiliate' },
       { label: 'About YallaGrow', icon: 'info', action: 'menu', submenu: 'about' },
-      { label: 'Talk to a human', icon: 'chat', action: 'external', url: 'https://api.whatsapp.com/send/?phone=447376441603&text=Hi%20YallaGrow%2C%20I%20need%20some%20help&type=phone_number&app_absent=0' },
+      { label: 'Talk to a human', icon: 'chat', action: 'external', url: 'https://api.whatsapp.com/send/?phone=96176302159&text=Hi%20YallaGrow%2C%20I%20need%20some%20help&type=phone_number&app_absent=0' },
     ],
   },
 
@@ -99,7 +99,7 @@ const MENUS: Record<string, Menu> = {
       { label: 'Who is on the team?', icon: 'users', action: 'response', response: "We're a lean, specialized team:\n\n• Founder/CEO — Strategy & sales\n• Designer — Content & brand\n• Copywriter — Words that convert\n• Media Buyer (freelance) — Paid ads\n\nEvery person touches your work directly — no agency middlemen." },
       { label: 'How fast do you deliver?', icon: 'bolt', action: 'response', response: "Timelines by project:\n\n• Monthly packages: Content starts within 1 week\n• Websites: 3 days (Starter) to 3 weeks (Advanced)\n• Branding: 1-2 weeks\n• Ad campaigns: Live within 5-7 days\n\nWe move fast without cutting corners." },
       { label: 'Do you have any guarantees?', icon: 'handshake', action: 'response', response: "Every partnership starts with a free strategy call to confirm we're the right fit.\n\nWe don't do refunds after work has started, but we're transparent and communicative — if something isn't right, we work with you to fix it. Most clients stay 6+ months." },
-      { label: 'How to contact you?', icon: 'phone', action: 'response', response: "Reach us via:\n\n• WhatsApp: +44 7376 441603 (fastest)\n• Email: info@yallagrow.net\n• Book a call: yallagrow.net/quiz" },
+      { label: 'How to contact you?', icon: 'phone', action: 'response', response: "Reach us via:\n\n• WhatsApp: +961 76 302 159 (fastest)\n• Email: info@yallagrow.net\n• Book a call: yallagrow.net/quiz" },
       { label: 'Are you hiring?', icon: 'briefcase', action: 'response', response: "Yes. Currently open positions:\n\n• Designer / Content Creator\n• Copywriter / Content Specialist\n• Freelance Media Buyer\n\nApply at yallagrow.net/careers" },
       { label: '← Back to main menu', action: 'menu', submenu: 'root' },
     ],
@@ -113,7 +113,7 @@ interface Message {
   options?: Option[]
 }
 
-const WHATSAPP_URL = 'https://api.whatsapp.com/send/?phone=447376441603&text=Hi%20YallaGrow%2C%20I%20need%20some%20help&type=phone_number&app_absent=0'
+const WHATSAPP_URL = 'https://api.whatsapp.com/send/?phone=96176302159&text=Hi%20YallaGrow%2C%20I%20need%20some%20help&type=phone_number&app_absent=0'
 
 export default function SupportBot() {
   const [open, setOpen] = useState(false)

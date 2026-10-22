@@ -53,7 +53,7 @@ export default function ContactPage() {
   }
 
   const contactOptions = [
-    { icon: 'chat', title: 'WhatsApp', desc: 'Fastest reply — usually within the hour', href: 'https://wa.me/447376441603', cta: 'Chat now →' },
+    { icon: 'chat', title: 'WhatsApp', desc: 'Fastest reply — usually within the hour', href: 'https://wa.me/96176302159', cta: 'Chat now →' },
     { icon: 'mail', title: 'Email', desc: 'We respond to all emails within 24 hours', href: 'mailto:info@yallagrow.net', cta: 'info@yallagrow.net' },
     { icon: 'calendar', title: 'Book a call', desc: 'Free 30-min strategy session — no commitment', href: process.env.NEXT_PUBLIC_BOOKING_URL || 'https://calendar.app.google/3WibM5kWvizhnHJt8', cta: 'Pick a time →' },
   ]

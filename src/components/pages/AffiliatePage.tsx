@@ -82,14 +82,26 @@ export default function AffiliatePage() {
               <th style={{padding:'14px 24px',fontSize:'0.68rem',fontWeight:700,letterSpacing:'1.5px',textTransform:'uppercase',color:'var(--sky)',textAlign:'left',borderBottom:'1px solid rgba(16,161,219,0.15)'}}>Example</th>
             </tr></thead>
             <tbody>
-              <tr style={{borderBottom:'1px solid var(--glass-border)'}}><td style={{padding:'20px 24px',color:'rgba(249,253,254,0.75)',fontSize:'0.88rem'}}>$179 – $999</td><td style={{padding:'20px 24px'}}><span style={{fontFamily:'Syne,sans-serif',fontWeight:800,fontSize:'1.5rem',color:'var(--sky)'}}>20%</span></td><td style={{padding:'20px 24px',color:'var(--text-muted)',fontSize:'0.82rem'}}>$299 → <strong style={{color:'var(--white)'}}>$59.80</strong></td></tr>
-              <tr><td style={{padding:'20px 24px',color:'rgba(249,253,254,0.75)',fontSize:'0.88rem'}}>$1,000+</td><td style={{padding:'20px 24px'}}><span style={{fontFamily:'Syne,sans-serif',fontWeight:800,fontSize:'1.8rem',background:'linear-gradient(135deg,var(--sky),var(--purple))',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent'}}>35%</span></td><td style={{padding:'20px 24px',color:'var(--text-muted)',fontSize:'0.82rem'}}>$1,200 → <strong style={{color:'var(--white)'}}>$420</strong></td></tr>
+              <tr style={{borderBottom:'1px solid var(--glass-border)'}}><td style={{padding:'20px 24px',color:'rgba(249,253,254,0.75)',fontSize:'0.88rem'}}>$149 – $999<br /><span style={{fontSize:'0.72rem',color:'var(--text-dim)'}}>Launch, Grow, Dominate</span></td><td style={{padding:'20px 24px'}}><span style={{fontFamily:'Syne,sans-serif',fontWeight:800,fontSize:'1.5rem',color:'var(--sky)'}}>20%</span></td><td style={{padding:'20px 24px',color:'var(--text-muted)',fontSize:'0.82rem'}}>$299 → <strong style={{color:'var(--white)'}}>$59.80</strong></td></tr>
+              <tr style={{borderBottom:'1px solid var(--glass-border)'}}><td style={{padding:'20px 24px',color:'rgba(249,253,254,0.75)',fontSize:'0.88rem'}}>$1,000+<br /><span style={{fontSize:'0.72rem',color:'var(--text-dim)'}}>Custom builds &amp; enterprise</span></td><td style={{padding:'20px 24px'}}><span style={{fontFamily:'Syne,sans-serif',fontWeight:800,fontSize:'1.8rem',background:'linear-gradient(135deg,var(--sky),var(--purple))',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent'}}>35%</span></td><td style={{padding:'20px 24px',color:'var(--text-muted)',fontSize:'0.82rem'}}>$1,200 → <strong style={{color:'var(--white)'}}>$420</strong></td></tr>
+              <tr><td style={{padding:'20px 24px',color:'rgba(249,253,254,0.5)',fontSize:'0.88rem'}}>Under $149<br /><span style={{fontSize:'0.72rem',color:'var(--text-dim)'}}>7-day Sprint ($49)</span></td><td style={{padding:'20px 24px',color:'var(--text-dim)',fontSize:'0.95rem',fontStyle:'italic'}}>No commission</td><td style={{padding:'20px 24px',color:'var(--text-dim)',fontSize:'0.78rem',fontStyle:'italic'}}>Full commission if they upgrade to a package</td></tr>
             </tbody>
           </table>
           <div style={{background:'rgba(249,253,254,0.02)',border:'1px solid var(--glass-border)',borderRadius:'12px',padding:'20px',display:'flex',flexDirection:'column',gap:'8px'}}>
-            {['Commission is paid once, on the client&apos;s first successful payment only.','35% applies exclusively when the first invoice is $1,000 or above.','No recurring commissions — this is a one-time referral reward.','Custom packages qualify for the 35% tier if initial invoice exceeds $1,000.'].map(n=>(
+            {['Commission is paid once, on the client&apos;s first successful package payment ($149+).','35% applies exclusively when the first invoice is $1,000 or above.','No recurring commissions — this is a one-time referral reward.','7-day Sprint purchases do not earn commission on their own, but if the client continues to a full package you earn the full tier commission.','Custom packages qualify for the 35% tier if initial invoice exceeds $1,000.'].map(n=>(
               <div key={n} style={{display:'flex',gap:'10px',fontSize:'0.75rem',color:'rgba(249,253,254,0.5)',lineHeight:1.5,fontWeight:300}} dangerouslySetInnerHTML={{__html:'<span style="color:var(--sky);flex-shrink:0;font-weight:700">→</span> '+n}}/>
             ))}
+          </div>
+
+          {/* Payout methods — spelling out HOW the money gets to affiliates */}
+          <div style={{marginTop:'16px',background:'linear-gradient(135deg,rgba(16,161,219,0.06),rgba(106,70,217,0.04))',border:'1px solid rgba(16,161,219,0.2)',borderRadius:'12px',padding:'20px'}}>
+            <div style={{fontSize:'0.68rem',fontWeight:700,letterSpacing:'1.5px',textTransform:'uppercase',color:'var(--sky)',marginBottom:'10px'}}>How we pay you</div>
+            <div style={{fontSize:'0.82rem',color:'rgba(249,253,254,0.75)',lineHeight:1.65,marginBottom:'10px'}}>
+              Payouts via <strong>Whish Money</strong>, <strong>OMT</strong>, or <strong>Cash USD</strong> — your choice. Fresh dollars, no lollars, no bank transfer fees on your end.
+            </div>
+            <div style={{fontSize:'0.75rem',color:'var(--text-muted)',lineHeight:1.6,fontStyle:'italic'}}>
+              Monthly payout cycle. Minimum balance of $50 to withdraw — anything below rolls to next month. For international affiliates, we coordinate on WhatsApp.
+            </div>
           </div>
         </div>
       </div>
