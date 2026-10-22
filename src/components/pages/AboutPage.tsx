@@ -31,14 +31,14 @@ const BLOCKS = [
 
 const TEAM = [
   {
-    role: 'Founder · CEO',
-    title: 'Strategy & Sales',
-    desc: 'The person your business works with directly. Leads positioning, defines direction, manages client relationships, and ensures everything we do is tied to a real business outcome.',
+    role: 'Karim · Founder',
+    title: 'Strategy, Sales & Your Direct Line',
+    desc: "The person you'll actually work with. I run YallaGrow end-to-end: strategy, client relationships, and every important decision on your account. I'm based in Lebanon (Maarake), I built this agency in June 2024 while studying at Sagesse University and working at Alfa — so I know what it's like to run everything with limited time and real money on the line. When you WhatsApp us, you reach me directly.",
     responsibilities: [
-      'Leads strategy and market positioning',
-      'Handles client acquisition and onboarding',
-      'Oversees all active client relationships',
-      'Defines marketing direction per project',
+      'Owns strategy and positioning for every active client',
+      'Runs discovery calls and onboarding personally',
+      'Direct WhatsApp line: +961 76 302 159',
+      'Decides what gets built, posted, or killed — not an account manager',
     ],
     color: '#10a1db',
     bg: 'linear-gradient(135deg,rgba(16,161,219,0.15),rgba(1,32,76,0.3))',

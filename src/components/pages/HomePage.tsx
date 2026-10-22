@@ -368,6 +368,67 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* MEET THE FOUNDER — the person you'll actually work with */}
+      <section style={{ padding: '100px 6%' }}>
+        <div style={{ maxWidth: '1000px', margin: '0 auto', display: 'grid', gridTemplateColumns: '240px 1fr', gap: '48px', alignItems: 'center' }} className="founder-grid">
+          {/* Avatar block — initials placeholder until a real photo is added */}
+          <div style={{
+            width: '240px',
+            height: '240px',
+            borderRadius: '28px',
+            background: 'linear-gradient(135deg, rgba(1,32,76,0.6), rgba(16,161,219,0.1))',
+            border: '1px solid rgba(16,161,219,0.3)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            position: 'relative',
+            overflow: 'hidden',
+          }} className="founder-avatar">
+            <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 30% 30%, rgba(16,161,219,0.2), transparent 60%)' }} />
+            <div style={{
+              fontFamily: 'Syne, sans-serif',
+              fontWeight: 800,
+              fontSize: '5rem',
+              background: 'linear-gradient(135deg, var(--sky), var(--purple))',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              letterSpacing: '-3px',
+              position: 'relative',
+            }}>K</div>
+          </div>
+
+          {/* Bio */}
+          <div>
+            <span className="eyebrow" style={{ marginBottom: '12px' }}>Who you&apos;re actually working with</span>
+            <h2 style={{
+              fontFamily: 'Syne, sans-serif',
+              fontWeight: 800,
+              fontSize: 'clamp(1.8rem, 4vw, 2.6rem)',
+              color: 'var(--white)',
+              letterSpacing: '-1px',
+              lineHeight: 1.1,
+              margin: '14px 0 20px',
+            }}>
+              Hi, I&apos;m Karim.<br />
+              <span className="grad">I run YallaGrow.</span>
+            </h2>
+            <p style={{ fontSize: '1rem', color: 'rgba(249,253,254,0.72)', lineHeight: 1.75, fontWeight: 300, marginBottom: '20px' }}>
+              I started YallaGrow in June 2024 while studying at Sagesse University and working shifts at Alfa — so I know exactly what it feels like to build a business on limited time and real money. Every strategy call, every pitch, every important decision on your account goes through me. Not an account manager, not a sales rep.
+            </p>
+            <p style={{ fontSize: '0.95rem', color: 'var(--text-muted)', lineHeight: 1.7, fontWeight: 300, marginBottom: '28px' }}>
+              If we work together, you get my direct WhatsApp. If something isn&apos;t working, I&apos;m the one who fixes it. That&apos;s the whole promise.
+            </p>
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+              <a href="https://wa.me/96176302159" target="_blank" rel="noopener" className="btn-primary" style={{ fontSize: '0.88rem' }}>
+                WhatsApp me directly →
+              </a>
+              <Link href="/about" className="btn-secondary" style={{ fontSize: '0.88rem' }}>More about the team</Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* PHILOSOPHY */}
       <section style={{ padding: '100px 6%', background: 'rgba(0,0,0,0.15)' }}>
         <div style={{ textAlign: 'center', marginBottom: '60px' }}>
@@ -502,6 +563,8 @@ export default function HomePage() {
         }
         @media(max-width:900px){
           .phil-grid,.svc-grid,.proc-grid,.testi-grid{grid-template-columns:1fr 1fr!important}
+          .founder-grid{grid-template-columns:1fr!important;gap:28px!important;text-align:center}
+          .founder-avatar{margin:0 auto}
         }
         @media(max-width:720px){
           .case-main{padding:36px 28px 32px!important}
@@ -511,6 +574,7 @@ export default function HomePage() {
           .phil-grid,.svc-grid,.proc-grid,.testi-grid{grid-template-columns:1fr!important}
           .case-metrics{grid-template-columns:1fr!important;gap:14px!important}
           .case-main{padding:28px 20px 24px!important;border-radius:20px!important}
+          .founder-avatar{width:180px!important;height:180px!important}
         }
       `}</style>
     </div>

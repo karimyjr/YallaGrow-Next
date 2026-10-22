@@ -176,6 +176,76 @@ export default function PackagesPage() {
         </div>
       </section>
 
+      {/* 7-DAY ONBOARDING SPRINT — low-risk entry point for prospects who aren't ready for a full month */}
+      <section style={{ padding: '0 6% 80px' }}>
+        <div style={{
+          maxWidth: '900px',
+          margin: '0 auto',
+          background: 'linear-gradient(135deg, rgba(1,32,76,0.6), rgba(16,161,219,0.1))',
+          border: '1px solid rgba(16,161,219,0.3)',
+          borderRadius: '24px',
+          padding: '48px 44px',
+          position: 'relative',
+          overflow: 'hidden',
+        }} className="trial-block">
+          <div style={{ position: 'absolute', top: '-30%', right: '-10%', width: '400px', height: '400px', background: 'radial-gradient(circle, rgba(16,161,219,0.15), transparent 60%)', pointerEvents: 'none' }} />
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '48px', alignItems: 'center', position: 'relative', zIndex: 1 }} className="trial-grid">
+            {/* Left: pitch */}
+            <div>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(16,161,219,0.12)', border: '1px solid rgba(16,161,219,0.3)', color: 'var(--sky)', fontSize: '0.62rem', fontWeight: 800, letterSpacing: '1.5px', textTransform: 'uppercase', padding: '5px 12px', borderRadius: '100px', marginBottom: '18px' }}>
+                <Icon name="bolt" size={11} /> Low-risk entry
+              </div>
+              <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 'clamp(1.6rem, 3.5vw, 2.2rem)', color: 'var(--white)', letterSpacing: '-1px', lineHeight: 1.15, marginBottom: '18px' }}>
+                Not ready to commit?<br />
+                <span className="grad">Try us for 7 days — $49.</span>
+              </h2>
+              <p style={{ fontSize: '0.92rem', color: 'rgba(249,253,254,0.72)', lineHeight: 1.7, fontWeight: 300, marginBottom: '20px' }}>
+                A one-time onboarding sprint. You get a real taste of how we work — strategy, audit, and actual content — before deciding whether to continue to a full month. No pressure, no auto-charge.
+              </p>
+              <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontStyle: 'italic', marginBottom: '28px' }}>
+                $49 covers the sprint. If you continue, your month 1 is at full package price. If you walk, you keep everything we made.
+              </div>
+              <a href={`https://wa.me/96176302159?text=${encodeURIComponent("Hi Karim, I'd like to start the 7-day sprint. Here's my business:")}`} target="_blank" rel="noopener" className="btn-primary" style={{ fontSize: '0.88rem' }}>
+                Start the sprint on WhatsApp →
+              </a>
+            </div>
+
+            {/* Right: what you get */}
+            <div style={{
+              background: 'rgba(6,12,20,0.5)',
+              border: '1px solid rgba(16,161,219,0.15)',
+              borderRadius: '18px',
+              padding: '28px 26px',
+            }}>
+              <div style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '1.5px', textTransform: 'uppercase', color: 'var(--sky)', marginBottom: '18px' }}>
+                What you get in 7 days
+              </div>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                {[
+                  { d: 'Day 1', t: '30-min discovery call — your business, your goals, what’s broken.' },
+                  { d: 'Day 2–3', t: 'Written audit of your Instagram + 3 priority fixes.' },
+                  { d: 'Day 4–5', t: 'Content strategy for month 1 — pillars + 8 post topics.' },
+                  { d: 'Day 6', t: '1 ready-to-post piece of content (reel concept or carousel).' },
+                  { d: 'Day 7', t: 'Follow-up call — continue to full month, or walk. Your call.' },
+                ].map(item => (
+                  <li key={item.d} style={{ display: 'flex', gap: '14px', alignItems: 'flex-start', fontSize: '0.82rem', color: 'rgba(249,253,254,0.8)', lineHeight: 1.55, fontWeight: 300 }}>
+                    <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '0.68rem', color: 'var(--sky)', letterSpacing: '0.5px', background: 'rgba(16,161,219,0.1)', border: '1px solid rgba(16,161,219,0.2)', padding: '3px 8px', borderRadius: '6px', flexShrink: 0, minWidth: '58px', textAlign: 'center' }}>{item.d}</span>
+                    <span>{item.t}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+        <style>{`
+          @media (max-width: 760px) {
+            .trial-grid { grid-template-columns: 1fr !important; gap: 32px !important; }
+            .trial-block { padding: 36px 26px !important; }
+          }
+        `}</style>
+      </section>
+
       {/* VS HIRING / vs ALTERNATIVES — anchors price against what else they could spend money on */}
       <section style={{ padding: '100px 6%' }}>
         <div style={{ textAlign: 'center', marginBottom: '12px' }}>
