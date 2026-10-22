@@ -107,6 +107,35 @@ export default function PackagesPage() {
         </div>
       </div>
 
+      {/* SCARCITY STRIP — real capacity constraint, honestly stated */}
+      <section style={{ padding: '0 6% 40px' }}>
+        <div style={{
+          maxWidth: '760px',
+          margin: '0 auto',
+          padding: '16px 22px',
+          background: 'linear-gradient(135deg, rgba(16,161,219,0.08), rgba(106,70,217,0.06))',
+          border: '1px solid rgba(16,161,219,0.28)',
+          borderRadius: '14px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '14px',
+        }} className="pkg-scarcity">
+          <span style={{
+            width: '10px', height: '10px', borderRadius: '50%',
+            background: '#16db64', flexShrink: 0,
+            boxShadow: '0 0 0 4px rgba(22,219,100,0.18)',
+          }} />
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: '0.86rem', color: 'var(--white)', fontWeight: 600, lineHeight: 1.4 }}>
+              Karim personally onboards <span style={{ color: 'var(--sky)' }}>3 new clients per month.</span>
+            </div>
+            <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', lineHeight: 1.55, marginTop: '3px' }}>
+              It&apos;s how we keep quality high and the account manager — you — real. Book a strategy call to check this month&apos;s availability.
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* PACKAGE CARDS */}
       <section style={{ padding: '0 6% 100px' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', alignItems: 'stretch', maxWidth: '1200px', margin: '0 auto' }} className="pkg-grid">
@@ -145,6 +174,55 @@ export default function PackagesPage() {
             </div>
           ))}
         </div>
+      </section>
+
+      {/* VS HIRING / vs ALTERNATIVES — anchors price against what else they could spend money on */}
+      <section style={{ padding: '100px 6%' }}>
+        <div style={{ textAlign: 'center', marginBottom: '12px' }}>
+          <span className="eyebrow" style={{ marginBottom: '12px' }}>Honest Comparison</span>
+          <h2 className="section-title" style={{ margin: '12px auto' }}>$299/mo vs the Alternatives</h2>
+          <p className="section-sub" style={{ margin: '12px auto 0', textAlign: 'center' }}>Most Lebanese business owners don&apos;t compare us to agencies. They compare us to hiring, freelancers, or doing nothing. Here&apos;s the real math.</p>
+        </div>
+        <div style={{ maxWidth: '1000px', margin: '48px auto 0', overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid var(--glass-border)', borderRadius: '16px', overflow: 'hidden' }}>
+            <thead>
+              <tr style={{ background: 'rgba(249,253,254,0.03)' }}>
+                <th style={{ padding: '16px 14px', textAlign: 'left', fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '1px', textTransform: 'uppercase' }}>Question</th>
+                <th style={{ padding: '16px 14px', textAlign: 'center', fontFamily: 'Syne,sans-serif', fontWeight: 700, fontSize: '0.9rem', color: 'rgba(249,253,254,0.75)' }}>Do it yourself<br /><span style={{ fontSize: '0.72rem', fontWeight: 500, color: 'var(--text-dim)' }}>Your time</span></th>
+                <th style={{ padding: '16px 14px', textAlign: 'center', fontFamily: 'Syne,sans-serif', fontWeight: 700, fontSize: '0.9rem', color: 'rgba(249,253,254,0.75)' }}>Hire in-house<br /><span style={{ fontSize: '0.72rem', fontWeight: 500, color: 'var(--text-dim)' }}>$800–1,500/mo</span></th>
+                <th style={{ padding: '16px 14px', textAlign: 'center', fontFamily: 'Syne,sans-serif', fontWeight: 700, fontSize: '0.9rem', color: 'rgba(249,253,254,0.75)' }}>Freelancer<br /><span style={{ fontSize: '0.72rem', fontWeight: 500, color: 'var(--text-dim)' }}>$150–300/post</span></th>
+                <th style={{ padding: '16px 14px', textAlign: 'center', fontFamily: 'Syne,sans-serif', fontWeight: 700, fontSize: '0.95rem', color: 'var(--white)', background: 'rgba(16,161,219,0.1)', borderLeft: '1px solid rgba(16,161,219,0.3)', borderRight: '1px solid rgba(16,161,219,0.3)' }}>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                    <Icon name="star" size={11} /> YallaGrow Grow
+                  </div>
+                  <div style={{ fontSize: '0.72rem', fontWeight: 500, color: 'var(--sky)', marginTop: '2px' }}>$299/mo</div>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {([
+                ['Monthly cost', '15+ hrs/week of your time', '$800–1,500 + benefits', '$600–1,200 for 4 posts', '$299 flat'],
+                ['Strategy & planning', 'If you know how', 'Depends on who you hire', 'Rarely included', 'Included every month'],
+                ['Content production', 'You create everything', '1 person\'s output', 'Per-post billing', 'Full team: design, ads, copy'],
+                ['Direct account access', '—', 'Yes, if they stay', 'When they reply', 'Direct WhatsApp with Karim'],
+                ['Replacement if it stops working', 'You burn out', 'Rehire = 2–3 months lost', 'Ghost risk, start over', 'Cancel anytime, no notice'],
+                ['Lock-in', '—', 'Full employment contract', 'Project-based', 'Month-to-month, no notice'],
+                ['Pays in Lebanon?', '—', 'LBP payroll complexity', 'Varies, often cash only', 'Whish / OMT / Cash USD'],
+              ] as string[][]).map((row, i) => (
+                <tr key={i}>
+                  <td style={{ padding: '14px', borderBottom: '1px solid var(--glass-border)', color: 'rgba(249,253,254,0.8)', fontSize: '0.82rem', fontWeight: 500 }}>{row[0]}</td>
+                  <td style={{ padding: '14px', borderBottom: '1px solid var(--glass-border)', textAlign: 'center', color: 'rgba(249,253,254,0.55)', fontSize: '0.78rem', lineHeight: 1.4 }}>{row[1]}</td>
+                  <td style={{ padding: '14px', borderBottom: '1px solid var(--glass-border)', textAlign: 'center', color: 'rgba(249,253,254,0.55)', fontSize: '0.78rem', lineHeight: 1.4 }}>{row[2]}</td>
+                  <td style={{ padding: '14px', borderBottom: '1px solid var(--glass-border)', textAlign: 'center', color: 'rgba(249,253,254,0.55)', fontSize: '0.78rem', lineHeight: 1.4 }}>{row[3]}</td>
+                  <td style={{ padding: '14px', borderBottom: '1px solid var(--glass-border)', textAlign: 'center', color: 'var(--white)', fontSize: '0.82rem', fontWeight: 500, background: 'rgba(16,161,219,0.04)', borderLeft: '1px solid rgba(16,161,219,0.15)', borderRight: '1px solid rgba(16,161,219,0.15)', lineHeight: 1.4 }}>{row[4]}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p style={{ fontSize: '0.72rem', color: 'var(--text-dim)', textAlign: 'center', marginTop: '20px', fontStyle: 'italic' }}>
+          Hiring/freelancer figures are typical Lebanese market rates (2026). Your situation may vary — book a strategy call and we&apos;ll run your real numbers together.
+        </p>
       </section>
 
       {/* PHILOSOPHY */}

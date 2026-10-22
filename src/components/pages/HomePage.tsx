@@ -86,6 +86,34 @@ export default function HomePage() {
               </div>
             ))}
           </div>
+
+          {/* LEBANON TRUST BAR — the three questions every LB SMB asks before paying */}
+          <div style={{
+            marginTop: '44px',
+            padding: '18px 22px',
+            background: 'rgba(16,161,219,0.04)',
+            border: '1px solid rgba(16,161,219,0.18)',
+            borderRadius: '14px',
+            maxWidth: '560px',
+          }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '14px 24px', marginBottom: '10px' }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', color: 'rgba(249,253,254,0.78)', fontWeight: 500 }}>
+                <span style={{ color: 'var(--sky)', display: 'inline-flex' }}><Icon name="map-pin" size={14} /></span>
+                Lebanese team
+              </div>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', color: 'rgba(249,253,254,0.78)', fontWeight: 500 }}>
+                <span style={{ color: 'var(--sky)', display: 'inline-flex' }}><Icon name="dollar" size={14} /></span>
+                Whish &middot; OMT &middot; Cash USD
+              </div>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', color: 'rgba(249,253,254,0.78)', fontWeight: 500 }}>
+                <span style={{ color: 'var(--sky)', display: 'inline-flex' }}><Icon name="unlock" size={14} /></span>
+                Month-to-month
+              </div>
+            </div>
+            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontStyle: 'italic', lineHeight: 1.5 }}>
+              Fresh dollars only — no lollars, no long-term contracts, no bank transfer games.
+            </div>
+          </div>
         </div>
       </section>
 
