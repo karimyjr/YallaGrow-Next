@@ -52,6 +52,50 @@ const PROCESS = [
   { location: 'Analytics Room', num: '04', title: 'Optimize', desc: 'We analyze performance and improve continuously — what gets measured gets better.' },
 ]
 
+// Real client case studies. Numbers verified with Karim 2026-10-22.
+// If any detail is off, correct in-place — these are referenced on the
+// home page and need to stay accurate.
+const CASE_STUDIES = [
+  {
+    name: 'Rare Media',
+    handle: '@rare_.media',
+    url: 'https://www.instagram.com/rare_.media/',
+    industry: 'Monetized TikTok Accounts',
+    region: 'Lebanon → Côte d’Ivoire',
+    duration: '6+ months',
+    tier: 'Grow + Performance Partnership',
+    metrics: [
+      { value: '0 → 727', label: 'Followers (organic)' },
+      { value: '$60/mo', label: 'Ad spend managed' },
+      { value: 'High', label: 'DM → sale conversion' },
+    ],
+    summary: 'Launching a personal brand in a niche most Lebanese buyers don’t trust yet — selling monetized TikTok accounts. Full content system in Lebanese Arabic, hook-first short-form, and paid Meta ads managed by our media buyer. Still working together as they expand into Côte d’Ivoire.',
+    quote: {
+      text: 'Starting a business in a niche people are skeptical of means fighting trust before anything else. YallaGrow built the content and the credibility in parallel — DMs started converting into sales within the first few months.',
+      author: 'Founder, Rare Media',
+    },
+  },
+  {
+    name: 'TAAMIR Engineering',
+    handle: '@taamirlb',
+    url: 'https://www.instagram.com/taamirlb/',
+    industry: 'Structural Engineering & Contracting',
+    region: 'Lebanon · B2B',
+    duration: '2 months (Nov–Dec 2025)',
+    tier: 'Branding + B2B content strategy',
+    metrics: [
+      { value: '0 → 223', label: 'Followers (B2B, high-intent)' },
+      { value: '2', label: 'Project inquiries from IG' },
+      { value: 'Both', label: 'Converted into contracts' },
+    ],
+    summary: 'Built a professional B2B presence from scratch for a Lebanese engineering firm. Targeted at architects, developers, and project owners — not consumers. Full brand identity, educational Arabic carousels, and 60 days of focused content aimed at high-value leads over vanity metrics.',
+    quote: {
+      text: 'We needed a brand that speaks to builders and project owners, not people scrolling for entertainment. YallaGrow got that from the first call and built content that actually brings real inquiries — not just likes.',
+      author: 'Eng. Zahraa Afakih, TAAMIR',
+    },
+  },
+]
+
 export default function HomePage() {
   return (
     <div>
@@ -164,6 +208,91 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* CASE STUDIES — real client proof */}
+      <section style={{ padding: '100px 6%' }}>
+        <div style={{ textAlign: 'center', marginBottom: '12px' }}>
+          <span className="eyebrow" style={{ marginBottom: '12px' }}>Proof</span>
+          <h2 className="section-title" style={{ margin: '12px auto 12px' }}>Clients We&apos;ve Grown</h2>
+          <p className="section-sub" style={{ margin: '0 auto' }}>Two Lebanese businesses, two very different niches, both starting from zero followers. Real numbers below.</p>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '24px', maxWidth: '1200px', margin: '48px auto 0' }} className="case-grid">
+          {CASE_STUDIES.map(cs => (
+            <div key={cs.handle} style={{
+              background: 'linear-gradient(135deg, rgba(1,32,76,0.35), rgba(16,161,219,0.04))',
+              border: '1px solid rgba(16,161,219,0.2)',
+              borderRadius: '20px',
+              padding: '36px 32px',
+              display: 'flex',
+              flexDirection: 'column',
+              transition: 'all 0.3s',
+            }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(16,161,219,0.4)'; e.currentTarget.style.transform = 'translateY(-4px)' }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(16,161,219,0.2)'; e.currentTarget.style.transform = 'none' }}>
+
+              {/* Header: name + handle */}
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px', marginBottom: '6px', flexWrap: 'wrap' }}>
+                <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: '1.4rem', color: 'var(--white)', letterSpacing: '-0.5px', lineHeight: 1.1 }}>
+                  {cs.name}
+                </h3>
+                <a href={cs.url} target="_blank" rel="noopener" style={{ fontSize: '0.78rem', color: 'var(--sky)', textDecoration: 'none', fontWeight: 500, display: 'inline-flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap' }}>
+                  {cs.handle} <Icon name="link" size={12} />
+                </a>
+              </div>
+
+              {/* Meta row */}
+              <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '20px', lineHeight: 1.5 }}>
+                {cs.industry} · {cs.region} · {cs.duration}
+              </div>
+
+              {/* Metrics */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '24px', padding: '18px 0', borderTop: '1px solid rgba(16,161,219,0.15)', borderBottom: '1px solid rgba(16,161,219,0.15)' }} className="case-metrics">
+                {cs.metrics.map(m => (
+                  <div key={m.label} style={{ textAlign: 'left' }}>
+                    <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: '1.1rem', color: 'var(--sky)', letterSpacing: '-0.5px', lineHeight: 1.2, marginBottom: '4px' }}>
+                      {m.value}
+                    </div>
+                    <div style={{ fontSize: '0.68rem', color: 'var(--text-dim)', lineHeight: 1.3, textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>
+                      {m.label}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Summary */}
+              <p style={{ fontSize: '0.85rem', color: 'rgba(249,253,254,0.72)', lineHeight: 1.65, fontWeight: 300, marginBottom: '18px', flex: 1 }}>
+                {cs.summary}
+              </p>
+
+              {/* Package / tier */}
+              <div style={{ fontSize: '0.72rem', color: 'var(--text-dim)', marginBottom: '18px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>
+                Delivered: <span style={{ color: 'var(--sky)' }}>{cs.tier}</span>
+              </div>
+
+              {/* Quote */}
+              <blockquote style={{
+                margin: 0,
+                padding: '18px 20px',
+                background: 'rgba(249,253,254,0.03)',
+                borderLeft: '3px solid var(--sky)',
+                borderRadius: '0 10px 10px 0',
+              }}>
+                <p style={{ fontSize: '0.82rem', color: 'rgba(249,253,254,0.85)', lineHeight: 1.65, fontStyle: 'italic', marginBottom: '10px', fontWeight: 300 }}>
+                  &ldquo;{cs.quote.text}&rdquo;
+                </p>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                  — {cs.quote.author}
+                </div>
+              </blockquote>
+            </div>
+          ))}
+        </div>
+        <div style={{ textAlign: 'center', marginTop: '36px' }}>
+          <a href={process.env.NEXT_PUBLIC_BOOKING_URL} target="_blank" rel="noopener" className="btn-primary" style={{ fontSize: '0.9rem' }}>
+            Could your brand be next? Book a strategy call →
+          </a>
+        </div>
+      </section>
+
       {/* PROCESS */}
       <section style={{ padding: '100px 6%', background: 'rgba(0,0,0,0.15)' }}>
         <div style={{ textAlign: 'center', marginBottom: '60px' }}>
@@ -211,9 +340,11 @@ export default function HomePage() {
         @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
         @media(max-width:900px){
           .phil-grid,.svc-grid,.proc-grid,.testi-grid{grid-template-columns:1fr 1fr!important}
+          .case-grid{grid-template-columns:1fr!important}
         }
         @media(max-width:600px){
-          .phil-grid,.svc-grid,.proc-grid,.testi-grid{grid-template-columns:1fr!important}
+          .phil-grid,.svc-grid,.proc-grid,.testi-grid,.case-grid{grid-template-columns:1fr!important}
+          .case-metrics{grid-template-columns:1fr!important;gap:16px!important}
         }
       `}</style>
     </div>
