@@ -33,7 +33,7 @@ const TEAM = [
   {
     role: 'Karim · Founder',
     title: 'Strategy, Sales & Your Direct Line',
-    desc: "The person you'll actually work with. I run YallaGrow end-to-end: strategy, client relationships, and every important decision on your account. I'm based in Lebanon (Maarake), I built this agency in June 2024 while studying at Sagesse University and working at Alfa — so I know what it's like to run everything with limited time and real money on the line. When you WhatsApp us, you reach me directly.",
+    desc: "The person you'll actually work with. I run YallaGrow end-to-end: strategy, client relationships, and every important decision on your account. I'm based in Lebanon (Beirut), I built this agency in June 2024 while studying at Sagesse University — so I know what it's like to run everything with limited time and real money on the line. When you WhatsApp us, you reach me directly.",
     responsibilities: [
       'Owns strategy and positioning for every active client',
       'Runs discovery calls and onboarding personally',

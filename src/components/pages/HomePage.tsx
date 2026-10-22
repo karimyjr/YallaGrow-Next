@@ -414,7 +414,7 @@ export default function HomePage() {
               <span className="grad">I run YallaGrow.</span>
             </h2>
             <p style={{ fontSize: '1rem', color: 'rgba(249,253,254,0.72)', lineHeight: 1.75, fontWeight: 300, marginBottom: '20px' }}>
-              I started YallaGrow in June 2024 while studying at Sagesse University and working shifts at Alfa — so I know exactly what it feels like to build a business on limited time and real money. Every strategy call, every pitch, every important decision on your account goes through me. Not an account manager, not a sales rep.
+              I started YallaGrow in June 2024 while studying at Sagesse University — so I know exactly what it feels like to build a business on limited time and real money. Every strategy call, every pitch, every important decision on your account goes through me. Not an account manager, not a sales rep.
             </p>
             <p style={{ fontSize: '0.95rem', color: 'var(--text-muted)', lineHeight: 1.7, fontWeight: 300, marginBottom: '28px' }}>
               If we work together, you get my direct WhatsApp. If something isn&apos;t working, I&apos;m the one who fixes it. That&apos;s the whole promise.
