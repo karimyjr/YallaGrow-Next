@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { Icon } from '@/components/ui/Icons'
 
@@ -91,10 +91,217 @@ const CASE_STUDIES = [
     summary: 'Built a professional B2B presence from scratch for a Lebanese engineering firm. Targeted at architects, developers, and project owners — not consumers. Full brand identity, educational Arabic carousels, and 60 days of focused content aimed at high-value leads over vanity metrics.',
     quote: {
       text: 'We needed a brand that speaks to builders and project owners, not people scrolling for entertainment. YallaGrow got that from the first call and built content that actually brings real inquiries — not just likes.',
-      author: 'Eng. Zahraa Afakih, TAAMIR',
+      author: 'Founder, TAAMIR Engineering',
     },
   },
 ]
+
+// Testimonial carousel — stacked card deck with peek cards behind
+function CaseStudyCarousel() {
+  const [idx, setIdx] = useState(0)
+  const total = CASE_STUDIES.length
+  const current = CASE_STUDIES[idx]
+  const next = () => setIdx(i => (i + 1) % total)
+  const prev = () => setIdx(i => (i - 1 + total) % total)
+
+  const glassBase: React.CSSProperties = {
+    background: 'linear-gradient(135deg, rgba(249,253,254,0.06), rgba(249,253,254,0.02))',
+    backdropFilter: 'blur(24px)',
+    WebkitBackdropFilter: 'blur(24px)',
+    border: '1px solid rgba(249,253,254,0.08)',
+    borderRadius: '28px',
+    boxShadow: '0 24px 80px rgba(1,32,76,0.4)',
+  }
+
+  return (
+    <div style={{ position: 'relative', maxWidth: '860px', margin: '0 auto', padding: '20px 0' }}>
+      {/* Ghost card — left peek */}
+      <div style={{
+        ...glassBase,
+        position: 'absolute',
+        top: '36px',
+        left: '-6%',
+        right: '14%',
+        height: 'calc(100% - 72px)',
+        transform: 'rotate(-3deg)',
+        opacity: 0.35,
+        zIndex: 1,
+      }} aria-hidden="true" />
+
+      {/* Ghost card — right peek */}
+      <div style={{
+        ...glassBase,
+        position: 'absolute',
+        top: '36px',
+        left: '14%',
+        right: '-6%',
+        height: 'calc(100% - 72px)',
+        transform: 'rotate(3deg)',
+        opacity: 0.35,
+        zIndex: 1,
+      }} aria-hidden="true" />
+
+      {/* Main card */}
+      <div key={idx} style={{
+        ...glassBase,
+        position: 'relative',
+        zIndex: 2,
+        padding: '48px 52px 40px',
+        animation: 'caseIn 0.4s cubic-bezier(0.16,1,0.3,1)',
+      }} className="case-main">
+        {/* Top row: client + handle link */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '14px', marginBottom: '28px', flexWrap: 'wrap' }}>
+          <div>
+            <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: '1.5rem', color: 'var(--white)', letterSpacing: '-0.5px', lineHeight: 1.1, marginBottom: '6px' }}>
+              {current.name}
+            </h3>
+            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', letterSpacing: '0.5px' }}>
+              {current.industry} &middot; {current.region} &middot; {current.duration}
+            </div>
+          </div>
+          <a href={current.url} target="_blank" rel="noopener" style={{ fontSize: '0.78rem', color: 'var(--sky)', textDecoration: 'none', fontWeight: 500, display: 'inline-flex', alignItems: 'center', gap: '5px', whiteSpace: 'nowrap' }}>
+            {current.handle} <Icon name="link" size={12} />
+          </a>
+        </div>
+
+        {/* The quote — the hero element */}
+        <blockquote style={{ margin: 0, marginBottom: '36px' }}>
+          <p style={{
+            fontFamily: 'Syne, sans-serif',
+            fontWeight: 500,
+            fontSize: 'clamp(1.1rem, 2.2vw, 1.5rem)',
+            lineHeight: 1.45,
+            color: 'var(--white)',
+            letterSpacing: '-0.3px',
+            fontStyle: 'italic',
+            marginBottom: '18px',
+          }}>
+            &ldquo;{current.quote.text}&rdquo;
+          </p>
+          <footer style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 500 }}>
+            — {current.quote.author}
+          </footer>
+        </blockquote>
+
+        {/* Metrics strip */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, 1fr)',
+          gap: '20px',
+          padding: '22px 0 6px',
+          borderTop: '1px solid rgba(16,161,219,0.15)',
+        }} className="case-metrics">
+          {current.metrics.map(m => (
+            <div key={m.label}>
+              <div style={{
+                fontFamily: 'Syne, sans-serif',
+                fontWeight: 800,
+                fontSize: '1.3rem',
+                background: 'linear-gradient(135deg, var(--sky), var(--purple))',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+                letterSpacing: '-0.5px',
+                lineHeight: 1.1,
+                marginBottom: '6px',
+              }}>
+                {m.value}
+              </div>
+              <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600, lineHeight: 1.4 }}>
+                {m.label}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Delivered */}
+        <div style={{ fontSize: '0.68rem', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: 600, marginTop: '20px', paddingTop: '18px', borderTop: '1px solid rgba(249,253,254,0.05)' }}>
+          Delivered: <span style={{ color: 'var(--sky)' }}>{current.tier}</span>
+        </div>
+      </div>
+
+      {/* Nav arrows */}
+      <button
+        onClick={prev}
+        aria-label="Previous case study"
+        style={{
+          position: 'absolute',
+          left: '-28px',
+          top: '50%',
+          transform: 'translateY(-50%)',
+          width: '48px',
+          height: '48px',
+          borderRadius: '50%',
+          background: 'rgba(6,12,20,0.85)',
+          border: '1px solid rgba(16,161,219,0.25)',
+          color: 'var(--white)',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 3,
+          backdropFilter: 'blur(12px)',
+          transition: 'all 0.2s',
+        }}
+        className="case-arrow"
+        onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--sky)'; e.currentTarget.style.transform = 'translateY(-50%) scale(1.08)' }}
+        onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(16,161,219,0.25)'; e.currentTarget.style.transform = 'translateY(-50%) scale(1)' }}
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+
+      <button
+        onClick={next}
+        aria-label="Next case study"
+        style={{
+          position: 'absolute',
+          right: '-28px',
+          top: '50%',
+          transform: 'translateY(-50%)',
+          width: '48px',
+          height: '48px',
+          borderRadius: '50%',
+          background: 'rgba(6,12,20,0.85)',
+          border: '1px solid rgba(16,161,219,0.25)',
+          color: 'var(--white)',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 3,
+          backdropFilter: 'blur(12px)',
+          transition: 'all 0.2s',
+        }}
+        className="case-arrow"
+        onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--sky)'; e.currentTarget.style.transform = 'translateY(-50%) scale(1.08)' }}
+        onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(16,161,219,0.25)'; e.currentTarget.style.transform = 'translateY(-50%) scale(1)' }}
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+
+      {/* Dots */}
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '32px' }}>
+        {CASE_STUDIES.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setIdx(i)}
+            aria-label={`Go to case study ${i + 1}`}
+            style={{
+              width: i === idx ? '28px' : '8px',
+              height: '8px',
+              borderRadius: '100px',
+              background: i === idx ? 'var(--sky)' : 'rgba(249,253,254,0.2)',
+              border: 'none',
+              padding: 0,
+              cursor: 'pointer',
+              transition: 'all 0.3s cubic-bezier(0.16,1,0.3,1)',
+            }}
+          />
+        ))}
+      </div>
+    </div>
+  )
+}
 
 export default function HomePage() {
   return (
@@ -208,85 +415,36 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* CASE STUDIES — real client proof */}
-      <section style={{ padding: '100px 6%' }}>
-        <div style={{ textAlign: 'center', marginBottom: '12px' }}>
-          <span className="eyebrow" style={{ marginBottom: '12px' }}>Proof</span>
-          <h2 className="section-title" style={{ margin: '12px auto 12px' }}>Clients We&apos;ve Grown</h2>
-          <p className="section-sub" style={{ margin: '0 auto' }}>Two Lebanese businesses, two very different niches, both starting from zero followers. Real numbers below.</p>
+      {/* CASE STUDIES — carousel of real client proof */}
+      <section style={{ padding: '120px 6%', position: 'relative', overflow: 'hidden' }}>
+        {/* Soft radial gradient background */}
+        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 80% 60% at 50% 20%, rgba(16,161,219,0.12) 0%, transparent 55%), radial-gradient(ellipse 60% 50% at 50% 80%, rgba(106,70,217,0.08) 0%, transparent 55%)', pointerEvents: 'none' }} />
+
+        <div style={{ textAlign: 'center', marginBottom: '72px', position: 'relative', zIndex: 1 }}>
+          <span className="eyebrow" style={{ marginBottom: '16px' }}>Proof</span>
+          <h2 style={{
+            fontFamily: 'Syne, sans-serif',
+            fontWeight: 800,
+            fontSize: 'clamp(2rem, 5vw, 3.4rem)',
+            color: 'var(--white)',
+            letterSpacing: '-1.5px',
+            lineHeight: 1.05,
+            margin: '18px auto 20px',
+            maxWidth: '720px',
+          }}>
+            Lebanese businesses.<br />
+            <span className="grad">Grown from zero.</span>
+          </h2>
+          <p style={{ fontSize: '1rem', color: 'var(--text-muted)', lineHeight: 1.7, fontWeight: 300, maxWidth: '560px', margin: '0 auto' }}>
+            Not fake &ldquo;10x growth&rdquo; promises. Real clients, real timelines, real numbers you can verify on Instagram right now.
+          </p>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '24px', maxWidth: '1200px', margin: '48px auto 0' }} className="case-grid">
-          {CASE_STUDIES.map(cs => (
-            <div key={cs.handle} style={{
-              background: 'linear-gradient(135deg, rgba(1,32,76,0.35), rgba(16,161,219,0.04))',
-              border: '1px solid rgba(16,161,219,0.2)',
-              borderRadius: '20px',
-              padding: '36px 32px',
-              display: 'flex',
-              flexDirection: 'column',
-              transition: 'all 0.3s',
-            }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(16,161,219,0.4)'; e.currentTarget.style.transform = 'translateY(-4px)' }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(16,161,219,0.2)'; e.currentTarget.style.transform = 'none' }}>
 
-              {/* Header: name + handle */}
-              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px', marginBottom: '6px', flexWrap: 'wrap' }}>
-                <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: '1.4rem', color: 'var(--white)', letterSpacing: '-0.5px', lineHeight: 1.1 }}>
-                  {cs.name}
-                </h3>
-                <a href={cs.url} target="_blank" rel="noopener" style={{ fontSize: '0.78rem', color: 'var(--sky)', textDecoration: 'none', fontWeight: 500, display: 'inline-flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap' }}>
-                  {cs.handle} <Icon name="link" size={12} />
-                </a>
-              </div>
-
-              {/* Meta row */}
-              <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '20px', lineHeight: 1.5 }}>
-                {cs.industry} · {cs.region} · {cs.duration}
-              </div>
-
-              {/* Metrics */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '24px', padding: '18px 0', borderTop: '1px solid rgba(16,161,219,0.15)', borderBottom: '1px solid rgba(16,161,219,0.15)' }} className="case-metrics">
-                {cs.metrics.map(m => (
-                  <div key={m.label} style={{ textAlign: 'left' }}>
-                    <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: '1.1rem', color: 'var(--sky)', letterSpacing: '-0.5px', lineHeight: 1.2, marginBottom: '4px' }}>
-                      {m.value}
-                    </div>
-                    <div style={{ fontSize: '0.68rem', color: 'var(--text-dim)', lineHeight: 1.3, textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>
-                      {m.label}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Summary */}
-              <p style={{ fontSize: '0.85rem', color: 'rgba(249,253,254,0.72)', lineHeight: 1.65, fontWeight: 300, marginBottom: '18px', flex: 1 }}>
-                {cs.summary}
-              </p>
-
-              {/* Package / tier */}
-              <div style={{ fontSize: '0.72rem', color: 'var(--text-dim)', marginBottom: '18px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>
-                Delivered: <span style={{ color: 'var(--sky)' }}>{cs.tier}</span>
-              </div>
-
-              {/* Quote */}
-              <blockquote style={{
-                margin: 0,
-                padding: '18px 20px',
-                background: 'rgba(249,253,254,0.03)',
-                borderLeft: '3px solid var(--sky)',
-                borderRadius: '0 10px 10px 0',
-              }}>
-                <p style={{ fontSize: '0.82rem', color: 'rgba(249,253,254,0.85)', lineHeight: 1.65, fontStyle: 'italic', marginBottom: '10px', fontWeight: 300 }}>
-                  &ldquo;{cs.quote.text}&rdquo;
-                </p>
-                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-                  — {cs.quote.author}
-                </div>
-              </blockquote>
-            </div>
-          ))}
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <CaseStudyCarousel />
         </div>
-        <div style={{ textAlign: 'center', marginTop: '36px' }}>
+
+        <div style={{ textAlign: 'center', marginTop: '48px', position: 'relative', zIndex: 1 }}>
           <a href={process.env.NEXT_PUBLIC_BOOKING_URL} target="_blank" rel="noopener" className="btn-primary" style={{ fontSize: '0.9rem' }}>
             Could your brand be next? Book a strategy call →
           </a>
@@ -338,13 +496,21 @@ export default function HomePage() {
 
       <style>{`
         @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+        @keyframes caseIn{
+          from{opacity:0;transform:translateY(12px) scale(0.98)}
+          to{opacity:1;transform:translateY(0) scale(1)}
+        }
         @media(max-width:900px){
           .phil-grid,.svc-grid,.proc-grid,.testi-grid{grid-template-columns:1fr 1fr!important}
-          .case-grid{grid-template-columns:1fr!important}
+        }
+        @media(max-width:720px){
+          .case-main{padding:36px 28px 32px!important}
+          .case-arrow{display:none!important}
         }
         @media(max-width:600px){
-          .phil-grid,.svc-grid,.proc-grid,.testi-grid,.case-grid{grid-template-columns:1fr!important}
-          .case-metrics{grid-template-columns:1fr!important;gap:16px!important}
+          .phil-grid,.svc-grid,.proc-grid,.testi-grid{grid-template-columns:1fr!important}
+          .case-metrics{grid-template-columns:1fr!important;gap:14px!important}
+          .case-main{padding:28px 20px 24px!important;border-radius:20px!important}
         }
       `}</style>
     </div>
