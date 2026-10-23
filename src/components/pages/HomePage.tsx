@@ -371,31 +371,35 @@ export default function HomePage() {
       {/* MEET THE FOUNDER — the person you'll actually work with */}
       <section style={{ padding: '100px 6%' }}>
         <div style={{ maxWidth: '1000px', margin: '0 auto', display: 'grid', gridTemplateColumns: '240px 1fr', gap: '48px', alignItems: 'center' }} className="founder-grid">
-          {/* Avatar block — initials placeholder until a real photo is added */}
+          {/* Founder photo */}
           <div style={{
             width: '240px',
             height: '240px',
             borderRadius: '28px',
-            background: 'linear-gradient(135deg, rgba(1,32,76,0.6), rgba(16,161,219,0.1))',
             border: '1px solid rgba(16,161,219,0.3)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
             position: 'relative',
             overflow: 'hidden',
+            boxShadow: '0 20px 60px rgba(1,32,76,0.4)',
           }} className="founder-avatar">
-            <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 30% 30%, rgba(16,161,219,0.2), transparent 60%)' }} />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/karim.jpg"
+              alt="Karim, YallaGrow founder"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                objectPosition: 'center 20%',
+                display: 'block',
+              }}
+            />
+            {/* Subtle brand tint overlay */}
             <div style={{
-              fontFamily: 'Syne, sans-serif',
-              fontWeight: 800,
-              fontSize: '5rem',
-              background: 'linear-gradient(135deg, var(--sky), var(--purple))',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-              letterSpacing: '-3px',
-              position: 'relative',
-            }}>K</div>
+              position: 'absolute',
+              inset: 0,
+              background: 'linear-gradient(135deg, rgba(16,161,219,0.08), transparent 50%)',
+              pointerEvents: 'none',
+            }} />
           </div>
 
           {/* Bio */}
