@@ -3,6 +3,11 @@ import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Icon } from '@/components/ui/Icons'
 
+// NOTE: All table reads/writes go through /api/admin/* routes which use
+// the service_role key server-side. The anon `supabase` client here is
+// used ONLY for Storage uploads/deletes on the 'affiliate-resources'
+// bucket. Enforce Storage access with bucket-level RLS, not table RLS.
+
 interface Affiliate {
   id: string
   full_name: string
@@ -48,6 +53,21 @@ interface ResourceItem {
   sort_order: number
 }
 
+async function jsonFetch<T = unknown>(url: string, init?: RequestInit): Promise<T> {
+  const res = await fetch(url, {
+    ...init,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(init?.headers || {}),
+    },
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: 'Request failed' }))
+    throw new Error(err.error || `HTTP ${res.status}`)
+  }
+  return res.json()
+}
+
 export default function AdminAffiliatesPage() {
   const [tab, setTab] = useState<'members' | 'referrals' | 'resources'>('members')
   const [affiliates, setAffiliates] = useState<Affiliate[]>([])
@@ -64,72 +84,125 @@ export default function AdminAffiliatesPage() {
   const [rate, setRate] = useState(30)
 
   const loadAll = useCallback(async () => {
-    const [a, r, res] = await Promise.all([
-      supabase.from('affiliates').select('*').order('created_at', { ascending: false }),
-      supabase.from('referrals').select('*').order('created_at', { ascending: false }),
-      supabase.from('affiliate_resources').select('*').order('sort_order'),
-    ])
-    if (a.data) setAffiliates(a.data)
-    if (r.data) setReferrals(r.data)
-    if (res.data) setResources(res.data)
+    try {
+      const [a, r, res] = await Promise.all([
+        jsonFetch<{ affiliates: Affiliate[] }>('/api/admin/affiliates'),
+        jsonFetch<{ referrals: Referral[] }>('/api/admin/referrals'),
+        jsonFetch<{ resources: Resource[] }>('/api/admin/resources'),
+      ])
+      setAffiliates(a.affiliates || [])
+      setReferrals(r.referrals || [])
+      setResources(res.resources || [])
+    } catch (err) {
+      console.error('Load failed:', err)
+    }
   }, [])
 
   useEffect(() => { loadAll() }, [loadAll])
 
   // === MEMBERS ACTIONS ===
   const updateAffiliateStatus = async (id: string, status: string) => {
-    await supabase.from('affiliates').update({ status }).eq('id', id)
-    loadAll()
+    try {
+      await jsonFetch('/api/admin/affiliates', {
+        method: 'PATCH',
+        body: JSON.stringify({ id, status }),
+      })
+      loadAll()
+    } catch (err) {
+      alert('Update failed: ' + (err as Error).message)
+    }
   }
+
   const deleteAffiliate = async (id: string) => {
     if (!confirm('Permanently delete this affiliate?')) return
-    await supabase.from('affiliates').delete().eq('id', id)
-    loadAll()
+    try {
+      await jsonFetch(`/api/admin/affiliates?id=${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+      })
+      loadAll()
+    } catch (err) {
+      alert('Delete failed: ' + (err as Error).message)
+    }
   }
 
   // === REFERRAL ACTIONS ===
   const logReferral = async () => {
-    if (!refCode || !clientName || !invoice) { alert('Fill in ref code, client name, and invoice amount.'); return }
-    const commission = (Number(invoice) * rate) / 100
-    await supabase.from('referrals').insert({
-      ref_code: refCode.toUpperCase(),
-      client_name: clientName,
-      client_email: clientEmail,
-      invoice_amount: Number(invoice),
-      commission_rate: rate,
-      commission_amount: commission,
-      status: 'pending',
-    })
-    setRefCode(''); setClientName(''); setClientEmail(''); setInvoice(''); setRate(30)
-    loadAll()
-    alert(`Referral logged! Commission: $${commission.toFixed(2)}`)
+    if (!refCode || !clientName || !invoice) {
+      alert('Fill in ref code, client name, and invoice amount.')
+      return
+    }
+    try {
+      const result = await jsonFetch<{ commission: number }>('/api/admin/referrals', {
+        method: 'POST',
+        body: JSON.stringify({
+          ref_code: refCode,
+          client_name: clientName,
+          client_email: clientEmail,
+          invoice_amount: Number(invoice),
+          commission_rate: rate,
+        }),
+      })
+      setRefCode(''); setClientName(''); setClientEmail(''); setInvoice(''); setRate(30)
+      loadAll()
+      alert(`Referral logged! Commission: $${result.commission.toFixed(2)}`)
+    } catch (err) {
+      alert('Log failed: ' + (err as Error).message)
+    }
   }
+
   const updateReferralStatus = async (id: string, status: string) => {
-    await supabase.from('referrals').update({ status }).eq('id', id)
-    loadAll()
+    try {
+      await jsonFetch('/api/admin/referrals', {
+        method: 'PATCH',
+        body: JSON.stringify({ id, status }),
+      })
+      loadAll()
+    } catch (err) {
+      alert('Update failed: ' + (err as Error).message)
+    }
   }
 
   // === RESOURCE ACTIONS ===
   const toggleResource = async (id: string, enabled: boolean) => {
-    await supabase.from('affiliate_resources').update({ enabled: !enabled }).eq('id', id)
-    loadAll()
+    try {
+      await jsonFetch('/api/admin/resources', {
+        method: 'PATCH',
+        body: JSON.stringify({ id, enabled: !enabled }),
+      })
+      loadAll()
+    } catch (err) {
+      alert('Toggle failed: ' + (err as Error).message)
+    }
   }
+
   const addResource = async () => {
     const title = prompt('Resource title (e.g. "Case Studies"):')
     if (!title) return
     const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
     const icon = prompt('Icon name (e.g. "bar-chart", "document"):') || 'document'
-    const { data } = await supabase.from('affiliate_resources').insert({
-      title, slug, icon, sort_order: resources.length + 1,
-    }).select().single()
-    if (data) setEditingResource(data)
-    loadAll()
+    try {
+      const result = await jsonFetch<{ resource: Resource }>('/api/admin/resources', {
+        method: 'POST',
+        body: JSON.stringify({ title, slug, icon, sort_order: resources.length + 1 }),
+      })
+      if (result.resource) setEditingResource(result.resource)
+      loadAll()
+    } catch (err) {
+      alert('Create failed: ' + (err as Error).message)
+    }
   }
+
   const deleteResource = async (id: string) => {
     if (!confirm('Delete this resource and all its content?')) return
-    await supabase.from('affiliate_resources').delete().eq('id', id)
-    loadAll()
-    setEditingResource(null)
+    try {
+      await jsonFetch(`/api/admin/resources?id=${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+      })
+      loadAll()
+      setEditingResource(null)
+    } catch (err) {
+      alert('Delete failed: ' + (err as Error).message)
+    }
   }
 
   const filteredAffiliates = affiliates.filter(a =>
@@ -304,24 +377,45 @@ function ResourceEditor({ resource, onClose, onDelete }: { resource: Resource; o
   const [uploading, setUploading] = useState(false)
 
   const loadItems = useCallback(async () => {
-    const { data } = await supabase.from('affiliate_resource_items').select('*').eq('resource_id', resource.id).order('sort_order')
-    if (data) setItems(data)
+    try {
+      const result = await jsonFetch<{ items: ResourceItem[] }>(
+        `/api/admin/resource-items?resource_id=${encodeURIComponent(resource.id)}`
+      )
+      setItems(result.items || [])
+    } catch (err) {
+      console.error('Load items failed:', err)
+    }
   }, [resource.id])
 
   useEffect(() => { loadItems() }, [loadItems])
 
   const saveMetadata = async () => {
-    await supabase.from('affiliate_resources').update({
-      title: meta.title, description: meta.description, icon: meta.icon, cta_text: meta.cta_text, slug: meta.slug,
-    }).eq('id', resource.id)
-    alert('Saved!')
+    try {
+      await jsonFetch('/api/admin/resources', {
+        method: 'PATCH',
+        body: JSON.stringify({
+          id: resource.id,
+          title: meta.title, description: meta.description, icon: meta.icon, cta_text: meta.cta_text, slug: meta.slug,
+        }),
+      })
+      alert('Saved!')
+    } catch (err) {
+      alert('Save failed: ' + (err as Error).message)
+    }
   }
 
   const addTextBlock = async () => {
-    await supabase.from('affiliate_resource_items').insert({
-      resource_id: resource.id, type: 'text', title: 'New Text Block', content: 'Write your content here...', sort_order: items.length,
-    })
-    loadItems()
+    try {
+      await jsonFetch('/api/admin/resource-items', {
+        method: 'POST',
+        body: JSON.stringify({
+          resource_id: resource.id, type: 'text', title: 'New Text Block', content: 'Write your content here...', sort_order: items.length,
+        }),
+      })
+      loadItems()
+    } catch (err) {
+      alert('Add failed: ' + (err as Error).message)
+    }
   }
 
   const addLink = async () => {
@@ -329,53 +423,97 @@ function ResourceEditor({ resource, onClose, onDelete }: { resource: Resource; o
     if (!title) return
     const url = prompt('URL:')
     if (!url) return
-    await supabase.from('affiliate_resource_items').insert({
-      resource_id: resource.id, type: 'link', title, url, sort_order: items.length,
-    })
-    loadItems()
+    try {
+      await jsonFetch('/api/admin/resource-items', {
+        method: 'POST',
+        body: JSON.stringify({
+          resource_id: resource.id, type: 'link', title, url, sort_order: items.length,
+        }),
+      })
+      loadItems()
+    } catch (err) {
+      alert('Add failed: ' + (err as Error).message)
+    }
   }
 
   const uploadFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
     setUploading(true)
-    const path = `${resource.slug}/${Date.now()}-${file.name}`
-    const { error } = await supabase.storage.from('affiliate-resources').upload(path, file)
-    if (error) { alert('Upload failed: ' + error.message); setUploading(false); return }
-    const { data: { publicUrl } } = supabase.storage.from('affiliate-resources').getPublicUrl(path)
-    const sizeKB = file.size / 1024
-    const sizeStr = sizeKB > 1024 ? `${(sizeKB / 1024).toFixed(1)} MB` : `${sizeKB.toFixed(0)} KB`
-    await supabase.from('affiliate_resource_items').insert({
-      resource_id: resource.id, type: 'file', title: file.name, url: publicUrl, file_size: sizeStr, sort_order: items.length,
-    })
-    setUploading(false)
-    loadItems()
-    e.target.value = ''
+    try {
+      // Storage upload still uses the client (anon key) — Storage has its
+      // own RLS layer, separate from table RLS. The bucket policy should
+      // allow authenticated writes; see the RLS SQL file for storage policies.
+      const path = `${resource.slug}/${Date.now()}-${file.name}`
+      const { error } = await supabase.storage.from('affiliate-resources').upload(path, file)
+      if (error) throw error
+      const { data: { publicUrl } } = supabase.storage.from('affiliate-resources').getPublicUrl(path)
+      const sizeKB = file.size / 1024
+      const sizeStr = sizeKB > 1024 ? `${(sizeKB / 1024).toFixed(1)} MB` : `${sizeKB.toFixed(0)} KB`
+      await jsonFetch('/api/admin/resource-items', {
+        method: 'POST',
+        body: JSON.stringify({
+          resource_id: resource.id, type: 'file', title: file.name, url: publicUrl, file_size: sizeStr, sort_order: items.length,
+        }),
+      })
+      loadItems()
+    } catch (err) {
+      alert('Upload failed: ' + (err as Error).message)
+    } finally {
+      setUploading(false)
+      e.target.value = ''
+    }
   }
 
   const updateItem = async (id: string, updates: Partial<ResourceItem>) => {
-    await supabase.from('affiliate_resource_items').update(updates).eq('id', id)
-    loadItems()
+    try {
+      await jsonFetch('/api/admin/resource-items', {
+        method: 'PATCH',
+        body: JSON.stringify({ id, ...updates }),
+      })
+      loadItems()
+    } catch (err) {
+      alert('Update failed: ' + (err as Error).message)
+    }
   }
 
   const deleteItem = async (id: string) => {
     if (!confirm('Delete this content block?')) return
     const item = items.find(i => i.id === id)
-    if (item?.type === 'file' && item.url) {
-      const path = item.url.split('/affiliate-resources/')[1]
-      if (path) await supabase.storage.from('affiliate-resources').remove([path])
+    try {
+      // Clean up storage file first (uses anon key against storage RLS)
+      if (item?.type === 'file' && item.url) {
+        const path = item.url.split('/affiliate-resources/')[1]
+        if (path) await supabase.storage.from('affiliate-resources').remove([path])
+      }
+      await jsonFetch(`/api/admin/resource-items?id=${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+      })
+      loadItems()
+    } catch (err) {
+      alert('Delete failed: ' + (err as Error).message)
     }
-    await supabase.from('affiliate_resource_items').delete().eq('id', id)
-    loadItems()
   }
 
   const moveItem = async (id: string, direction: -1 | 1) => {
     const idx = items.findIndex(i => i.id === id)
     const swapIdx = idx + direction
     if (swapIdx < 0 || swapIdx >= items.length) return
-    await supabase.from('affiliate_resource_items').update({ sort_order: items[swapIdx].sort_order }).eq('id', items[idx].id)
-    await supabase.from('affiliate_resource_items').update({ sort_order: items[idx].sort_order }).eq('id', items[swapIdx].id)
-    loadItems()
+    try {
+      await Promise.all([
+        jsonFetch('/api/admin/resource-items', {
+          method: 'PATCH',
+          body: JSON.stringify({ id: items[idx].id, sort_order: items[swapIdx].sort_order }),
+        }),
+        jsonFetch('/api/admin/resource-items', {
+          method: 'PATCH',
+          body: JSON.stringify({ id: items[swapIdx].id, sort_order: items[idx].sort_order }),
+        }),
+      ])
+      loadItems()
+    } catch (err) {
+      alert('Move failed: ' + (err as Error).message)
+    }
   }
 
   return (
