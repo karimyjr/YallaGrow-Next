@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { motion } from 'framer-motion'
 import { Icon } from '@/components/ui/Icons'
 
 const NAV_LINKS = [
@@ -33,9 +34,9 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [servicesOpen, setServicesOpen] = useState(false)
+  const [hoveredHref, setHoveredHref] = useState<string | null>(null)
   const pathname = usePathname()
   const hideNavbar = pathname.startsWith('/admin') || pathname.startsWith('/affiliate/dashboard')
-if (hideNavbar) return null
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20)
@@ -44,6 +45,13 @@ if (hideNavbar) return null
   }, [])
 
   useEffect(() => { setMobileOpen(false) }, [pathname])
+
+  if (hideNavbar) return null
+
+  // The animated pill tracks whatever link is currently being hovered;
+  // if nothing is hovered, it sits on the active route. `layoutId`
+  // makes framer-motion slide the pill between mount points.
+  const targetHref = hoveredHref ?? pathname
 
   return (
     <>
@@ -62,20 +70,48 @@ if (hideNavbar) return null
           Yalla<em style={{ color: 'var(--sky)', fontStyle: 'normal' }}>Grow</em>
         </Link>
 
-        {/* Desktop links */}
-        <ul style={{ display: 'flex', gap: 0, listStyle: 'none', justifyContent: 'center', alignItems: 'center' }}>
-          {NAV_LINKS.map(link => (
+        {/* Desktop links — animated liquid pill highlight */}
+        <ul style={{ display: 'flex', gap: '2px', listStyle: 'none', justifyContent: 'center', alignItems: 'center' }}
+          onMouseLeave={() => setHoveredHref(null)}>
+          {NAV_LINKS.map(link => {
+            const isTarget = link.href === targetHref
+            return (
             <li key={link.href} style={{ position: 'relative' }}
-              onMouseEnter={() => link.hasDropdown && setServicesOpen(true)}
+              onMouseEnter={() => {
+                setHoveredHref(link.href)
+                if (link.hasDropdown) setServicesOpen(true)
+              }}
               onMouseLeave={() => link.hasDropdown && setServicesOpen(false)}>
+              {/* The sliding pill — layoutId makes framer-motion animate it between links */}
+              {isTarget && (
+                <motion.div
+                  layoutId="nav-highlight"
+                  aria-hidden="true"
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    background: 'linear-gradient(180deg, rgba(16,161,219,0.16), rgba(16,161,219,0.05))',
+                    border: '1px solid rgba(16,161,219,0.28)',
+                    borderRadius: '10px',
+                    backdropFilter: 'blur(10px)',
+                    WebkitBackdropFilter: 'blur(10px)',
+                    boxShadow: '0 4px 20px rgba(16,161,219,0.18), inset 0 1px 0 rgba(255,255,255,0.06)',
+                    zIndex: 0,
+                    pointerEvents: 'none',
+                  }}
+                  transition={{ type: 'spring', stiffness: 380, damping: 32, mass: 0.6 }}
+                />
+              )}
               <Link href={link.href} style={{
+                position: 'relative',
+                zIndex: 1,
                 textDecoration: 'none',
-                color: link.highlight ? 'var(--sky)' : pathname === link.href ? 'var(--white)' : 'var(--text-muted)',
-                fontSize: '0.68rem', fontWeight: 500, padding: '6px 7px',
-                borderRadius: '7px', display: 'block', whiteSpace: 'nowrap',
-                background: pathname === link.href ? 'var(--glass)' : 'transparent',
+                color: isTarget ? 'var(--white)' : link.highlight ? 'var(--sky)' : 'var(--text-muted)',
+                fontSize: '0.72rem', fontWeight: 500, padding: '8px 12px',
+                borderRadius: '10px', display: 'block', whiteSpace: 'nowrap',
+                transition: 'color 0.25s',
               }}>
-                {link.label} {link.hasDropdown && <span style={{ fontSize: '0.5rem' }}>▼</span>}
+                {link.label} {link.hasDropdown && <span style={{ fontSize: '0.5rem', opacity: 0.6 }}>▼</span>}
               </Link>
 
               {/* Mega menu */}
@@ -96,7 +132,7 @@ if (hideNavbar) return null
                     onMouseEnter={e => (e.currentTarget.style.background = 'var(--glass)')}
                     onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
                       <span style={{ width: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--sky)' }}>
-                        <Icon name={s.icon as any} size={18} />
+                        <Icon name={s.icon as 'target'} size={18} />
                       </span>
                       <div>
                         <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--white)' }}>{s.label}</div>
@@ -107,7 +143,7 @@ if (hideNavbar) return null
                 </div>
               )}
             </li>
-          ))}
+          )})}
         </ul>
 
         {/* Right */}
