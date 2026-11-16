@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
+import { motion } from 'framer-motion'
 import { Icon } from '@/components/ui/Icons'
 
 // Small counter component
@@ -96,128 +97,189 @@ const CASE_STUDIES = [
   },
 ]
 
-// Testimonial carousel — stacked card deck with peek cards behind
+// Glassy 3D carousel — fan of cards with perspective. Active card centered
+// upright, neighbors tilt away and recede. Click a neighbor to rotate the
+// stack. Driven by framer-motion springs on transform values.
 function CaseStudyCarousel() {
   const [idx, setIdx] = useState(0)
   const total = CASE_STUDIES.length
-  const current = CASE_STUDIES[idx]
   const next = () => setIdx(i => (i + 1) % total)
   const prev = () => setIdx(i => (i - 1 + total) % total)
 
-  const glassBase: React.CSSProperties = {
-    background: 'linear-gradient(135deg, rgba(249,253,254,0.06), rgba(249,253,254,0.02))',
-    backdropFilter: 'blur(24px)',
-    WebkitBackdropFilter: 'blur(24px)',
-    border: '1px solid rgba(249,253,254,0.08)',
-    borderRadius: '28px',
-    boxShadow: '0 24px 80px rgba(1,32,76,0.4)',
+  // Compute signed distance from active card, wrapping so e.g. with 3 items
+  // and idx=0, item 2 is at distance -1 (not +2).
+  const distanceFrom = (i: number) => {
+    let d = i - idx
+    if (d > total / 2) d -= total
+    if (d < -total / 2) d += total
+    return d
   }
 
   return (
-    <div style={{ position: 'relative', maxWidth: '860px', margin: '0 auto', padding: '20px 0' }}>
-      {/* Ghost card — left peek */}
-      <div style={{
-        ...glassBase,
-        position: 'absolute',
-        top: '36px',
-        left: '-6%',
-        right: '14%',
-        height: 'calc(100% - 72px)',
-        transform: 'rotate(-3deg)',
-        opacity: 0.35,
-        zIndex: 1,
-      }} aria-hidden="true" />
-
-      {/* Ghost card — right peek */}
-      <div style={{
-        ...glassBase,
-        position: 'absolute',
-        top: '36px',
-        left: '14%',
-        right: '-6%',
-        height: 'calc(100% - 72px)',
-        transform: 'rotate(3deg)',
-        opacity: 0.35,
-        zIndex: 1,
-      }} aria-hidden="true" />
-
-      {/* Main card */}
-      <div key={idx} style={{
-        ...glassBase,
+    <div
+      style={{
         position: 'relative',
-        zIndex: 2,
-        padding: '48px 52px 40px',
-        animation: 'caseIn 0.4s cubic-bezier(0.16,1,0.3,1)',
-      }} className="case-main">
-        {/* Top row: client + handle link */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '14px', marginBottom: '28px', flexWrap: 'wrap' }}>
-          <div>
-            <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: '1.5rem', color: 'var(--white)', letterSpacing: '-0.5px', lineHeight: 1.1, marginBottom: '6px' }}>
-              {current.name}
-            </h3>
-            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', letterSpacing: '0.5px' }}>
-              {current.industry} &middot; {current.region} &middot; {current.duration}
-            </div>
-          </div>
-          <a href={current.url} target="_blank" rel="noopener" style={{ fontSize: '0.78rem', color: 'var(--sky)', textDecoration: 'none', fontWeight: 500, display: 'inline-flex', alignItems: 'center', gap: '5px', whiteSpace: 'nowrap' }}>
-            {current.handle} <Icon name="link" size={12} />
-          </a>
-        </div>
+        maxWidth: '1000px',
+        margin: '0 auto',
+        padding: '40px 0 24px',
+        perspective: '1600px',
+      }}
+      className="case-stage"
+    >
+      {/* Soft ambient blobs behind the stack for depth */}
+      <div aria-hidden="true" style={{
+        position: 'absolute', inset: '0 20% 40% 20%',
+        background: 'radial-gradient(ellipse at center, rgba(16,161,219,0.18), transparent 60%)',
+        filter: 'blur(40px)', pointerEvents: 'none',
+      }} />
 
-        {/* The quote — the hero element */}
-        <blockquote style={{ margin: 0, marginBottom: '36px' }}>
-          <p style={{
-            fontFamily: 'Syne, sans-serif',
-            fontWeight: 500,
-            fontSize: 'clamp(1.1rem, 2.2vw, 1.5rem)',
-            lineHeight: 1.45,
-            color: 'var(--white)',
-            letterSpacing: '-0.3px',
-            fontStyle: 'italic',
-            marginBottom: '18px',
-          }}>
-            &ldquo;{current.quote.text}&rdquo;
-          </p>
-          <footer style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 500 }}>
-            — {current.quote.author}
-          </footer>
-        </blockquote>
+      <div style={{
+        position: 'relative',
+        height: 'clamp(440px, 50vw, 520px)',
+        transformStyle: 'preserve-3d',
+      }} className="case-stack">
+        {CASE_STUDIES.map((cs, i) => {
+          const d = distanceFrom(i)
+          const abs = Math.abs(d)
+          // Only render active + direct neighbors; others park out of view
+          const isActive = d === 0
+          const isVisible = abs <= 1
 
-        {/* Metrics strip */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: '20px',
-          padding: '22px 0 6px',
-          borderTop: '1px solid rgba(16,161,219,0.15)',
-        }} className="case-metrics">
-          {current.metrics.map(m => (
-            <div key={m.label}>
+          // Per-position transform
+          const x = d * 32          // horizontal shift, percent of card width
+          const z = -abs * 160      // push neighbors back
+          const rotateY = d * -22   // fan rotation (negative so left card tilts right)
+          const scale = isActive ? 1 : 0.86
+          const opacity = isActive ? 1 : (isVisible ? 0.55 : 0)
+
+          return (
+            <motion.div
+              key={cs.handle}
+              aria-hidden={!isActive}
+              onClick={() => !isActive && isVisible && setIdx(i)}
+              initial={false}
+              animate={{
+                x: `${x}%`,
+                z,
+                rotateY,
+                scale,
+                opacity,
+                pointerEvents: isVisible ? 'auto' : 'none',
+              }}
+              transition={{ type: 'spring', stiffness: 220, damping: 26, mass: 0.9 }}
+              style={{
+                position: 'absolute',
+                top: 0, left: '50%', marginLeft: 'calc(min(440px, 85vw) / -2)',
+                width: 'min(440px, 85vw)',
+                height: '100%',
+                transformOrigin: '50% 50%',
+                transformStyle: 'preserve-3d',
+                zIndex: 10 - abs,
+                cursor: isActive ? 'default' : 'pointer',
+                WebkitTapHighlightColor: 'transparent',
+              }}
+              className="case-card"
+            >
               <div style={{
-                fontFamily: 'Syne, sans-serif',
-                fontWeight: 800,
-                fontSize: '1.3rem',
-                background: 'linear-gradient(135deg, var(--sky), var(--purple))',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-                letterSpacing: '-0.5px',
-                lineHeight: 1.1,
-                marginBottom: '6px',
+                height: '100%',
+                background: 'linear-gradient(140deg, rgba(249,253,254,0.09), rgba(249,253,254,0.02) 60%)',
+                backdropFilter: 'blur(24px)',
+                WebkitBackdropFilter: 'blur(24px)',
+                border: '1px solid rgba(16,161,219,0.18)',
+                borderRadius: '28px',
+                boxShadow: isActive
+                  ? '0 32px 80px rgba(1,32,76,0.55), inset 0 1px 0 rgba(255,255,255,0.08)'
+                  : '0 20px 50px rgba(1,32,76,0.4), inset 0 1px 0 rgba(255,255,255,0.04)',
+                padding: 'clamp(24px, 4vw, 44px) clamp(22px, 4vw, 44px) 32px',
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden',
+                position: 'relative',
               }}>
-                {m.value}
-              </div>
-              <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600, lineHeight: 1.4 }}>
-                {m.label}
-              </div>
-            </div>
-          ))}
-        </div>
+                {/* Subtle sheen highlight on top edge */}
+                <div aria-hidden="true" style={{
+                  position: 'absolute', top: 0, left: 0, right: 0, height: '1px',
+                  background: 'linear-gradient(90deg, transparent, rgba(16,161,219,0.5), transparent)',
+                }} />
 
-        {/* Delivered */}
-        <div style={{ fontSize: '0.68rem', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: 600, marginTop: '20px', paddingTop: '18px', borderTop: '1px solid rgba(249,253,254,0.05)' }}>
-          Delivered: <span style={{ color: 'var(--sky)' }}>{current.tier}</span>
-        </div>
+                {/* Top row: client + handle */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', marginBottom: '24px', flexWrap: 'wrap' }}>
+                  <div>
+                    <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 'clamp(1.2rem, 2.2vw, 1.5rem)', color: 'var(--white)', letterSpacing: '-0.5px', lineHeight: 1.1, marginBottom: '6px' }}>
+                      {cs.name}
+                    </h3>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', letterSpacing: '0.5px', lineHeight: 1.5 }}>
+                      {cs.industry} &middot; {cs.region}
+                    </div>
+                    <div style={{ fontSize: '0.68rem', color: 'var(--text-dim)', letterSpacing: '0.5px' }}>
+                      {cs.duration}
+                    </div>
+                  </div>
+                  {isActive && (
+                    <a href={cs.url} target="_blank" rel="noopener" style={{ fontSize: '0.74rem', color: 'var(--sky)', textDecoration: 'none', fontWeight: 500, display: 'inline-flex', alignItems: 'center', gap: '5px', whiteSpace: 'nowrap' }}>
+                      {cs.handle} <Icon name="link" size={11} />
+                    </a>
+                  )}
+                </div>
+
+                {/* Quote */}
+                <blockquote style={{ margin: 0, marginBottom: '28px', flex: 1 }}>
+                  <p style={{
+                    fontFamily: 'Syne, sans-serif',
+                    fontWeight: 500,
+                    fontSize: 'clamp(0.95rem, 1.7vw, 1.25rem)',
+                    lineHeight: 1.45,
+                    color: 'var(--white)',
+                    letterSpacing: '-0.3px',
+                    fontStyle: 'italic',
+                    marginBottom: '14px',
+                  }}>
+                    &ldquo;{cs.quote.text}&rdquo;
+                  </p>
+                  <footer style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 500 }}>
+                    — {cs.quote.author}
+                  </footer>
+                </blockquote>
+
+                {/* Metrics */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(3, 1fr)',
+                  gap: '14px',
+                  padding: '18px 0 2px',
+                  borderTop: '1px solid rgba(16,161,219,0.18)',
+                }} className="case-metrics">
+                  {cs.metrics.map(m => (
+                    <div key={m.label}>
+                      <div style={{
+                        fontFamily: 'Syne, sans-serif',
+                        fontWeight: 800,
+                        fontSize: 'clamp(0.9rem, 1.6vw, 1.15rem)',
+                        background: 'linear-gradient(135deg, var(--sky), var(--purple))',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        backgroundClip: 'text',
+                        letterSpacing: '-0.5px',
+                        lineHeight: 1.1,
+                        marginBottom: '4px',
+                      }}>
+                        {m.value}
+                      </div>
+                      <div style={{ fontSize: '0.6rem', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600, lineHeight: 1.3 }}>
+                        {m.label}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Delivered */}
+                <div style={{ fontSize: '0.64rem', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: 600, marginTop: '16px', paddingTop: '14px', borderTop: '1px solid rgba(249,253,254,0.05)' }}>
+                  Delivered: <span style={{ color: 'var(--sky)' }}>{cs.tier}</span>
+                </div>
+              </div>
+            </motion.div>
+          )
+        })}
       </div>
 
       {/* Nav arrows */}
@@ -226,26 +288,28 @@ function CaseStudyCarousel() {
         aria-label="Previous case study"
         style={{
           position: 'absolute',
-          left: '-28px',
+          left: '2%',
           top: '50%',
           transform: 'translateY(-50%)',
-          width: '48px',
-          height: '48px',
+          width: '52px',
+          height: '52px',
           borderRadius: '50%',
-          background: 'rgba(6,12,20,0.85)',
-          border: '1px solid rgba(16,161,219,0.25)',
+          background: 'rgba(6,12,20,0.6)',
+          border: '1px solid rgba(16,161,219,0.3)',
           color: 'var(--white)',
           cursor: 'pointer',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          zIndex: 3,
-          backdropFilter: 'blur(12px)',
+          zIndex: 20,
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
           transition: 'all 0.2s',
+          boxShadow: '0 10px 30px rgba(1,32,76,0.4)',
         }}
         className="case-arrow"
         onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--sky)'; e.currentTarget.style.transform = 'translateY(-50%) scale(1.08)' }}
-        onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(16,161,219,0.25)'; e.currentTarget.style.transform = 'translateY(-50%) scale(1)' }}
+        onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(16,161,219,0.3)'; e.currentTarget.style.transform = 'translateY(-50%) scale(1)' }}
       >
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
       </button>
@@ -255,32 +319,34 @@ function CaseStudyCarousel() {
         aria-label="Next case study"
         style={{
           position: 'absolute',
-          right: '-28px',
+          right: '2%',
           top: '50%',
           transform: 'translateY(-50%)',
-          width: '48px',
-          height: '48px',
+          width: '52px',
+          height: '52px',
           borderRadius: '50%',
-          background: 'rgba(6,12,20,0.85)',
-          border: '1px solid rgba(16,161,219,0.25)',
+          background: 'rgba(6,12,20,0.6)',
+          border: '1px solid rgba(16,161,219,0.3)',
           color: 'var(--white)',
           cursor: 'pointer',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          zIndex: 3,
-          backdropFilter: 'blur(12px)',
+          zIndex: 20,
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
           transition: 'all 0.2s',
+          boxShadow: '0 10px 30px rgba(1,32,76,0.4)',
         }}
         className="case-arrow"
         onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--sky)'; e.currentTarget.style.transform = 'translateY(-50%) scale(1.08)' }}
-        onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(16,161,219,0.25)'; e.currentTarget.style.transform = 'translateY(-50%) scale(1)' }}
+        onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(16,161,219,0.3)'; e.currentTarget.style.transform = 'translateY(-50%) scale(1)' }}
       >
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
       </button>
 
       {/* Dots */}
-      <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '32px' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '28px' }}>
         {CASE_STUDIES.map((_, i) => (
           <button
             key={i}
@@ -561,23 +627,20 @@ export default function HomePage() {
 
       <style>{`
         @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
-        @keyframes caseIn{
-          from{opacity:0;transform:translateY(12px) scale(0.98)}
-          to{opacity:1;transform:translateY(0) scale(1)}
-        }
         @media(max-width:900px){
           .phil-grid,.svc-grid,.proc-grid,.testi-grid{grid-template-columns:1fr 1fr!important}
           .founder-grid{grid-template-columns:1fr!important;gap:28px!important;text-align:center}
           .founder-avatar{margin:0 auto}
         }
         @media(max-width:720px){
-          .case-main{padding:36px 28px 32px!important}
-          .case-arrow{display:none!important}
+          /* Shrink side-card offsets so neighbors still peek on narrower screens */
+          .case-stage{perspective:1200px!important}
+          .case-arrow{width:44px!important;height:44px!important;left:0!important;right:0!important}
+          .case-arrow:last-of-type{left:auto!important;right:0!important}
         }
         @media(max-width:600px){
           .phil-grid,.svc-grid,.proc-grid,.testi-grid{grid-template-columns:1fr!important}
-          .case-metrics{grid-template-columns:1fr!important;gap:14px!important}
-          .case-main{padding:28px 20px 24px!important;border-radius:20px!important}
+          .case-metrics{grid-template-columns:repeat(3,1fr)!important;gap:10px!important}
           .founder-avatar{width:180px!important;height:180px!important}
         }
       `}</style>
