@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Icon } from '@/components/ui/Icons'
+import { downloadCSV } from '@/lib/csv'
 
 // NOTE: All table reads/writes go through /api/admin/* routes which use
 // the service_role key server-side. The anon `supabase` client here is
@@ -218,8 +219,24 @@ export default function AdminAffiliatesPage() {
 
   return (
     <div style={{ padding: '32px 24px', maxWidth: '1200px', margin: '0 auto' }}>
-      <h2 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: '1.6rem', color: 'var(--white)', marginBottom: '8px', display: 'inline-flex', alignItems: 'center', gap: '10px' }}><Icon name="handshake" size={22} /> Affiliate Program</h2>
-      <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '24px' }}>Manage members, referrals, and marketing resources.</p>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px', marginBottom: '24px' }}>
+        <div>
+          <h2 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: '1.6rem', color: 'var(--white)', marginBottom: '8px', display: 'inline-flex', alignItems: 'center', gap: '10px' }}><Icon name="handshake" size={22} /> Affiliate Program</h2>
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: 0 }}>Manage members, referrals, and marketing resources.</p>
+        </div>
+        <button
+          onClick={() => {
+            const rows = tab === 'members' ? affiliates : tab === 'referrals' ? referrals : resources
+            if (!rows.length) return
+            downloadCSV(rows as unknown as Record<string, unknown>[], `yallagrow-affiliate-${tab}`)
+          }}
+          className="btn-primary"
+          style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '0.78rem', padding: '9px 14px' }}
+        >
+          <Icon name="download" size={14} />
+          Export {tab} CSV
+        </button>
+      </div>
 
       {/* Sub-tabs */}
       <div style={{ display: 'flex', gap: '6px', borderBottom: '1px solid var(--glass-border)', marginBottom: '32px', flexWrap: 'wrap' }}>

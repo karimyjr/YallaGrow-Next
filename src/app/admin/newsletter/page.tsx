@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useToast } from '@/components/ui/Toast'
 import { Icon } from '@/components/ui/Icons'
+import { downloadCSV } from '@/lib/csv'
 
 interface Subscriber {
   id: string
@@ -32,17 +33,8 @@ export default function AdminNewsletterPage() {
   }
 
   const exportCSV = () => {
-    const csv = ['Email,Source,Confirmed,Subscribed At']
-    filtered.forEach(s => {
-      csv.push(`${s.email},${s.source},${s.confirmed ? 'yes' : 'no'},${s.subscribed_at}`)
-    })
-    const blob = new Blob([csv.join('\n')], { type: 'text/csv' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `subscribers-${new Date().toISOString().split('T')[0]}.csv`
-    a.click()
-    URL.revokeObjectURL(url)
+    if (!filtered.length) return
+    downloadCSV(filtered as unknown as Record<string, unknown>[], 'yallagrow-newsletter')
   }
 
   const filtered = subscribers.filter(s =>

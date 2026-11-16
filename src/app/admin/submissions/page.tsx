@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useToast } from '@/components/ui/Toast'
 import { Icon } from '@/components/ui/Icons'
+import { downloadCSV } from '@/lib/csv'
 
 interface PackageSubmission {
   id: string
@@ -117,12 +118,26 @@ export default function AdminSubmissionsPage() {
 
   return (
     <div style={{ padding: '32px 24px', maxWidth: '1200px', margin: '0 auto' }}>
-      <div style={{ marginBottom: '20px' }}>
-        <h2 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: '1.6rem', color: 'var(--white)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <Icon name="clipboard" size={22} />
-          Form Submissions
-        </h2>
-        <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: 0 }}>All incoming leads and applications.</p>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
+        <div>
+          <h2 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: '1.6rem', color: 'var(--white)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <Icon name="clipboard" size={22} />
+            Form Submissions
+          </h2>
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: 0 }}>All incoming leads and applications.</p>
+        </div>
+        <button
+          onClick={() => {
+            const rows = tab === 'packages' ? packages : tab === 'jobs' ? jobs : contacts
+            if (!rows.length) return
+            downloadCSV(rows as unknown as Record<string, unknown>[], `yallagrow-${tab}`)
+          }}
+          className="btn-primary"
+          style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '0.78rem', padding: '9px 14px' }}
+        >
+          <Icon name="download" size={14} />
+          Export {tab} CSV
+        </button>
       </div>
 
       {/* Sub-tabs */}

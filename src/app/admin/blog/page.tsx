@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useToast } from '@/components/ui/Toast'
 import { Icon } from '@/components/ui/Icons'
+import { downloadCSV } from '@/lib/csv'
 
 interface Post {
   id: string
@@ -304,7 +305,17 @@ export default function AdminBlogPage() {
           </h2>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: 0 }}>Manage your blog posts.</p>
         </div>
-        <button onClick={() => openEditor(null)} className="btn-primary">+ New Post</button>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button
+            onClick={() => posts.length && downloadCSV(posts as unknown as Record<string, unknown>[], 'yallagrow-blog-posts')}
+            className="btn-secondary"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '0.78rem', padding: '9px 14px' }}
+          >
+            <Icon name="download" size={14} />
+            Export CSV
+          </button>
+          <button onClick={() => openEditor(null)} className="btn-primary">+ New Post</button>
+        </div>
       </div>
 
       <input

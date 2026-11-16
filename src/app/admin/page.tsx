@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { motion } from 'framer-motion'
+import AdminOverviewPage from './overview/page'
 import AdminBlogPage from './blog/page'
 import AdminPackagesPage from './packages/page'
 import AdminPricingPage from './pricing/page'
@@ -10,21 +11,22 @@ import AdminNewsletterPage from './newsletter/page'
 import AdminSubmissionsPage from './submissions/page'
 import { Icon } from '@/components/ui/Icons'
 
-type IconName = 'edit' | 'package' | 'dollar' | 'handshake' | 'mail' | 'wrench' | 'clipboard'
+type IconName = 'bar-chart' | 'edit' | 'package' | 'dollar' | 'handshake' | 'mail' | 'wrench' | 'clipboard'
 const TABS: { id: string; icon: IconName; label: string; component: React.ComponentType }[] = [
+  { id: 'overview', icon: 'bar-chart', label: 'Overview', component: AdminOverviewPage },
+  { id: 'submissions', icon: 'clipboard', label: 'Submissions', component: AdminSubmissionsPage },
+  { id: 'affiliates', icon: 'handshake', label: 'Affiliates', component: AdminAffiliatesPage },
+  { id: 'newsletter', icon: 'mail', label: 'Newsletter', component: AdminNewsletterPage },
   { id: 'blog', icon: 'edit', label: 'Blog', component: AdminBlogPage },
   { id: 'packages', icon: 'package', label: 'Packages', component: AdminPackagesPage },
   { id: 'pricing', icon: 'dollar', label: 'Pricing', component: AdminPricingPage },
-  { id: 'affiliates', icon: 'handshake', label: 'Affiliates', component: AdminAffiliatesPage },
-  { id: 'newsletter', icon: 'mail', label: 'Newsletter', component: AdminNewsletterPage },
   { id: 'maintenance', icon: 'wrench', label: 'Maintenance', component: AdminMaintenancePage },
-  { id: 'submissions', icon: 'clipboard', label: 'Submissions', component: AdminSubmissionsPage },
 ]
 
 export default function AdminPage() {
-  const [activeTab, setActiveTab] = useState('blog')
+  const [activeTab, setActiveTab] = useState('overview')
   const [hoveredTab, setHoveredTab] = useState<string | null>(null)
-  const ActiveComponent = TABS.find(t => t.id === activeTab)?.component || AdminBlogPage
+  const ActiveComponent = TABS.find(t => t.id === activeTab)?.component || AdminOverviewPage
 
   // Liquid pill tracks hover first, falls back to active tab.
   const targetTab = hoveredTab ?? activeTab
