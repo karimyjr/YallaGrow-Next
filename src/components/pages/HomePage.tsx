@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Icon } from '@/components/ui/Icons'
 
 // Small counter component
@@ -97,260 +97,180 @@ const CASE_STUDIES = [
   },
 ]
 
-// Glassy 3D carousel — fan of cards with perspective. Active card centered
-// upright, neighbors tilt away and recede. Click a neighbor to rotate the
-// stack. Driven by framer-motion springs on transform values.
+// Single-card crossfade carousel. One card renders at a time;
+// AnimatePresence(mode="wait") makes the old slide out before the new
+// slides in — so cards never overlap. 320ms ease, no 3D transforms,
+// no perspective, no lag.
 function CaseStudyCarousel() {
   const [idx, setIdx] = useState(0)
+  const [dir, setDir] = useState(1)   // +1 = next, -1 = prev (drives slide direction)
   const total = CASE_STUDIES.length
-  const next = () => setIdx(i => (i + 1) % total)
-  const prev = () => setIdx(i => (i - 1 + total) % total)
+  const next = () => { setDir(1);  setIdx(i => (i + 1) % total) }
+  const prev = () => { setDir(-1); setIdx(i => (i - 1 + total) % total) }
+  const goTo = (i: number) => { setDir(i > idx ? 1 : -1); setIdx(i) }
 
-  // Compute signed distance from active card, wrapping so e.g. with 3 items
-  // and idx=0, item 2 is at distance -1 (not +2).
-  const distanceFrom = (i: number) => {
-    let d = i - idx
-    if (d > total / 2) d -= total
-    if (d < -total / 2) d += total
-    return d
-  }
+  const cs = CASE_STUDIES[idx]
 
   return (
-    <div
-      style={{
-        position: 'relative',
-        maxWidth: '1000px',
-        margin: '0 auto',
-        padding: '40px 0 24px',
-        perspective: '1600px',
-      }}
-      className="case-stage"
-    >
-      {/* Soft ambient blobs behind the stack for depth */}
+    <div style={{ position: 'relative', maxWidth: '920px', margin: '0 auto', padding: '32px 0 16px' }}>
+      {/* Ambient glow */}
       <div aria-hidden="true" style={{
-        position: 'absolute', inset: '0 20% 40% 20%',
-        background: 'radial-gradient(ellipse at center, rgba(16,161,219,0.18), transparent 60%)',
-        filter: 'blur(40px)', pointerEvents: 'none',
+        position: 'absolute', inset: '10% 15% 20% 15%',
+        background: 'radial-gradient(ellipse at center, rgba(16,161,219,0.14), transparent 65%)',
+        filter: 'blur(50px)', pointerEvents: 'none', zIndex: 0,
       }} />
 
-      <div style={{
-        position: 'relative',
-        height: 'clamp(440px, 50vw, 520px)',
-        transformStyle: 'preserve-3d',
-      }} className="case-stack">
-        {CASE_STUDIES.map((cs, i) => {
-          const d = distanceFrom(i)
-          const abs = Math.abs(d)
-          // Only render active + direct neighbors; others park out of view
-          const isActive = d === 0
-          const isVisible = abs <= 1
+      {/* Card stage — fixed-height container so swaps don't jump */}
+      <div style={{ position: 'relative', minHeight: 'clamp(460px, 48vw, 500px)', padding: '0 clamp(60px, 7vw, 76px)', zIndex: 1 }}>
+        <AnimatePresence mode="wait" initial={false} custom={dir}>
+          <motion.div
+            key={cs.handle}
+            custom={dir}
+            initial={{ opacity: 0, x: dir * 40 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: dir * -40 }}
+            transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+            style={{
+              background: 'linear-gradient(140deg, rgba(249,253,254,0.07), rgba(249,253,254,0.015) 60%)',
+              backdropFilter: 'blur(24px)',
+              WebkitBackdropFilter: 'blur(24px)',
+              border: '1px solid rgba(16,161,219,0.2)',
+              borderRadius: '24px',
+              boxShadow: '0 28px 70px rgba(1,32,76,0.5), inset 0 1px 0 rgba(255,255,255,0.06)',
+              padding: 'clamp(26px, 4vw, 44px) clamp(24px, 4vw, 44px) 30px',
+              position: 'relative',
+              overflow: 'hidden',
+            }}
+          >
+            {/* Top sheen */}
+            <div aria-hidden="true" style={{
+              position: 'absolute', top: 0, left: 0, right: 0, height: '1px',
+              background: 'linear-gradient(90deg, transparent, rgba(16,161,219,0.5), transparent)',
+            }} />
 
-          // Per-position transform
-          const x = d * 32          // horizontal shift, percent of card width
-          const z = -abs * 160      // push neighbors back
-          const rotateY = d * -22   // fan rotation (negative so left card tilts right)
-          const scale = isActive ? 1 : 0.86
-          const opacity = isActive ? 1 : (isVisible ? 0.55 : 0)
-
-          return (
-            <motion.div
-              key={cs.handle}
-              aria-hidden={!isActive}
-              onClick={() => !isActive && isVisible && setIdx(i)}
-              initial={false}
-              animate={{
-                x: `${x}%`,
-                z,
-                rotateY,
-                scale,
-                opacity,
-                pointerEvents: isVisible ? 'auto' : 'none',
-              }}
-              transition={{ type: 'spring', stiffness: 220, damping: 26, mass: 0.9 }}
-              style={{
-                position: 'absolute',
-                top: 0, left: '50%', marginLeft: 'calc(min(440px, 85vw) / -2)',
-                width: 'min(440px, 85vw)',
-                height: '100%',
-                transformOrigin: '50% 50%',
-                transformStyle: 'preserve-3d',
-                zIndex: 10 - abs,
-                cursor: isActive ? 'default' : 'pointer',
-                WebkitTapHighlightColor: 'transparent',
-              }}
-              className="case-card"
-            >
-              <div style={{
-                height: '100%',
-                background: 'linear-gradient(140deg, rgba(249,253,254,0.09), rgba(249,253,254,0.02) 60%)',
-                backdropFilter: 'blur(24px)',
-                WebkitBackdropFilter: 'blur(24px)',
-                border: '1px solid rgba(16,161,219,0.18)',
-                borderRadius: '28px',
-                boxShadow: isActive
-                  ? '0 32px 80px rgba(1,32,76,0.55), inset 0 1px 0 rgba(255,255,255,0.08)'
-                  : '0 20px 50px rgba(1,32,76,0.4), inset 0 1px 0 rgba(255,255,255,0.04)',
-                padding: 'clamp(24px, 4vw, 44px) clamp(22px, 4vw, 44px) 32px',
-                display: 'flex',
-                flexDirection: 'column',
-                overflow: 'hidden',
-                position: 'relative',
-              }}>
-                {/* Subtle sheen highlight on top edge */}
-                <div aria-hidden="true" style={{
-                  position: 'absolute', top: 0, left: 0, right: 0, height: '1px',
-                  background: 'linear-gradient(90deg, transparent, rgba(16,161,219,0.5), transparent)',
-                }} />
-
-                {/* Top row: client + handle */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', marginBottom: '24px', flexWrap: 'wrap' }}>
-                  <div>
-                    <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 'clamp(1.2rem, 2.2vw, 1.5rem)', color: 'var(--white)', letterSpacing: '-0.5px', lineHeight: 1.1, marginBottom: '6px' }}>
-                      {cs.name}
-                    </h3>
-                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', letterSpacing: '0.5px', lineHeight: 1.5 }}>
-                      {cs.industry} &middot; {cs.region}
-                    </div>
-                    <div style={{ fontSize: '0.68rem', color: 'var(--text-dim)', letterSpacing: '0.5px' }}>
-                      {cs.duration}
-                    </div>
-                  </div>
-                  {isActive && (
-                    <a href={cs.url} target="_blank" rel="noopener" style={{ fontSize: '0.74rem', color: 'var(--sky)', textDecoration: 'none', fontWeight: 500, display: 'inline-flex', alignItems: 'center', gap: '5px', whiteSpace: 'nowrap' }}>
-                      {cs.handle} <Icon name="link" size={11} />
-                    </a>
-                  )}
+            {/* Top row */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', marginBottom: '22px', flexWrap: 'wrap' }}>
+              <div>
+                <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 'clamp(1.3rem, 2.4vw, 1.7rem)', color: 'var(--white)', letterSpacing: '-0.5px', lineHeight: 1.1, marginBottom: '6px' }}>
+                  {cs.name}
+                </h3>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', letterSpacing: '0.5px', lineHeight: 1.5 }}>
+                  {cs.industry} &middot; {cs.region}
                 </div>
-
-                {/* Quote */}
-                <blockquote style={{ margin: 0, marginBottom: '28px', flex: 1 }}>
-                  <p style={{
-                    fontFamily: 'Syne, sans-serif',
-                    fontWeight: 500,
-                    fontSize: 'clamp(0.95rem, 1.7vw, 1.25rem)',
-                    lineHeight: 1.45,
-                    color: 'var(--white)',
-                    letterSpacing: '-0.3px',
-                    fontStyle: 'italic',
-                    marginBottom: '14px',
-                  }}>
-                    &ldquo;{cs.quote.text}&rdquo;
-                  </p>
-                  <footer style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 500 }}>
-                    — {cs.quote.author}
-                  </footer>
-                </blockquote>
-
-                {/* Metrics */}
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(3, 1fr)',
-                  gap: '14px',
-                  padding: '18px 0 2px',
-                  borderTop: '1px solid rgba(16,161,219,0.18)',
-                }} className="case-metrics">
-                  {cs.metrics.map(m => (
-                    <div key={m.label}>
-                      <div style={{
-                        fontFamily: 'Syne, sans-serif',
-                        fontWeight: 800,
-                        fontSize: 'clamp(0.9rem, 1.6vw, 1.15rem)',
-                        background: 'linear-gradient(135deg, var(--sky), var(--purple))',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                        backgroundClip: 'text',
-                        letterSpacing: '-0.5px',
-                        lineHeight: 1.1,
-                        marginBottom: '4px',
-                      }}>
-                        {m.value}
-                      </div>
-                      <div style={{ fontSize: '0.6rem', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600, lineHeight: 1.3 }}>
-                        {m.label}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Delivered */}
-                <div style={{ fontSize: '0.64rem', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: 600, marginTop: '16px', paddingTop: '14px', borderTop: '1px solid rgba(249,253,254,0.05)' }}>
-                  Delivered: <span style={{ color: 'var(--sky)' }}>{cs.tier}</span>
+                <div style={{ fontSize: '0.68rem', color: 'var(--text-dim)', letterSpacing: '0.5px' }}>
+                  {cs.duration}
                 </div>
               </div>
-            </motion.div>
-          )
-        })}
+              <a href={cs.url} target="_blank" rel="noopener" style={{ fontSize: '0.76rem', color: 'var(--sky)', textDecoration: 'none', fontWeight: 500, display: 'inline-flex', alignItems: 'center', gap: '5px', whiteSpace: 'nowrap' }}>
+                {cs.handle} <Icon name="link" size={11} />
+              </a>
+            </div>
+
+            {/* Quote */}
+            <blockquote style={{ margin: 0, marginBottom: '26px' }}>
+              <p style={{
+                fontFamily: 'Syne, sans-serif',
+                fontWeight: 500,
+                fontSize: 'clamp(0.98rem, 1.7vw, 1.2rem)',
+                lineHeight: 1.5,
+                color: 'var(--white)',
+                letterSpacing: '-0.2px',
+                fontStyle: 'italic',
+                marginBottom: '12px',
+              }}>
+                &ldquo;{cs.quote.text}&rdquo;
+              </p>
+              <footer style={{ fontSize: '0.74rem', color: 'var(--text-muted)', fontWeight: 500 }}>
+                — {cs.quote.author}
+              </footer>
+            </blockquote>
+
+            {/* Metrics */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: '14px',
+              padding: '18px 0 2px',
+              borderTop: '1px solid rgba(16,161,219,0.18)',
+            }}>
+              {cs.metrics.map(m => (
+                <div key={m.label}>
+                  <div style={{
+                    fontFamily: 'Syne, sans-serif',
+                    fontWeight: 800,
+                    fontSize: 'clamp(0.95rem, 1.7vw, 1.2rem)',
+                    background: 'linear-gradient(135deg, var(--sky), var(--purple))',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                    letterSpacing: '-0.5px',
+                    lineHeight: 1.1,
+                    marginBottom: '4px',
+                  }}>
+                    {m.value}
+                  </div>
+                  <div style={{ fontSize: '0.6rem', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600, lineHeight: 1.3 }}>
+                    {m.label}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Delivered */}
+            <div style={{ fontSize: '0.64rem', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: 600, marginTop: '16px', paddingTop: '14px', borderTop: '1px solid rgba(249,253,254,0.05)' }}>
+              Delivered: <span style={{ color: 'var(--sky)' }}>{cs.tier}</span>
+            </div>
+          </motion.div>
+        </AnimatePresence>
       </div>
 
-      {/* Nav arrows */}
+      {/* Nav arrows — positioned inside the padded stage */}
       <button
         onClick={prev}
         aria-label="Previous case study"
         style={{
-          position: 'absolute',
-          left: '2%',
-          top: '50%',
-          transform: 'translateY(-50%)',
-          width: '52px',
-          height: '52px',
-          borderRadius: '50%',
-          background: 'rgba(6,12,20,0.6)',
-          border: '1px solid rgba(16,161,219,0.3)',
-          color: 'var(--white)',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 20,
-          backdropFilter: 'blur(16px)',
-          WebkitBackdropFilter: 'blur(16px)',
-          transition: 'all 0.2s',
-          boxShadow: '0 10px 30px rgba(1,32,76,0.4)',
+          position: 'absolute', left: '6px', top: '50%', transform: 'translateY(-50%)',
+          width: '44px', height: '44px', borderRadius: '50%',
+          background: 'rgba(6,12,20,0.7)', border: '1px solid rgba(16,161,219,0.3)',
+          color: 'var(--white)', cursor: 'pointer',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          zIndex: 10,
+          backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
+          transition: 'border-color 0.2s, background 0.2s',
+          boxShadow: '0 10px 24px rgba(1,32,76,0.4)',
         }}
-        className="case-arrow"
-        onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--sky)'; e.currentTarget.style.transform = 'translateY(-50%) scale(1.08)' }}
-        onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(16,161,219,0.3)'; e.currentTarget.style.transform = 'translateY(-50%) scale(1)' }}
+        onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--sky)'; e.currentTarget.style.background = 'rgba(16,161,219,0.12)' }}
+        onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(16,161,219,0.3)'; e.currentTarget.style.background = 'rgba(6,12,20,0.7)' }}
       >
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
       </button>
 
       <button
         onClick={next}
         aria-label="Next case study"
         style={{
-          position: 'absolute',
-          right: '2%',
-          top: '50%',
-          transform: 'translateY(-50%)',
-          width: '52px',
-          height: '52px',
-          borderRadius: '50%',
-          background: 'rgba(6,12,20,0.6)',
-          border: '1px solid rgba(16,161,219,0.3)',
-          color: 'var(--white)',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 20,
-          backdropFilter: 'blur(16px)',
-          WebkitBackdropFilter: 'blur(16px)',
-          transition: 'all 0.2s',
-          boxShadow: '0 10px 30px rgba(1,32,76,0.4)',
+          position: 'absolute', right: '6px', top: '50%', transform: 'translateY(-50%)',
+          width: '44px', height: '44px', borderRadius: '50%',
+          background: 'rgba(6,12,20,0.7)', border: '1px solid rgba(16,161,219,0.3)',
+          color: 'var(--white)', cursor: 'pointer',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          zIndex: 10,
+          backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
+          transition: 'border-color 0.2s, background 0.2s',
+          boxShadow: '0 10px 24px rgba(1,32,76,0.4)',
         }}
-        className="case-arrow"
-        onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--sky)'; e.currentTarget.style.transform = 'translateY(-50%) scale(1.08)' }}
-        onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(16,161,219,0.3)'; e.currentTarget.style.transform = 'translateY(-50%) scale(1)' }}
+        onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--sky)'; e.currentTarget.style.background = 'rgba(16,161,219,0.12)' }}
+        onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(16,161,219,0.3)'; e.currentTarget.style.background = 'rgba(6,12,20,0.7)' }}
       >
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
       </button>
 
       {/* Dots */}
-      <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '28px' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '22px' }}>
         {CASE_STUDIES.map((_, i) => (
           <button
             key={i}
-            onClick={() => setIdx(i)}
+            onClick={() => goTo(i)}
             aria-label={`Go to case study ${i + 1}`}
             style={{
               width: i === idx ? '28px' : '8px',
