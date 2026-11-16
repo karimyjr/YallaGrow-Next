@@ -78,8 +78,8 @@ export default function AdminOverviewPage() {
     }
 
     const [affRes, refRes, nlRes, blogRes, contactsRes, packagesRes, jobsRes, maintRes] = await Promise.all([
-      fetch('/api/admin/affiliates').then(r => r.ok ? r.json() : []).catch(() => []),
-      fetch('/api/admin/referrals').then(r => r.ok ? r.json() : []).catch(() => []),
+      fetch('/api/admin/affiliates').then(r => r.ok ? r.json() : { affiliates: [] }).catch(() => ({ affiliates: [] })),
+      fetch('/api/admin/referrals').then(r => r.ok ? r.json() : { referrals: [] }).catch(() => ({ referrals: [] })),
       supabase.from('newsletter_subscribers').select('*').order('subscribed_at', { ascending: false }),
       supabase.from('blog_posts').select('id,title,status,updated_at,created_at'),
       supabase.from('contact_submissions').select('*').order('created_at', { ascending: false }),
@@ -88,8 +88,9 @@ export default function AdminOverviewPage() {
       supabase.from('site_config').select('*').eq('key', 'maintenance').maybeSingle(),
     ])
 
-    const affiliates: Row[] = Array.isArray(affRes) ? affRes : []
-    const referrals: Row[] = Array.isArray(refRes) ? refRes : []
+    // Both admin APIs wrap their rows as { affiliates: [...] } / { referrals: [...] }.
+    const affiliates: Row[] = Array.isArray(affRes?.affiliates) ? affRes.affiliates : []
+    const referrals: Row[] = Array.isArray(refRes?.referrals) ? refRes.referrals : []
     const nl: Row[] = nlRes.data || []
     const blog: Row[] = blogRes.data || []
     const contacts: Row[] = contactsRes.data || []
@@ -143,18 +144,24 @@ export default function AdminOverviewPage() {
       events.push({ kind: 'newsletter', id: String(n.id), who: String(n.email), verb: KIND_META.newsletter.verb, at: String(n.subscribed_at || '') })
     }
     for (const a of affiliates.slice(0, 15)) {
-      events.push({ kind: 'affiliate', id: String(a.id), who: String(a.name || a.email || 'Affiliate'), verb: KIND_META.affiliate.verb, at: String(a.created_at || '') })
+      events.push({ kind: 'affiliate', id: String(a.id), who: String(a.full_name || a.name || a.email || 'Affiliate'), verb: KIND_META.affiliate.verb, at: String(a.created_at || '') })
     }
     events.sort((a, b) => (a.at < b.at ? 1 : -1))
     setActivity(events.slice(0, 30))
 
-    const byAff: Record<string, number> = {}
+    // Referrals link to affiliates by ref_code (string), NOT affiliate_id.
+    const byCode: Record<string, number> = {}
     for (const r of referrals) {
-      const k = String(r.affiliate_id || '')
-      if (k) byAff[k] = (byAff[k] || 0) + 1
+      const k = String(r.ref_code || '').toUpperCase()
+      if (k) byCode[k] = (byCode[k] || 0) + 1
     }
     const top: TopAffiliate[] = affiliates
-      .map(a => ({ id: String(a.id), name: String(a.name || '—'), email: String(a.email || ''), referrals: byAff[String(a.id)] || 0 }))
+      .map(a => ({
+        id: String(a.id),
+        name: String(a.full_name || a.name || '—'),
+        email: String(a.email || ''),
+        referrals: byCode[String(a.ref_code || '').toUpperCase()] || 0,
+      }))
       .sort((a, b) => b.referrals - a.referrals)
       .slice(0, 5)
     setTopAffiliates(top)
@@ -183,13 +190,14 @@ export default function AdminOverviewPage() {
       supabase.from('package_submissions').select('*'),
       supabase.from('job_applications').select('*'),
       supabase.from('newsletter_subscribers').select('*'),
-      fetch('/api/admin/affiliates').then(r => r.ok ? r.json() : []).catch(() => []),
+      fetch('/api/admin/affiliates').then(r => r.ok ? r.json() : { affiliates: [] }).catch(() => ({ affiliates: [] })),
     ])
     if (contactsRes.data?.length) downloadCSV(contactsRes.data, 'yallagrow-contacts')
     if (packagesRes.data?.length) downloadCSV(packagesRes.data, 'yallagrow-packages')
     if (jobsRes.data?.length) downloadCSV(jobsRes.data, 'yallagrow-jobs')
     if (nlRes.data?.length) downloadCSV(nlRes.data, 'yallagrow-newsletter')
-    if (Array.isArray(affRes) && affRes.length) downloadCSV(affRes, 'yallagrow-affiliates')
+    const affList = Array.isArray(affRes?.affiliates) ? affRes.affiliates : []
+    if (affList.length) downloadCSV(affList, 'yallagrow-affiliates')
   }
 
   if (loading || !counts) {
