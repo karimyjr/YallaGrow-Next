@@ -1,5 +1,9 @@
 // src/app/not-found.tsx
+// The 404 page: interactive spider-web canvas sits behind the content.
+// Move the cursor through the web and it flexes — spring-damper physics
+// on every node, cursor repulsion within an interaction radius.
 import Link from 'next/link'
+import SpiderWeb from '@/components/ui/SpiderWeb'
 
 export const metadata = {
   title: 'Page Not Found',
@@ -9,14 +13,24 @@ export const metadata = {
 export default function NotFound() {
   return (
     <div style={{
+      position: 'relative',
       minHeight: '100vh',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       padding: '80px 20px',
       background: 'var(--dark2)',
+      overflow: 'hidden',
     }}>
-      <div style={{ maxWidth: '560px', textAlign: 'center', position: 'relative' }}>
+      {/* Interactive spider web — absolute, pointer-events:none, behind content */}
+      <SpiderWeb />
+
+      <div style={{
+        maxWidth: '560px',
+        textAlign: 'center',
+        position: 'relative',
+        zIndex: 1,
+      }}>
         {/* Giant 404 */}
         <div style={{
           fontFamily: 'Syne, sans-serif',
@@ -29,12 +43,13 @@ export default function NotFound() {
           WebkitTextFillColor: 'transparent',
           backgroundClip: 'text',
           marginBottom: '20px',
-          opacity: 0.9,
+          opacity: 0.95,
+          textShadow: '0 0 60px rgba(16,161,219,0.25)',
         }}>
           404
         </div>
 
-        <span className="eyebrow" style={{ marginBottom: '14px' }}>Lost in Space</span>
+        <span className="eyebrow" style={{ marginBottom: '14px' }}>Caught in the Web</span>
 
         <h1 style={{
           fontFamily: 'Syne, sans-serif',
@@ -51,7 +66,7 @@ export default function NotFound() {
 
         <p style={{
           fontSize: '0.95rem',
-          color: 'rgba(249,253,254,0.65)',
+          color: 'rgba(249,253,254,0.7)',
           lineHeight: 1.7,
           fontWeight: 300,
           marginBottom: '36px',
@@ -59,7 +74,7 @@ export default function NotFound() {
           marginLeft: 'auto',
           marginRight: 'auto',
         }}>
-          Either the link is broken, or whatever you were looking for has moved. No worries — let&apos;s get you back on track.
+          Either the link is broken, or whatever you were looking for has moved. Move your cursor through the web, then let&apos;s get you back on track.
         </p>
 
         <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '40px' }}>
