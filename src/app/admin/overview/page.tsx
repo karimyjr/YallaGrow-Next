@@ -27,10 +27,14 @@ interface Counts {
   jobsTotal: number
   jobsNew: number
   jobs7d: number
+  quizTotal: number
+  quizNew: number
+  quiz7d: number
+  quizBooked: number
 }
 
 interface Row { id: string; created_at?: string; status?: string; [k: string]: unknown }
-type EventKind = 'contact' | 'package' | 'job' | 'newsletter' | 'affiliate'
+type EventKind = 'contact' | 'package' | 'job' | 'newsletter' | 'affiliate' | 'quiz'
 interface ActivityItem {
   kind: EventKind
   id: string
@@ -46,6 +50,7 @@ const KIND_META: Record<EventKind, { tag: string; color: string; verb: string }>
   job:        { tag: 'JOB',        color: '#ec4899', verb: 'applied for a job' },
   newsletter: { tag: 'NEWSLETTER', color: '#22c55e', verb: 'joined the newsletter' },
   affiliate:  { tag: 'AFFILIATE',  color: '#f59e0b', verb: 'signed up as an affiliate' },
+  quiz:       { tag: 'QUIZ',       color: '#06b6d4', verb: 'finished Find My Plan' },
 }
 
 const KPI_COLORS: Record<string, string> = {
@@ -77,7 +82,7 @@ export default function AdminOverviewPage() {
       return !isNaN(t) && t >= sevenDaysAgo
     }
 
-    const [affRes, refRes, nlRes, blogRes, contactsRes, packagesRes, jobsRes, maintRes] = await Promise.all([
+    const [affRes, refRes, nlRes, blogRes, contactsRes, packagesRes, jobsRes, quizRes, maintRes] = await Promise.all([
       fetch('/api/admin/affiliates').then(r => r.ok ? r.json() : { affiliates: [] }).catch(() => ({ affiliates: [] })),
       fetch('/api/admin/referrals').then(r => r.ok ? r.json() : { referrals: [] }).catch(() => ({ referrals: [] })),
       supabase.from('newsletter_subscribers').select('*').order('subscribed_at', { ascending: false }),
@@ -85,6 +90,7 @@ export default function AdminOverviewPage() {
       supabase.from('contact_submissions').select('*').order('created_at', { ascending: false }),
       supabase.from('package_submissions').select('*').order('created_at', { ascending: false }),
       supabase.from('job_applications').select('*').order('created_at', { ascending: false }),
+      supabase.from('quiz_submissions').select('*').order('created_at', { ascending: false }),
       supabase.from('site_config').select('*').eq('key', 'maintenance').maybeSingle(),
     ])
 
@@ -96,6 +102,7 @@ export default function AdminOverviewPage() {
     const contacts: Row[] = contactsRes.data || []
     const packages: Row[] = packagesRes.data || []
     const jobs: Row[] = jobsRes.data || []
+    const quizzes: Row[] = quizRes.data || []
 
     const refsPending = referrals.filter(r => r.status === 'pending')
     const refsPaid = referrals.filter(r => r.status === 'paid')
@@ -120,6 +127,10 @@ export default function AdminOverviewPage() {
       jobsTotal: jobs.length,
       jobsNew: jobs.filter(j => j.status === 'new').length,
       jobs7d: jobs.filter(j => isRecent(String(j.created_at || ''))).length,
+      quizTotal: quizzes.length,
+      quizNew: quizzes.filter(q => q.status === 'new').length,
+      quiz7d: quizzes.filter(q => isRecent(String(q.created_at || ''))).length,
+      quizBooked: quizzes.filter(q => q.booked_call).length,
     })
 
     setNeedsAction({
@@ -145,6 +156,12 @@ export default function AdminOverviewPage() {
     }
     for (const a of affiliates.slice(0, 15)) {
       events.push({ kind: 'affiliate', id: String(a.id), who: String(a.full_name || a.name || a.email || 'Affiliate'), verb: KIND_META.affiliate.verb, at: String(a.created_at || '') })
+    }
+    for (const q of quizzes.slice(0, 15)) {
+      const plan = String(q.recommended_plan || '').toLowerCase()
+      const planLabel = plan ? ` — matched ${plan.charAt(0).toUpperCase() + plan.slice(1)}` : ''
+      const bookedTag = q.booked_call ? ' (booked)' : ''
+      events.push({ kind: 'quiz', id: String(q.id), who: String(q.name || q.email || 'Visitor'), verb: `finished Find My Plan${planLabel}${bookedTag}`, at: String(q.created_at || '') })
     }
     events.sort((a, b) => (a.at < b.at ? 1 : -1))
     setActivity(events.slice(0, 30))
@@ -204,8 +221,8 @@ export default function AdminOverviewPage() {
     return <div style={{ padding: '40px 24px', color: 'var(--text-dim)', textAlign: 'center' }}>Loading overview…</div>
   }
 
-  const totalNew = counts.contactsNew + counts.packagesNew + counts.jobsNew
-  const totalThisWeek = counts.contacts7d + counts.packages7d + counts.jobs7d + counts.newsletter7d + counts.affiliates7d
+  const totalNew = counts.contactsNew + counts.packagesNew + counts.jobsNew + counts.quizNew
+  const totalThisWeek = counts.contacts7d + counts.packages7d + counts.jobs7d + counts.newsletter7d + counts.affiliates7d + counts.quiz7d
 
   return (
     <div style={{ padding: '18px 20px 60px', maxWidth: '1400px', margin: '0 auto' }}>
@@ -237,6 +254,7 @@ export default function AdminOverviewPage() {
         <KpiTile label="New contacts" value={counts.contactsNew} sub={`${counts.contactsTotal} total`} tone={counts.contactsNew > 0 ? 'red' : 'sky'} />
         <KpiTile label="New package requests" value={counts.packagesNew} sub={`${counts.packagesTotal} total`} tone={counts.packagesNew > 0 ? 'red' : 'sky'} />
         <KpiTile label="New job applications" value={counts.jobsNew} sub={`${counts.jobsTotal} total`} tone={counts.jobsNew > 0 ? 'red' : 'sky'} />
+        <KpiTile label="Quiz leads" value={counts.quizNew} sub={`${counts.quizTotal} total · ${counts.quizBooked} booked`} tone={counts.quizNew > 0 ? 'red' : 'sky'} />
         <KpiTile label="Blog posts" value={counts.blogPosts} sub={`${counts.blogPublished} published`} tone="pink" />
       </div>
 
@@ -248,6 +266,7 @@ export default function AdminOverviewPage() {
         <MiniTile label="Job applicants" value={counts.jobs7d} color={KIND_META.job.color} />
         <MiniTile label="Newsletter subs" value={counts.newsletter7d} color={KIND_META.newsletter.color} />
         <MiniTile label="New affiliates" value={counts.affiliates7d} color={KIND_META.affiliate.color} />
+        <MiniTile label="Quiz leads" value={counts.quiz7d} color={KIND_META.quiz.color} />
       </div>
 
       {/* ───────── SECTION 3: Needs action ───────── */}
@@ -285,7 +304,7 @@ export default function AdminOverviewPage() {
           right={
             <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
               <FilterChip active={filter === 'all'} onClick={() => setFilter('all')} color="#9ca3af">All</FilterChip>
-              {(['contact', 'package', 'job', 'newsletter', 'affiliate'] as const).map(k => (
+              {(['contact', 'package', 'job', 'quiz', 'newsletter', 'affiliate'] as const).map(k => (
                 <FilterChip key={k} active={filter === k} onClick={() => setFilter(k)} color={KIND_META[k].color}>
                   {KIND_META[k].tag}
                 </FilterChip>

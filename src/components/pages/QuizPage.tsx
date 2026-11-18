@@ -161,6 +161,55 @@ export default function QuizPage() {
   const [addons, setAddons] = useState<Record<string, boolean>>({})
   const [procStep, setProcStep] = useState(0)
 
+  // Booking capture modal — opens when either Book button is clicked.
+  // We collect contact details, POST the full quiz payload, then open
+  // the Calendly/booking URL in a new tab.
+  const [bookingOpen, setBookingOpen] = useState(false)
+  const [bookForm, setBookForm] = useState({ name: '', email: '', whatsapp: '' })
+  const [bookSubmitting, setBookSubmitting] = useState(false)
+  const [bookError, setBookError] = useState<string | null>(null)
+
+  const openBooking = () => {
+    setBookError(null)
+    setBookingOpen(true)
+  }
+
+  const submitBooking = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setBookError(null)
+    setBookSubmitting(true)
+    try {
+      const payload = {
+        ...bookForm,
+        business_type:    answers.type,
+        goal:             answers.goal,
+        current_state:    answers.state,
+        services:         Array.isArray(answers.services) ? answers.services : [],
+        involvement:      answers.involvement,
+        budget:           answers.budget,
+        recommended_plan: result,
+        addons:           Object.keys(addons).filter(k => addons[k]),
+        booked_call:      true,
+      }
+      const r = await fetch('/api/quiz/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      const data = await r.json()
+      if (!r.ok) throw new Error(data.error || 'Could not save.')
+
+      // Only after we've saved, open Calendly in a new tab.
+      const bookingUrl = process.env.NEXT_PUBLIC_BOOKING_URL || '#'
+      window.open(bookingUrl, '_blank', 'noopener')
+      setBookingOpen(false)
+    } catch (err) {
+      setBookError((err as Error).message || 'Something went wrong. Please try again.')
+    } finally {
+      setBookSubmitting(false)
+    }
+  }
+
   useEffect(() => {
     if (step === 7) {
       setProcStep(0)
@@ -364,7 +413,7 @@ export default function QuizPage() {
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <a href={process.env.NEXT_PUBLIC_BOOKING_URL} target="_blank" rel="noopener" className="btn-primary" style={{ width: '100%', justifyContent: 'center', fontSize: '0.95rem', padding: '16px' }}>Book a Free Strategy Call →</a>
+              <button onClick={openBooking} className="btn-primary" style={{ width: '100%', justifyContent: 'center', fontSize: '0.95rem', padding: '16px' }}>Book a Free Strategy Call →</button>
               <button onClick={() => setStep(9)} className="btn-secondary" style={{ width: '100%', justifyContent: 'center' }}>Customize My Plan</button>
             </div>
             <div style={{ textAlign: 'center', marginTop: '16px' }}>
@@ -429,7 +478,7 @@ export default function QuizPage() {
                 The next step is a free 30-minute strategy call. We&apos;ll walk through your plan, answer every question, and make sure we&apos;re the right fit before you commit to anything.
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <a href={process.env.NEXT_PUBLIC_BOOKING_URL} target="_blank" rel="noopener" className="btn-primary" style={{ width: '100%', justifyContent: 'center', fontSize: '1rem', padding: '16px' }}>Book My Free Strategy Call →</a>
+                <button onClick={openBooking} className="btn-primary" style={{ width: '100%', justifyContent: 'center', fontSize: '1rem', padding: '16px' }}>Book My Free Strategy Call →</button>
                 <Link href="/packages" className="btn-secondary" style={{ width: '100%', justifyContent: 'center' }}>Browse All Packages First</Link>
               </div>
               <p style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginTop: '16px', lineHeight: 1.6 }}>
@@ -444,6 +493,104 @@ export default function QuizPage() {
 
       </div>
 
+      {/* ───────── BOOKING CAPTURE MODAL ───────── */}
+      {bookingOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          onClick={() => !bookSubmitting && setBookingOpen(false)}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 2000,
+            background: 'rgba(4,8,16,0.75)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: '20px',
+            animation: 'pageIn 0.25s ease',
+          }}
+        >
+          <form
+            onClick={e => e.stopPropagation()}
+            onSubmit={submitBooking}
+            style={{
+              maxWidth: '440px', width: '100%',
+              background: 'linear-gradient(180deg, rgba(16,24,40,0.98), rgba(6,12,20,0.98))',
+              border: '1px solid rgba(16,161,219,0.25)',
+              borderRadius: '18px',
+              padding: '26px',
+              boxShadow: '0 30px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06)',
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+              <div>
+                <div style={{ fontSize: '0.62rem', fontWeight: 700, color: 'var(--sky)', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '4px' }}>One quick step</div>
+                <h2 style={{ fontFamily: 'Syne,sans-serif', fontSize: '1.3rem', fontWeight: 800, color: 'var(--white)', letterSpacing: '-0.5px', margin: 0 }}>
+                  Who are we meeting?
+                </h2>
+                <p style={{ fontSize: '0.78rem', color: 'var(--text-dim)', margin: '6px 0 0' }}>
+                  So Karim knows your plan before the call. Takes 10 seconds.
+                </p>
+              </div>
+              <button type="button" onClick={() => setBookingOpen(false)} aria-label="Close" style={{
+                background: 'transparent', border: 'none', color: 'var(--text-dim)',
+                cursor: 'pointer', padding: '4px', fontSize: '1.2rem', lineHeight: 1,
+              }}>×</button>
+            </div>
+
+            <label style={modalLabel}>Full name *</label>
+            <input
+              required autoFocus
+              value={bookForm.name}
+              onChange={e => setBookForm(f => ({ ...f, name: e.target.value }))}
+              placeholder="Your name"
+              style={modalInput}
+            />
+
+            <label style={{ ...modalLabel, marginTop: '12px' }}>Email *</label>
+            <input
+              required type="email"
+              value={bookForm.email}
+              onChange={e => setBookForm(f => ({ ...f, email: e.target.value }))}
+              placeholder="you@example.com"
+              style={modalInput}
+            />
+
+            <label style={{ ...modalLabel, marginTop: '12px' }}>WhatsApp (optional)</label>
+            <input
+              type="tel"
+              value={bookForm.whatsapp}
+              onChange={e => setBookForm(f => ({ ...f, whatsapp: e.target.value }))}
+              placeholder="+961 …"
+              style={modalInput}
+            />
+
+            {bookError && (
+              <div style={{
+                marginTop: '12px',
+                padding: '9px 12px',
+                background: 'rgba(239,68,68,0.08)',
+                border: '1px solid rgba(239,68,68,0.3)',
+                borderRadius: '8px',
+                color: '#ff8585',
+                fontSize: '0.76rem',
+              }}>{bookError}</div>
+            )}
+
+            <button
+              type="submit"
+              disabled={bookSubmitting}
+              className="btn-primary"
+              style={{ marginTop: '18px', width: '100%', justifyContent: 'center', fontSize: '0.92rem', padding: '14px' }}
+            >
+              {bookSubmitting ? 'Saving…' : 'Continue to booking →'}
+            </button>
+            <p style={{ fontSize: '0.68rem', color: 'var(--text-dim)', textAlign: 'center', marginTop: '10px', margin: '10px 0 0' }}>
+              Your quiz answers will be shared with Karim. No spam.
+            </p>
+          </form>
+        </div>
+      )}
+
       <style>{`
         @keyframes pageIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
         @keyframes spin{to{transform:rotate(360deg)}}
@@ -453,4 +600,26 @@ export default function QuizPage() {
       `}</style>
     </div>
   )
+}
+
+const modalLabel: React.CSSProperties = {
+  display: 'block',
+  fontSize: '0.66rem',
+  fontWeight: 600,
+  letterSpacing: '1px',
+  color: 'var(--text-muted)',
+  textTransform: 'uppercase',
+  marginBottom: '6px',
+}
+
+const modalInput: React.CSSProperties = {
+  background: 'rgba(249,253,254,0.03)',
+  border: '1px solid var(--glass-border)',
+  borderRadius: '10px',
+  padding: '11px 14px',
+  color: 'var(--white)',
+  width: '100%',
+  fontFamily: 'Inter,sans-serif',
+  fontSize: '0.86rem',
+  outline: 'none',
 }

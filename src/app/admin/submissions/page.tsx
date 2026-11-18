@@ -49,6 +49,37 @@ interface ContactSubmission {
   created_at: string
 }
 
+interface QuizSubmission {
+  id: string
+  name: string
+  email: string
+  whatsapp: string | null
+  business_type: string | null
+  goal: string | null
+  current_state: string | null
+  services: string[] | null
+  involvement: string | null
+  budget: string | null
+  recommended_plan: string | null
+  addons: string[] | null
+  status: string
+  booked_call: boolean
+  created_at: string
+}
+
+// Human-readable labels for quiz values — keep in sync with QuizPage.tsx
+const QUIZ_LABELS: Record<string, Record<string, string>> = {
+  business_type: { local: 'Local Business', startup: 'Startup', ecommerce: 'E-commerce', service: 'Service Business', personal: 'Personal Brand' },
+  goal:          { awareness: 'Get discovered', leads: 'Generate leads', sales: 'Drive sales', presence: 'Build presence', scale: "Scale what's working" },
+  current_state: { none: 'Starting from zero', inconsistent: 'Posting inconsistently', active: 'Posting regularly', scaling: 'Already running ads + content' },
+  services:      { posts: 'Posts', reels: 'Reels', ads: 'Paid Ads', strategy: 'Strategy', branding: 'Branding', copy: 'Copywriting', web: 'Website', analytics: 'Analytics' },
+  involvement:   { handoff: 'Fully hand it off', collab: 'Collaborate', guided: 'Guide my team' },
+  budget:        { low: 'Under $200/mo', mid: '$200-400/mo', high: '$400+/mo', unsure: 'Not sure yet' },
+  recommended_plan: { launch: 'Launch ($149)', grow: 'Grow ($299)', dominate: 'Dominate ($499)' },
+}
+const labelFor = (field: string, value: string | null) =>
+  value ? (QUIZ_LABELS[field]?.[value] || value) : '—'
+
 // Inline icon helper for list items
 function Line({ icon, children }: { icon: string; children: React.ReactNode }) {
   return (
@@ -61,22 +92,25 @@ function Line({ icon, children }: { icon: string; children: React.ReactNode }) {
 
 export default function AdminSubmissionsPage() {
   const { showToast } = useToast()
-  const [tab, setTab] = useState<'packages' | 'jobs' | 'contacts'>('packages')
+  const [tab, setTab] = useState<'packages' | 'jobs' | 'contacts' | 'quiz'>('quiz')
   const [packages, setPackages] = useState<PackageSubmission[]>([])
   const [jobs, setJobs] = useState<JobApplication[]>([])
   const [contacts, setContacts] = useState<ContactSubmission[]>([])
+  const [quizzes, setQuizzes] = useState<QuizSubmission[]>([])
   const [search, setSearch] = useState('')
   const [expanded, setExpanded] = useState<string | null>(null)
 
   const load = useCallback(async () => {
-    const [p, j, c] = await Promise.all([
+    const [p, j, c, q] = await Promise.all([
       supabase.from('package_submissions').select('*').order('created_at', { ascending: false }),
       supabase.from('job_applications').select('*').order('created_at', { ascending: false }),
       supabase.from('contact_submissions').select('*').order('created_at', { ascending: false }),
+      supabase.from('quiz_submissions').select('*').order('created_at', { ascending: false }),
     ])
     if (p.data) setPackages(p.data)
     if (j.data) setJobs(j.data)
     if (c.data) setContacts(c.data)
+    if (q.data) setQuizzes(q.data)
   }, [])
 
   useEffect(() => { load() }, [load])
@@ -98,11 +132,12 @@ export default function AdminSubmissionsPage() {
     packages: packages.filter(p => p.status === 'new').length,
     jobs: jobs.filter(j => j.status === 'new').length,
     contacts: contacts.filter(c => c.status === 'new').length,
+    quiz: quizzes.filter(q => q.status === 'new').length,
   }
 
-  const filterFn = (obj: PackageSubmission | JobApplication | ContactSubmission) => {
+  const filterFn = (obj: { name?: string; email?: string }) => {
     const q = search.toLowerCase()
-    return obj.name?.toLowerCase().includes(q) || obj.email?.toLowerCase().includes(q)
+    return (obj.name || '').toLowerCase().includes(q) || (obj.email || '').toLowerCase().includes(q)
   }
 
   const statusColor: Record<string, string> = {
@@ -128,7 +163,7 @@ export default function AdminSubmissionsPage() {
         </div>
         <button
           onClick={() => {
-            const rows = tab === 'packages' ? packages : tab === 'jobs' ? jobs : contacts
+            const rows = tab === 'packages' ? packages : tab === 'jobs' ? jobs : tab === 'contacts' ? contacts : quizzes
             if (!rows.length) return
             downloadCSV(rows as unknown as Record<string, unknown>[], `yallagrow-${tab}`)
           }}
@@ -143,11 +178,12 @@ export default function AdminSubmissionsPage() {
       {/* Sub-tabs */}
       <div style={{ display: 'flex', gap: '4px', borderBottom: '1px solid var(--glass-border)', marginBottom: '20px', flexWrap: 'wrap' }}>
         {[
+          { id: 'quiz', icon: 'help', label: 'Quiz Answers', count: quizzes.length, newCount: counts.quiz },
           { id: 'packages', icon: 'package', label: 'Package Requests', count: packages.length, newCount: counts.packages },
           { id: 'jobs', icon: 'briefcase', label: 'Job Applications', count: jobs.length, newCount: counts.jobs },
           { id: 'contacts', icon: 'chat', label: 'Contact Messages', count: contacts.length, newCount: counts.contacts },
         ].map(t => (
-          <button key={t.id} onClick={() => setTab(t.id as 'packages' | 'jobs' | 'contacts')} style={{
+          <button key={t.id} onClick={() => setTab(t.id as 'packages' | 'jobs' | 'contacts' | 'quiz')} style={{
             background: tab === t.id ? 'rgba(16,161,219,0.08)' : 'transparent',
             border: 'none',
             borderBottom: tab === t.id ? '2px solid var(--sky)' : '2px solid transparent',
@@ -370,6 +406,122 @@ export default function AdminSubmissionsPage() {
           ))}
         </div>
       )}
+
+      {/* ─────────── QUIZ ANSWERS ─────────── */}
+      {tab === 'quiz' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          {quizzes.filter(filterFn).length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-dim)' }}>
+              No quiz submissions yet. They appear here when a visitor finishes Find My Plan and clicks Book a Call.
+            </div>
+          ) : quizzes.filter(filterFn).map(q => (
+            <div key={q.id} style={{ background: 'var(--glass)', border: '1px solid var(--glass-border)', borderRadius: '12px', overflow: 'hidden' }}>
+              <div style={{ padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap', cursor: 'pointer' }} onClick={() => setExpanded(expanded === q.id ? null : q.id)}>
+                <div style={{ flex: 1, minWidth: '200px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px', flexWrap: 'wrap' }}>
+                    <strong style={{ color: 'var(--white)', fontSize: '0.92rem' }}>{q.name}</strong>
+                    {q.recommended_plan && (
+                      <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--sky)', background: 'rgba(16,161,219,0.1)', border: '1px solid rgba(16,161,219,0.3)', padding: '2px 8px', borderRadius: '5px', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                        {q.recommended_plan}
+                      </span>
+                    )}
+                    {q.booked_call && (
+                      <span style={{ fontSize: '0.6rem', fontWeight: 800, color: '#16db64', background: 'rgba(22,219,100,0.1)', border: '1px solid rgba(22,219,100,0.3)', padding: '2px 8px', borderRadius: '5px', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                        Booked
+                      </span>
+                    )}
+                  </div>
+                  <div style={{ fontSize: '0.72rem', color: 'var(--text-dim)' }}>
+                    {q.email}{q.whatsapp ? ` · ${q.whatsapp}` : ''} · {new Date(q.created_at).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', padding: '3px 10px', borderRadius: '100px', background: statusBg[q.status] || 'transparent', color: statusColor[q.status] || 'var(--text-dim)', border: `1px solid ${statusColor[q.status]}40` }}>{q.status}</span>
+                  <span style={{ color: 'var(--text-dim)', fontSize: '1.1rem' }}>{expanded === q.id ? '−' : '+'}</span>
+                </div>
+              </div>
+
+              {expanded === q.id && (
+                <div style={{ padding: '0 20px 20px', borderTop: '1px solid var(--glass-border)', background: 'rgba(0,0,0,0.15)' }}>
+                  <div style={{ padding: '16px 0', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
+                    <QuizField label="Business type" value={labelFor('business_type', q.business_type)} />
+                    <QuizField label="Primary goal" value={labelFor('goal', q.goal)} />
+                    <QuizField label="Current state" value={labelFor('current_state', q.current_state)} />
+                    <QuizField label="Monthly budget" value={labelFor('budget', q.budget)} />
+                    <QuizField label="Involvement" value={labelFor('involvement', q.involvement)} />
+                    <QuizField label="Recommended plan" value={labelFor('recommended_plan', q.recommended_plan)} highlight />
+                  </div>
+
+                  <div style={{ padding: '12px 0', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                    <div style={{ fontSize: '0.62rem', fontWeight: 700, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '8px' }}>Services they want</div>
+                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                      {(q.services && q.services.length > 0) ? q.services.map(s => (
+                        <span key={s} style={{ fontSize: '0.72rem', color: 'var(--white)', background: 'rgba(16,161,219,0.08)', border: '1px solid rgba(16,161,219,0.25)', padding: '4px 10px', borderRadius: '6px' }}>
+                          {labelFor('services', s)}
+                        </span>
+                      )) : <span style={{ fontSize: '0.78rem', color: 'var(--text-dim)' }}>(none selected)</span>}
+                    </div>
+                  </div>
+
+                  {q.addons && q.addons.length > 0 && (
+                    <div style={{ padding: '12px 0', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                      <div style={{ fontSize: '0.62rem', fontWeight: 700, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '8px' }}>Add-ons picked</div>
+                      <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                        {q.addons.map(a => (
+                          <span key={a} style={{ fontSize: '0.72rem', color: 'var(--white)', background: 'rgba(141,92,255,0.1)', border: '1px solid rgba(141,92,255,0.25)', padding: '4px 10px', borderRadius: '6px' }}>
+                            {a}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div style={{ padding: '14px 0 0', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                    <a href={`mailto:${q.email}?subject=Your YallaGrow plan (${q.recommended_plan ? labelFor('recommended_plan', q.recommended_plan) : ''})`} style={{ background: 'var(--sky)', color: 'var(--dark)', padding: '5px 12px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                      <Icon name="mail" size={13} />
+                      Email
+                    </a>
+                    {q.whatsapp && (
+                      <a href={`https://wa.me/${q.whatsapp.replace(/\D/g, '')}`} target="_blank" rel="noopener" style={{ background: 'rgba(37,211,102,0.15)', color: '#25d366', padding: '5px 12px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px', border: '1px solid rgba(37,211,102,0.3)' }}>
+                        <Icon name="phone" size={13} />
+                        WhatsApp
+                      </a>
+                    )}
+                    {['new', 'contacted', 'won', 'lost'].map(s => (
+                      <button key={s} onClick={() => updateStatus('quiz_submissions', q.id, s)} style={{
+                        background: q.status === s ? statusBg[s] : 'transparent',
+                        color: q.status === s ? statusColor[s] : 'var(--text-muted)',
+                        border: `1px solid ${q.status === s ? statusColor[s] : 'var(--glass-border)'}`,
+                        padding: '5px 12px', borderRadius: '6px',
+                        fontSize: '0.72rem', fontWeight: 600, cursor: 'pointer',
+                        textTransform: 'capitalize',
+                      }}>{s}</button>
+                    ))}
+                    <button onClick={() => del('quiz_submissions', q.id, q.name)} style={{ marginLeft: 'auto', background: 'transparent', color: '#ff4d4d', border: '1px solid rgba(255,77,77,0.25)', padding: '5px 10px', borderRadius: '6px', fontSize: '0.72rem', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                      <Icon name="trash" size={13} />
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function QuizField({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
+  return (
+    <div style={{
+      background: highlight ? 'rgba(16,161,219,0.08)' : 'rgba(0,0,0,0.3)',
+      border: highlight ? '1px solid rgba(16,161,219,0.3)' : '1px solid rgba(255,255,255,0.05)',
+      borderRadius: '8px',
+      padding: '10px 12px',
+    }}>
+      <div style={{ fontSize: '0.6rem', fontWeight: 700, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '4px' }}>{label}</div>
+      <div style={{ fontSize: '0.82rem', color: highlight ? 'var(--sky)' : 'var(--white)', fontWeight: highlight ? 700 : 500 }}>{value}</div>
     </div>
   )
 }
