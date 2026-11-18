@@ -1,22 +1,13 @@
 // Public endpoint: captures a completed "Find My Plan" quiz with contact
 // info right before we send the visitor off to the booking URL.
-// Writes via anon key — works whether or not RLS is on (needs an insert
-// policy for anon on quiz_submissions once RLS is enabled).
+//
+// Uses the service-role client so RLS can't block us. Safe because this
+// endpoint only INSERTS validated, allow-listed values into one table —
+// it never reads, updates, or deletes. The validation below means a
+// tampered payload turns into nulls, not junk.
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-// Validate once at module load — don't throw at request time
-if (!url || !anonKey) {
-  console.warn('[api/quiz/submit] Missing Supabase env vars')
-}
-
-const supabase = createClient(url || '', anonKey || '', {
-  auth: { persistSession: false, autoRefreshToken: false },
-})
+import { supabaseAdmin } from '@/lib/supabase-admin'
 
 const ALLOWED_BUSINESS = new Set(['local', 'startup', 'ecommerce', 'service', 'personal'])
 const ALLOWED_GOAL     = new Set(['awareness', 'leads', 'sales', 'presence', 'scale'])
@@ -70,10 +61,22 @@ export async function POST(req: NextRequest) {
     booked_call:      Boolean(body.booked_call),
   }
 
-  const { error } = await supabase.from('quiz_submissions').insert(row)
+  const { error } = await supabaseAdmin.from('quiz_submissions').insert(row)
+
   if (error) {
+    // Surface the real Supabase error so it's diagnosable from the UI.
+    // Common causes:
+    //  - relation "public.quiz_submissions" does not exist → run the SQL
+    //    migration at supabase/quiz-submissions-table.sql
+    //  - SUPABASE_SERVICE_ROLE_KEY not set in Vercel → set it in env vars
     console.error('[api/quiz/submit] insert failed:', error)
-    return NextResponse.json({ error: 'Could not save your answers. Please try again.' }, { status: 500 })
+    const hint =
+      /does not exist/i.test(error.message)
+        ? 'The quiz_submissions table does not exist yet. Run the SQL migration in Supabase first.'
+        : /row-level security|RLS/i.test(error.message)
+          ? 'Row-level security is blocking the insert. The service-role key may not be set in Vercel env vars.'
+          : error.message
+    return NextResponse.json({ error: hint, raw: error.message }, { status: 500 })
   }
 
   return NextResponse.json({ success: true })
