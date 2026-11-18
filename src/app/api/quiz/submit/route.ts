@@ -39,11 +39,16 @@ export async function POST(req: NextRequest) {
 
   const name = String(body.name || '').trim().slice(0, 120)
   const email = String(body.email || '').trim().toLowerCase().slice(0, 160)
-  const whatsapp = String(body.whatsapp || '').trim().slice(0, 40) || null
+  const whatsapp = String(body.whatsapp || '').trim().slice(0, 40)
 
   if (!name) return NextResponse.json({ error: 'Name is required.' }, { status: 400 })
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return NextResponse.json({ error: 'A valid email is required.' }, { status: 400 })
+  }
+  // WhatsApp required — need at least 6 digits so we can reach the lead.
+  const whatsappDigits = whatsapp.replace(/\D/g, '')
+  if (whatsappDigits.length < 6) {
+    return NextResponse.json({ error: 'A valid WhatsApp number is required.' }, { status: 400 })
   }
 
   const row = {

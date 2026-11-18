@@ -90,7 +90,7 @@ export default function AdminOverviewPage() {
       supabase.from('contact_submissions').select('*').order('created_at', { ascending: false }),
       supabase.from('package_submissions').select('*').order('created_at', { ascending: false }),
       supabase.from('job_applications').select('*').order('created_at', { ascending: false }),
-      supabase.from('quiz_submissions').select('*').order('created_at', { ascending: false }),
+      fetch('/api/admin/quiz-submissions').then(r => r.ok ? r.json() : { submissions: [] }).catch(() => ({ submissions: [] })),
       supabase.from('site_config').select('*').eq('key', 'maintenance').maybeSingle(),
     ])
 
@@ -102,7 +102,7 @@ export default function AdminOverviewPage() {
     const contacts: Row[] = contactsRes.data || []
     const packages: Row[] = packagesRes.data || []
     const jobs: Row[] = jobsRes.data || []
-    const quizzes: Row[] = quizRes.data || []
+    const quizzes: Row[] = Array.isArray(quizRes?.submissions) ? quizRes.submissions : []
 
     const refsPending = referrals.filter(r => r.status === 'pending')
     const refsPaid = referrals.filter(r => r.status === 'paid')

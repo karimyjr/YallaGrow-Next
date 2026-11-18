@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Icon } from '@/components/ui/Icons'
+import { COUNTRIES, DEFAULT_COUNTRY } from '@/lib/country-codes'
 
 interface SingleStep {
   type: 'single'
@@ -165,7 +166,12 @@ export default function QuizPage() {
   // We collect contact details, POST the full quiz payload, then open
   // the Calendly/booking URL in a new tab.
   const [bookingOpen, setBookingOpen] = useState(false)
-  const [bookForm, setBookForm] = useState({ name: '', email: '', whatsapp: '' })
+  const [bookForm, setBookForm] = useState({
+    name: '',
+    email: '',
+    countryCode: DEFAULT_COUNTRY.code,   // ISO-2 (e.g. "LB")
+    phone: '',                            // national number only (no dial code)
+  })
   const [bookSubmitting, setBookSubmitting] = useState(false)
   const [bookError, setBookError] = useState<string | null>(null)
 
@@ -177,10 +183,22 @@ export default function QuizPage() {
   const submitBooking = async (e: React.FormEvent) => {
     e.preventDefault()
     setBookError(null)
+
+    // WhatsApp now required — validate here, Supabase accepts anything.
+    const country = COUNTRIES.find(c => c.code === bookForm.countryCode) || DEFAULT_COUNTRY
+    const digits = bookForm.phone.replace(/\D/g, '')
+    if (digits.length < 6) {
+      setBookError('Please enter a valid WhatsApp number (at least 6 digits).')
+      return
+    }
+    const whatsapp = `${country.dial} ${digits}`
+
     setBookSubmitting(true)
     try {
       const payload = {
-        ...bookForm,
+        name:             bookForm.name,
+        email:            bookForm.email,
+        whatsapp,
         business_type:    answers.type,
         goal:             answers.goal,
         current_state:    answers.state,
@@ -555,14 +573,40 @@ export default function QuizPage() {
               style={modalInput}
             />
 
-            <label style={{ ...modalLabel, marginTop: '12px' }}>WhatsApp (optional)</label>
-            <input
-              type="tel"
-              value={bookForm.whatsapp}
-              onChange={e => setBookForm(f => ({ ...f, whatsapp: e.target.value }))}
-              placeholder="+961 …"
-              style={modalInput}
-            />
+            <label style={{ ...modalLabel, marginTop: '12px' }}>WhatsApp *</label>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <select
+                value={bookForm.countryCode}
+                onChange={e => setBookForm(f => ({ ...f, countryCode: e.target.value }))}
+                style={{
+                  ...modalInput,
+                  width: '140px',
+                  flexShrink: 0,
+                  cursor: 'pointer',
+                  // Keep room for the native dropdown caret
+                  paddingRight: '10px',
+                }}
+                aria-label="Country code"
+              >
+                {COUNTRIES.map(c => (
+                  <option key={c.code} value={c.code} style={{ background: '#0b1220', color: '#fff' }}>
+                    {c.flag} {c.dial} {c.name}
+                  </option>
+                ))}
+              </select>
+              <input
+                required
+                type="tel"
+                inputMode="numeric"
+                value={bookForm.phone}
+                onChange={e => setBookForm(f => ({ ...f, phone: e.target.value.replace(/[^\d\s]/g, '') }))}
+                placeholder="76 302 159"
+                style={{ ...modalInput, flex: 1 }}
+              />
+            </div>
+            <p style={{ fontSize: '0.64rem', color: 'var(--text-dim)', margin: '4px 0 0' }}>
+              Number only — we&apos;ll combine it with the country code.
+            </p>
 
             {bookError && (
               <div style={{

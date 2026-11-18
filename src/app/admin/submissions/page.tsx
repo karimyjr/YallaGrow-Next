@@ -101,29 +101,43 @@ export default function AdminSubmissionsPage() {
   const [expanded, setExpanded] = useState<string | null>(null)
 
   const load = useCallback(async () => {
-    const [p, j, c, q] = await Promise.all([
+    // Quiz comes from the service-role API so RLS can't silently hide
+    // rows the way it does with the anon client.
+    const [p, j, c, qRes] = await Promise.all([
       supabase.from('package_submissions').select('*').order('created_at', { ascending: false }),
       supabase.from('job_applications').select('*').order('created_at', { ascending: false }),
       supabase.from('contact_submissions').select('*').order('created_at', { ascending: false }),
-      supabase.from('quiz_submissions').select('*').order('created_at', { ascending: false }),
+      fetch('/api/admin/quiz-submissions').then(r => r.ok ? r.json() : { submissions: [] }).catch(() => ({ submissions: [] })),
     ])
     if (p.data) setPackages(p.data)
     if (j.data) setJobs(j.data)
     if (c.data) setContacts(c.data)
-    if (q.data) setQuizzes(q.data)
+    setQuizzes(Array.isArray(qRes?.submissions) ? qRes.submissions : [])
   }, [])
 
   useEffect(() => { load() }, [load])
 
   const updateStatus = async (table: string, id: string, status: string) => {
-    await supabase.from(table).update({ status }).eq('id', id)
+    if (table === 'quiz_submissions') {
+      await fetch('/api/admin/quiz-submissions', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, status }),
+      })
+    } else {
+      await supabase.from(table).update({ status }).eq('id', id)
+    }
     showToast('Status updated', 'success')
     load()
   }
 
   const del = async (table: string, id: string, name: string) => {
     if (!confirm(`Delete submission from ${name}?`)) return
-    await supabase.from(table).delete().eq('id', id)
+    if (table === 'quiz_submissions') {
+      await fetch(`/api/admin/quiz-submissions?id=${encodeURIComponent(id)}`, { method: 'DELETE' })
+    } else {
+      await supabase.from(table).delete().eq('id', id)
+    }
     showToast('Submission deleted', 'info')
     load()
   }
