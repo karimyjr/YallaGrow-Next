@@ -12,7 +12,7 @@ export default function StickyMobileCTA() {
   const [dismissed, setDismissed] = useState(false)
 
   // Hide on admin, dashboard, and the quiz/packages flows (they have their own CTAs)
-  const hiddenPaths = ['/admin', '/affiliate/dashboard', '/newsletter/confirmed']
+  const hiddenPaths = ['/admin', '/affiliate/dashboard', '/affiliate/signin', '/newsletter/confirmed']
   const isHidden = hiddenPaths.some(p => pathname.startsWith(p))
 
   useEffect(() => {

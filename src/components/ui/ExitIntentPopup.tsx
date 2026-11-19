@@ -18,7 +18,8 @@ export default function ExitIntentPopup() {
     const path = window.location.pathname
     if (
       path.startsWith('/admin') ||
-      path.startsWith('/affiliate/dashboard')
+      path.startsWith('/affiliate/dashboard') ||
+      path.startsWith('/affiliate/signin')
     ) {
       setDismissed(true)
       return

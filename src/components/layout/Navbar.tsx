@@ -36,7 +36,7 @@ export default function Navbar() {
   const [servicesOpen, setServicesOpen] = useState(false)
   const [hoveredHref, setHoveredHref] = useState<string | null>(null)
   const pathname = usePathname()
-  const hideNavbar = pathname.startsWith('/admin') || pathname.startsWith('/affiliate/dashboard')
+  const hideNavbar = pathname.startsWith('/admin') || pathname.startsWith('/affiliate/dashboard') || pathname.startsWith('/affiliate/signin')
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20)
