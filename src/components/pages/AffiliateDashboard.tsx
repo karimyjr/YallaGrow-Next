@@ -1,13 +1,14 @@
 'use client'
 // Affiliate self-service dashboard — V24 glass treatment.
-// - Not logged in → glassy login form (email + ref_code)
-// - Logged in → KPIs with glow rings + gradient borders, referral
-//   link card with gradient background, referrals table in glass.
-// Session kept in sessionStorage so it survives tab navigation but
-// not a browser restart. No Supabase writes from this page.
+// - Not logged in → magic-link login form (email only)
+// - User enters email → Supabase sends magic link → user clicks link
+//   in email → lands back here with a session → dashboard loads.
+// Session is Supabase Auth (not sessionStorage) so it persists across
+// tabs and browser restarts until they sign out.
 
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
+import { supabase } from '@/lib/supabase'
 
 interface Affiliate {
   id: string
@@ -30,7 +31,6 @@ interface Referral {
   created_at: string
 }
 
-const SESSION_KEY = 'yg_affiliate_session'
 const SITE_URL = (typeof window !== 'undefined' ? window.location.origin : 'https://yallagrow.net')
 
 export default function AffiliateDashboard() {
@@ -41,64 +41,105 @@ export default function AffiliateDashboard() {
 
   // Login form state
   const [email, setEmail] = useState('')
-  const [refCode, setRefCode] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [linkSent, setLinkSent] = useState<string | null>(null)   // email we sent to
 
-  const fetchMe = useCallback(async (emailArg: string, codeArg: string) => {
-    const r = await fetch('/api/affiliate/me', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: emailArg, ref_code: codeArg }),
+  // Load affiliate data given an authed Supabase session
+  const loadAffiliate = useCallback(async (accessToken: string) => {
+    const r = await fetch('/api/affiliate/me-authed', {
+      headers: { Authorization: `Bearer ${accessToken}` },
     })
     const data = await r.json()
     if (!r.ok) throw new Error(data.error || 'Could not load dashboard')
     return data as { affiliate: Affiliate; referrals: Referral[] }
   }, [])
 
-  // On mount, try to restore session
+  // Try the existing Supabase session on mount, and listen for sign-in
+  // from the magic link redirect.
   useEffect(() => {
-    const raw = sessionStorage.getItem(SESSION_KEY)
-    if (!raw) { setLoading(false); return }
-    try {
-      const saved = JSON.parse(raw) as { email: string; ref_code: string }
-      fetchMe(saved.email, saved.ref_code)
-        .then(data => { setAffiliate(data.affiliate); setReferrals(data.referrals) })
-        .catch(() => sessionStorage.removeItem(SESSION_KEY))
-        .finally(() => setLoading(false))
-    } catch {
-      sessionStorage.removeItem(SESSION_KEY)
-      setLoading(false)
-    }
-  }, [fetchMe])
+    let cancelled = false
 
-  const signIn = async (e: React.FormEvent) => {
+    const checkSession = async () => {
+      const { data } = await supabase.auth.getSession()
+      const token = data.session?.access_token
+      if (!token) { if (!cancelled) setLoading(false); return }
+      try {
+        const payload = await loadAffiliate(token)
+        if (!cancelled) {
+          setAffiliate(payload.affiliate)
+          setReferrals(payload.referrals)
+        }
+      } catch (err) {
+        // Signed in to Supabase but email doesn't match an affiliate
+        if (!cancelled) setError((err as Error).message)
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
+    checkSession()
+
+    // When the user comes back from the email link, Supabase picks up
+    // the hash tokens and fires SIGNED_IN. Re-load with the new token.
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session?.access_token) {
+        setError(null); setLoading(true)
+        loadAffiliate(session.access_token)
+          .then(payload => {
+            setAffiliate(payload.affiliate)
+            setReferrals(payload.referrals)
+          })
+          .catch(err => setError((err as Error).message))
+          .finally(() => setLoading(false))
+      }
+      if (event === 'SIGNED_OUT') {
+        setAffiliate(null); setReferrals([])
+      }
+    })
+
+    return () => {
+      cancelled = true
+      sub.subscription.unsubscribe()
+    }
+  }, [loadAffiliate])
+
+  const sendMagicLink = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError(null)
+    setError(null); setLinkSent(null)
     setSubmitting(true)
     try {
-      const data = await fetchMe(email, refCode)
-      sessionStorage.setItem(SESSION_KEY, JSON.stringify({ email, ref_code: refCode.toUpperCase() }))
-      setAffiliate(data.affiliate)
-      setReferrals(data.referrals)
+      const { error: otpErr } = await supabase.auth.signInWithOtp({
+        email: email.trim().toLowerCase(),
+        options: {
+          emailRedirectTo: `${SITE_URL}/affiliate/dashboard`,
+          // shouldCreateUser: true so first-time affiliate logins work
+          // without pre-provisioning auth users. Non-affiliates who
+          // sign in will hit the /me-authed 404 and see a clear error.
+          shouldCreateUser: true,
+        },
+      })
+      if (otpErr) throw otpErr
+      setLinkSent(email.trim().toLowerCase())
     } catch (err) {
-      setError((err as Error).message)
+      setError((err as Error).message || 'Could not send the magic link. Please try again.')
     } finally {
       setSubmitting(false)
     }
   }
 
-  const signOut = () => {
-    sessionStorage.removeItem(SESSION_KEY)
+  const signOut = async () => {
+    await supabase.auth.signOut()
     setAffiliate(null)
     setReferrals([])
-    setEmail(''); setRefCode('')
+    setEmail(''); setLinkSent(null); setError(null)
   }
 
   const refresh = async () => {
-    if (!affiliate) return
+    const { data } = await supabase.auth.getSession()
+    const token = data.session?.access_token
+    if (!token) return
     try {
-      const data = await fetchMe(affiliate.email, affiliate.ref_code)
-      setReferrals(data.referrals)
+      const payload = await loadAffiliate(token)
+      setReferrals(payload.referrals)
     } catch { /* keep current data */ }
   }
 
@@ -121,59 +162,92 @@ export default function AffiliateDashboard() {
               Sign in to your dashboard
             </h1>
             <p style={{ fontSize: '0.84rem', color: 'var(--text-dim)', margin: 0 }}>
-              Use the email you applied with and your referral code.
+              Enter your email. We&apos;ll send you a magic link — one click signs you in.
             </p>
           </div>
 
-          <form onSubmit={signIn} style={{
-            background: 'linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01))',
-            border: '1px solid rgba(255,255,255,0.08)',
-            borderRadius: '16px',
-            padding: '26px',
-            backdropFilter: 'blur(14px) saturate(1.3)',
-            WebkitBackdropFilter: 'blur(14px) saturate(1.3)',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05), 0 0 0 1px rgba(16,161,219,0.08)',
-          }}>
-            <label style={labelStyle}>Email</label>
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              placeholder="you@example.com"
-              style={inputStyle}
-            />
+          {linkSent ? (
+            // ────── POST-SEND STATE ──────
+            <div style={{
+              background: 'linear-gradient(180deg, rgba(34,197,94,0.08), rgba(34,197,94,0.02))',
+              border: '1px solid rgba(34,197,94,0.3)',
+              borderRadius: '16px',
+              padding: '26px',
+              textAlign: 'center',
+              backdropFilter: 'blur(14px) saturate(1.3)',
+              WebkitBackdropFilter: 'blur(14px) saturate(1.3)',
+              boxShadow: '0 20px 60px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)',
+            }}>
+              <div style={{ fontSize: '2rem', marginBottom: '10px', color: '#22c55e' }}>✓</div>
+              <h2 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: '1.15rem', color: 'var(--white)', margin: '0 0 8px', letterSpacing: '-0.3px' }}>
+                Check your email
+              </h2>
+              <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', lineHeight: 1.6, margin: '0 0 16px' }}>
+                We sent a login link to <strong style={{ color: 'var(--white)' }}>{linkSent}</strong>.
+                Click it from this device and you&apos;ll be signed in.
+              </p>
+              <p style={{ fontSize: '0.72rem', color: 'var(--text-dim)', margin: '0 0 14px' }}>
+                Can&apos;t find it? Check spam/promotions. Link expires in 1 hour.
+              </p>
+              <button
+                onClick={() => { setLinkSent(null); setEmail('') }}
+                style={{
+                  fontSize: '0.78rem', fontWeight: 600,
+                  background: 'transparent', border: 'none', color: 'var(--sky)',
+                  cursor: 'pointer', textDecoration: 'underline',
+                }}
+              >
+                Try a different email →
+              </button>
+            </div>
+          ) : (
+            // ────── EMAIL FORM ──────
+            <form onSubmit={sendMagicLink} style={{
+              background: 'linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01))',
+              border: '1px solid rgba(255,255,255,0.08)',
+              borderRadius: '16px',
+              padding: '26px',
+              backdropFilter: 'blur(14px) saturate(1.3)',
+              WebkitBackdropFilter: 'blur(14px) saturate(1.3)',
+              boxShadow: '0 20px 60px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05), 0 0 0 1px rgba(16,161,219,0.08)',
+            }}>
+              <label style={labelStyle}>Email address</label>
+              <input
+                type="email"
+                required
+                autoFocus
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                style={inputStyle}
+              />
 
-            <label style={{ ...labelStyle, marginTop: '14px' }}>Referral code</label>
-            <input
-              required
-              value={refCode}
-              onChange={e => setRefCode(e.target.value.toUpperCase())}
-              placeholder="e.g. YG12AB"
-              style={{ ...inputStyle, textTransform: 'uppercase', letterSpacing: '1px' }}
-            />
+              {error && (
+                <div style={{
+                  marginTop: '14px',
+                  padding: '10px 12px',
+                  background: 'rgba(239,68,68,0.08)',
+                  border: '1px solid rgba(239,68,68,0.3)',
+                  borderRadius: '8px',
+                  color: '#ff8585',
+                  fontSize: '0.78rem',
+                }}>{error}</div>
+              )}
 
-            {error && (
-              <div style={{
-                marginTop: '14px',
-                padding: '10px 12px',
-                background: 'rgba(239,68,68,0.08)',
-                border: '1px solid rgba(239,68,68,0.3)',
-                borderRadius: '8px',
-                color: '#ff8585',
-                fontSize: '0.78rem',
-              }}>{error}</div>
-            )}
+              <button
+                type="submit"
+                disabled={submitting || !email.trim()}
+                className="btn-primary"
+                style={{ marginTop: '18px', width: '100%', justifyContent: 'center' }}
+              >
+                {submitting ? 'Sending link…' : 'Send Magic Link'}
+              </button>
 
-            <button
-              type="submit"
-              disabled={submitting}
-              className="btn-primary"
-              style={{ marginTop: '18px', width: '100%', justifyContent: 'center' }}
-            >
-              {submitting ? 'Signing in…' : 'Sign In'}
-            </button>
-          </form>
+              <p style={{ fontSize: '0.68rem', color: 'var(--text-dim)', textAlign: 'center', marginTop: '14px', margin: '14px 0 0' }}>
+                Must be the email you applied with.
+              </p>
+            </form>
+          )}
 
           <p style={{ fontSize: '0.74rem', color: 'var(--text-dim)', textAlign: 'center', marginTop: '18px' }}>
             Not an affiliate yet? <Link href="/affiliate" style={{ color: 'var(--sky)', textDecoration: 'none' }}>Apply to join →</Link>
