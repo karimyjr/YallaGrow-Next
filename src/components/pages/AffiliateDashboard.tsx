@@ -627,20 +627,19 @@ function GlassyOtpCard({ email, code, onChange, onVerify, onResend, onChangeEmai
       transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
       style={{
         position: 'relative',
-        // Deep warm navy base with layered gradient — not a flat glass panel
+        // Deep navy base — layered gradient with sky accent, not a flat glass panel
         background:
-          'radial-gradient(ellipse 120% 80% at 50% -10%, rgba(199,170,120,0.09), transparent 50%),' +
+          'radial-gradient(ellipse 120% 80% at 50% -10%, rgba(16,161,219,0.08), transparent 50%),' +
           'linear-gradient(180deg, #141a28 0%, #0a0f1a 100%)',
         border: '1px solid rgba(255,255,255,0.06)',
         borderRadius: '28px',
         padding: '44px 36px 32px',
-        // Layered shadows: outer soft drop, inner highlight on top edge, inner low-shadow
         boxShadow: [
-          '0 1px 0 rgba(255,255,255,0.08) inset',          // top highlight edge (light source)
-          '0 -1px 0 rgba(0,0,0,0.4) inset',                // bottom shadow edge
-          '0 50px 100px -20px rgba(0,0,0,0.7)',            // soft drop
-          '0 30px 60px -30px rgba(0,0,0,0.5)',             // tighter drop
-          '0 0 0 1px rgba(199,170,120,0.08)',              // warm hairline
+          '0 1px 0 rgba(255,255,255,0.08) inset',
+          '0 -1px 0 rgba(0,0,0,0.4) inset',
+          '0 50px 100px -20px rgba(0,0,0,0.7)',
+          '0 30px 60px -30px rgba(0,0,0,0.5)',
+          '0 0 0 1px rgba(16,161,219,0.08)',
         ].join(', '),
         overflow: 'hidden',
       }}
@@ -652,10 +651,10 @@ function GlassyOtpCard({ email, code, onChange, onVerify, onResend, onChangeEmai
         backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='200' height='200' filter='url(%23n)' opacity='0.5'/></svg>")`,
       }} />
 
-      {/* Warm light leak from top-left */}
+      {/* Sky light leak from top-left */}
       <div aria-hidden="true" style={{
         position: 'absolute', top: '-40%', left: '-20%', width: '80%', height: '80%',
-        background: 'radial-gradient(circle, rgba(199,170,120,0.12) 0%, transparent 60%)',
+        background: 'radial-gradient(circle, rgba(16,161,219,0.14) 0%, transparent 60%)',
         filter: 'blur(40px)', pointerEvents: 'none',
       }} />
 
@@ -706,17 +705,17 @@ function GlassyOtpCard({ email, code, onChange, onVerify, onResend, onChangeEmai
         style={{ textAlign: 'center', marginBottom: '28px', position: 'relative', zIndex: 1 }}
       >
         <h2 style={{
-          fontFamily: '"Instrument Serif", serif',
-          fontWeight: 400,
-          fontSize: '2.2rem',
-          color: '#f5efe3',
-          letterSpacing: '-0.5px',
+          fontFamily: 'Syne, sans-serif',
+          fontWeight: 800,
+          fontSize: '1.7rem',
+          color: 'var(--white)',
+          letterSpacing: '-0.8px',
           margin: '0 0 8px',
-          lineHeight: 1,
+          lineHeight: 1.05,
         }}>
           Check your inbox
         </h2>
-        <p style={{ fontSize: '0.8rem', color: 'rgba(245,239,227,0.55)', margin: 0, lineHeight: 1.6, fontWeight: 300 }}>
+        <p style={{ fontSize: '0.8rem', color: 'var(--text-dim)', margin: 0, lineHeight: 1.6, fontWeight: 400 }}>
           A 4-digit code was sent to
         </p>
         <div style={{
@@ -724,10 +723,10 @@ function GlassyOtpCard({ email, code, onChange, onVerify, onResend, onChangeEmai
           marginTop: '10px',
           padding: '5px 12px',
           background: 'rgba(0,0,0,0.3)',
-          border: '1px solid rgba(199,170,120,0.15)',
+          border: '1px solid rgba(16,161,219,0.2)',
           borderRadius: '8px',
           fontSize: '0.78rem',
-          color: 'rgba(245,239,227,0.85)',
+          color: 'var(--white)',
           fontFamily: '"SF Mono", Menlo, Consolas, monospace',
           letterSpacing: '0.2px',
         }}>{maskEmail(email)}</div>
@@ -769,20 +768,19 @@ function GlassyOtpCard({ email, code, onChange, onVerify, onResend, onChangeEmai
                 style={{
                   width: '62px', height: '76px',
                   textAlign: 'center',
-                  fontFamily: '"Instrument Serif", serif',
-                  fontSize: '2.4rem',
-                  fontWeight: 400,
-                  color: verified ? '#c7f4d4' : '#f5efe3',
-                  // Real bevel: darker base, inner shadow top, highlight bottom
+                  fontFamily: 'Syne, sans-serif',
+                  fontSize: '2rem',
+                  fontWeight: 800,
+                  color: verified ? '#c7f4d4' : 'var(--white)',
                   background: verified
                     ? 'radial-gradient(circle at 50% 30%, rgba(34,197,94,0.25), rgba(16,66,34,0.5))'
                     : filled
-                      ? 'radial-gradient(circle at 50% 30%, rgba(199,170,120,0.1), rgba(10,14,22,0.9))'
+                      ? 'radial-gradient(circle at 50% 30%, rgba(16,161,219,0.18), rgba(10,14,22,0.9))'
                       : 'radial-gradient(circle at 50% 30%, rgba(40,46,60,0.9), rgba(10,14,22,1))',
                   border: verified
                     ? '1px solid rgba(34,197,94,0.5)'
                     : filled
-                      ? '1px solid rgba(199,170,120,0.35)'
+                      ? '1px solid rgba(16,161,219,0.45)'
                       : '1px solid rgba(255,255,255,0.05)',
                   borderRadius: '16px',
                   outline: 'none',
@@ -794,7 +792,7 @@ function GlassyOtpCard({ email, code, onChange, onVerify, onResend, onChangeEmai
                       ].join(', ')
                     : filled
                       ? [
-                          '0 0 20px rgba(199,170,120,0.15)',
+                          '0 0 20px rgba(16,161,219,0.25)',
                           '0 1px 0 rgba(255,255,255,0.08) inset',
                           '0 -8px 16px rgba(0,0,0,0.3) inset',
                           '0 1px 0 rgba(0,0,0,0.5) inset',
@@ -805,7 +803,7 @@ function GlassyOtpCard({ email, code, onChange, onVerify, onResend, onChangeEmai
                           '0 1px 0 rgba(0,0,0,0.6) inset',
                         ].join(', '),
                   transition: 'all 0.35s cubic-bezier(0.22,1,0.36,1)',
-                  caretColor: '#c7aa78',
+                  caretColor: 'var(--sky)',
                 }}
               />
             </motion.div>
@@ -833,21 +831,21 @@ function GlassyOtpCard({ email, code, onChange, onVerify, onResend, onChangeEmai
           background: verified
             ? 'linear-gradient(180deg, #22c55e 0%, #15803d 100%)'
             : submitting
-              ? 'linear-gradient(180deg, #f5efe3 0%, #e8dec4 100%)'
+              ? 'linear-gradient(180deg, #ffffff 0%, #e6edf3 100%)'
               : complete
-                ? 'linear-gradient(180deg, #c7aa78 0%, #a3875a 100%)'
+                ? 'linear-gradient(180deg, #10a1db 0%, #0b6ea0 100%)'
                 : 'linear-gradient(180deg, rgba(30,36,50,0.8) 0%, rgba(14,18,28,0.9) 100%)',
-          color: verified ? '#fff' : submitting ? '#0a0f1a' : complete ? '#0a0f1a' : 'rgba(245,239,227,0.3)',
+          color: verified ? '#fff' : submitting ? '#0a0f1a' : complete ? '#fff' : 'rgba(255,255,255,0.3)',
         }}
         transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
         style={{
           width: '100%',
-          padding: '16px',
-          borderRadius: '16px',
-          fontFamily: '"Instrument Serif", serif',
-          fontSize: '1.15rem',
-          fontWeight: 400,
-          letterSpacing: '0.3px',
+          padding: '15px',
+          borderRadius: '14px',
+          fontFamily: 'Syne, sans-serif',
+          fontSize: '0.95rem',
+          fontWeight: 700,
+          letterSpacing: '-0.2px',
           cursor: complete && !submitting && !verified ? 'pointer' : 'default',
           border: 'none',
           position: 'relative',
@@ -857,7 +855,7 @@ function GlassyOtpCard({ email, code, onChange, onVerify, onResend, onChangeEmai
           boxShadow: verified
             ? '0 14px 36px rgba(34,197,94,0.35), 0 1px 0 rgba(255,255,255,0.2) inset, 0 -1px 0 rgba(0,0,0,0.3) inset'
             : complete
-              ? '0 14px 36px rgba(199,170,120,0.25), 0 1px 0 rgba(255,255,255,0.3) inset, 0 -1px 0 rgba(0,0,0,0.25) inset'
+              ? '0 14px 36px rgba(16,161,219,0.35), 0 1px 0 rgba(255,255,255,0.2) inset, 0 -1px 0 rgba(0,0,0,0.25) inset'
               : '0 1px 0 rgba(255,255,255,0.03) inset, 0 -1px 0 rgba(0,0,0,0.4) inset',
         }}
       >
@@ -905,7 +903,7 @@ function GlassyOtpCard({ email, code, onChange, onVerify, onResend, onChangeEmai
           textAlign: 'center',
           marginTop: '22px',
           fontSize: '0.76rem',
-          color: 'rgba(245,239,227,0.5)',
+          color: 'var(--text-dim)',
           position: 'relative', zIndex: 1,
           fontFamily: 'Inter, sans-serif',
         }}
@@ -917,7 +915,7 @@ function GlassyOtpCard({ email, code, onChange, onVerify, onResend, onChangeEmai
             onClick={() => onResend()}
             style={{
               background: 'transparent', border: 'none',
-              color: '#c7aa78',
+              color: 'var(--sky)',
               cursor: 'pointer', fontWeight: 600, fontSize: '0.76rem',
               fontFamily: 'Inter, sans-serif', padding: 0,
               textDecoration: 'underline', textUnderlineOffset: '3px',
@@ -926,7 +924,7 @@ function GlassyOtpCard({ email, code, onChange, onVerify, onResend, onChangeEmai
             Resend
           </button>
         ) : (
-          <span style={{ color: 'rgba(245,239,227,0.35)' }}>
+          <span style={{ color: 'var(--text-dim)' }}>
             Resend in {formatMMSS(resendIn)}
           </span>
         )}
@@ -940,7 +938,7 @@ function GlassyOtpCard({ email, code, onChange, onVerify, onResend, onChangeEmai
           disabled={submitting || verified}
           style={{
             background: 'transparent', border: 'none',
-            color: 'rgba(245,239,227,0.35)',
+            color: 'var(--text-dim)',
             fontSize: '0.72rem', fontWeight: 400,
             cursor: 'pointer', fontFamily: 'Inter, sans-serif',
             padding: 0,
