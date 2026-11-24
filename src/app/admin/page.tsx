@@ -70,11 +70,23 @@ export default function AdminPage() {
     <div>
       <GlassSidebar
         badge="Admin"
+        workspaceSubtitle="Admin console"
         groups={GROUPS}
         activeId={activeTab}
         onSelect={setActiveTab}
         user={{ name: 'Karim', email: 'info@yallagrow.net', initials: 'K' }}
         onSignOut={signOut}
+        search={{
+          placeholder: 'Search admin…',
+          // Fuzzy-match the query against tab labels and jump to the first
+          // hit. Keeps ⌘K → type → enter as a <1s navigation.
+          onSubmit: (q) => {
+            const needle = q.trim().toLowerCase()
+            if (!needle) return
+            const hit = TABS.find(t => t.label.toLowerCase().includes(needle))
+            if (hit) setActiveTab(hit.id)
+          },
+        }}
       />
 
       <div

@@ -11,7 +11,7 @@
 // renders the main content with left padding matching the current width.
 // Expose GLASS_SIDEBAR_WIDTH_COLLAPSED/EXPANDED so consumers can match.
 
-import { useEffect, useState, useSyncExternalStore } from 'react'
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import Link from 'next/link'
 import { Icon, type IconName } from '@/components/ui/Icons'
 
@@ -47,6 +47,8 @@ export interface UserCard {
 export interface GlassSidebarProps {
   /** Main title shown next to the logo when expanded ("Admin", "Affiliate"). */
   badge: string
+  /** One-line subtitle under the workspace name (e.g. "Admin console"). */
+  workspaceSubtitle?: string
   /** Groups of nav items, in render order. */
   groups: NavGroup[]
   /** Currently selected item id (both state- and URL-driven variants). */
@@ -63,6 +65,11 @@ export interface GlassSidebarProps {
     subtitle?: string
     ctaLabel: string
     onClick: () => void
+  }
+  /** Show a visual search input with ⌘K hint. onSearch fires on Enter. */
+  search?: {
+    placeholder?: string
+    onSubmit?: (q: string) => void
   }
 }
 
@@ -96,12 +103,14 @@ function getCollapsedServerSnapshot(): boolean {
 
 export default function GlassSidebar({
   badge,
+  workspaceSubtitle,
   groups,
   activeId,
   onSelect,
   user,
   onSignOut,
   promo,
+  search,
 }: GlassSidebarProps) {
   const storedCollapsed = useSyncExternalStore(subscribeCollapsed, getCollapsedSnapshot, getCollapsedServerSnapshot)
   // Local override lets the toggle button beat the storage reading until the
@@ -109,6 +118,7 @@ export default function GlassSidebar({
   const [override, setOverride] = useState<boolean | null>(null)
   const collapsed = override ?? storedCollapsed
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [searchQ, setSearchQ] = useState('')
 
   const toggle = () => {
     const next = !collapsed
@@ -136,6 +146,29 @@ export default function GlassSidebar({
     return () => { el.style.removeProperty('--yg-sidebar-width') }
   }, [width])
 
+  // ⌘K / Ctrl+K: focus the search input, matching the V10 reference's
+  // keyboard shortcut hint on the pill. Only wired when search is enabled.
+  const searchInputRef = useRef<HTMLInputElement | null>(null)
+  useEffect(() => {
+    if (!search) return
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault()
+        // Auto-expand so the user can actually see where they're typing
+        if (collapsed) {
+          setOverride(false)
+          try {
+            localStorage.setItem(STORAGE_KEY, '0')
+            window.dispatchEvent(new Event('storage'))
+          } catch { /* private mode */ }
+        }
+        searchInputRef.current?.focus()
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [search, collapsed])
+
   return (
     <>
       {/* Mobile hamburger — shown only <640px, hidden when drawer is open */}
@@ -156,7 +189,9 @@ export default function GlassSidebar({
         className={`gs-root ${collapsed ? 'gs-collapsed' : 'gs-expanded'} ${mobileOpen ? 'gs-mobile-open' : ''}`}
         aria-label="Primary navigation"
       >
-        {/* ─── HEADER: logo + badge + collapse toggle ─── */}
+        {/* ─── HEADER: workspace mark + name/subtitle + collapse toggle ─── */}
+        {/* Matches the V10 reference: logo pill + big name ("YallaGrow")
+            + small subtitle ("Admin console" / "Affiliate portal"). */}
         <div className="gs-header">
           <Link href="/" className="gs-brand" aria-label="YallaGrow home" onClick={closeMobile}>
             <div className="gs-brand-mark" aria-hidden="true">
@@ -167,7 +202,7 @@ export default function GlassSidebar({
             </div>
             <div className="gs-brand-text">
               <div className="gs-brand-name">Yalla<em>Grow</em></div>
-              <div className="gs-brand-badge">{badge}</div>
+              <div className="gs-brand-sub">{workspaceSubtitle || `${badge} workspace`}</div>
             </div>
           </Link>
           <button
@@ -176,9 +211,34 @@ export default function GlassSidebar({
             aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             onClick={toggle}
           >
-            <Icon name={collapsed ? 'menu' : 'menu'} size={14} />
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d={collapsed ? 'm9 18 6-6-6-6' : 'm15 18-6-6 6-6'} />
+            </svg>
           </button>
         </div>
+
+        {/* ─── SEARCH (optional, hidden when collapsed) ─── */}
+        {search && (
+          <form
+            className="gs-search"
+            onSubmit={e => { e.preventDefault(); search.onSubmit?.(searchQ) }}
+            role="search"
+          >
+            <span className="gs-search-icon" aria-hidden="true">
+              <Icon name="search" size={14} />
+            </span>
+            <input
+              ref={searchInputRef}
+              type="search"
+              value={searchQ}
+              onChange={e => setSearchQ(e.target.value)}
+              placeholder={search.placeholder || 'Search…'}
+              className="gs-search-input"
+              aria-label={search.placeholder || 'Search'}
+            />
+            <span className="gs-search-kbd" aria-hidden="true">⌘K</span>
+          </form>
+        )}
 
         {/* ─── NAV GROUPS ─── */}
         <nav className="gs-nav">
@@ -353,18 +413,22 @@ export default function GlassSidebar({
         .gs-brand-name {
           font-family: 'Syne', sans-serif;
           font-weight: 800;
-          font-size: 0.95rem;
+          font-size: 1rem;
           letter-spacing: -0.4px;
           line-height: 1.1;
+          color: #fff;
         }
         .gs-brand-name em { color: #10a1db; font-style: normal; }
-        .gs-brand-badge {
-          font-size: 0.56rem;
-          font-weight: 700;
-          letter-spacing: 1.6px;
-          text-transform: uppercase;
-          color: #10a1db;
-          margin-top: 2px;
+        .gs-brand-sub {
+          font-size: 0.66rem;
+          font-weight: 500;
+          color: rgba(255, 255, 255, 0.48);
+          margin-top: 3px;
+          text-transform: none;
+          letter-spacing: 0;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
         .gs-toggle {
           flex: none;
@@ -380,6 +444,47 @@ export default function GlassSidebar({
           transition: background 0.2s, color 0.2s;
         }
         .gs-toggle:hover { background: rgba(16,161,219,0.14); color: #fff; }
+
+        /* ── SEARCH ── */
+        .gs-search {
+          display: ${collapsed ? 'none' : 'flex'};
+          align-items: center;
+          gap: 8px;
+          padding: 8px 10px;
+          border-radius: 10px;
+          background: rgba(255, 255, 255, 0.04);
+          border: 1px solid rgba(255, 255, 255, 0.06);
+          transition: border-color 0.15s, background 0.15s;
+        }
+        .gs-search:focus-within {
+          border-color: rgba(16, 161, 219, 0.4);
+          background: rgba(16, 161, 219, 0.06);
+        }
+        .gs-search-icon { color: rgba(255, 255, 255, 0.45); display: grid; place-items: center; flex: none; }
+        .gs-search-input {
+          flex: 1;
+          min-width: 0;
+          background: transparent;
+          border: 0;
+          outline: none;
+          color: #fff;
+          font-family: inherit;
+          font-size: 0.8rem;
+          padding: 0;
+        }
+        .gs-search-input::placeholder { color: rgba(255, 255, 255, 0.35); }
+        .gs-search-kbd {
+          flex: none;
+          font-size: 0.62rem;
+          font-weight: 600;
+          color: rgba(255, 255, 255, 0.5);
+          background: rgba(255, 255, 255, 0.07);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          padding: 2px 6px;
+          border-radius: 5px;
+          font-family: -apple-system, system-ui, sans-serif;
+          letter-spacing: 0.5px;
+        }
 
         /* ── NAV ── */
         .gs-nav {
@@ -431,11 +536,26 @@ export default function GlassSidebar({
           background: rgba(255,255,255,0.05);
           color: #fff;
         }
+        /* V10 reference: active item is a solid white pill with dark text,
+           not a sky-tinted glass tile. Reads much louder as "you are here". */
         .gs-item-active {
-          background: linear-gradient(180deg, rgba(16,161,219,0.18), rgba(16,161,219,0.08));
+          background: linear-gradient(180deg, #ffffff 0%, #f0f4f8 100%);
+          color: #0a0f1a;
+          border-color: rgba(255, 255, 255, 0.5);
+          box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.9),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.08),
+            0 6px 16px -6px rgba(16, 161, 219, 0.4);
+        }
+        .gs-item-active:hover {
+          background: linear-gradient(180deg, #ffffff 0%, #e8eef5 100%);
+          color: #0a0f1a;
+        }
+        /* Badges on the active item need to stay legible against white */
+        .gs-item-active .gs-item-badge {
+          background: linear-gradient(180deg, #10a1db, #0b6ea0);
           color: #fff;
-          border-color: rgba(16,161,219,0.3);
-          box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 4px 12px -4px rgba(16,161,219,0.3);
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 2px 6px rgba(16, 161, 219, 0.4);
         }
         .gs-item-icon {
           flex: none;
