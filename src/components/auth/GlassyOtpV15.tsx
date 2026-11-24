@@ -351,17 +351,19 @@ export default function GlassyOtpV15({ email, onVerifyCode, onResend, onContinue
           width: min(372px, 100%);
           border-radius: 30px;
           padding: 30px 32px 24px;
+          /* YallaGrow glass: dark navy tinted with sky + purple */
           background: linear-gradient(180deg,
-            rgba(34, 27, 23, 0.86) 0%,
-            rgba(48, 38, 32, 0.72) 45%,
-            rgba(98, 76, 60, 0.42) 100%);
+            rgba(10, 15, 26, 0.88) 0%,
+            rgba(16, 24, 44, 0.74) 45%,
+            rgba(44, 36, 84, 0.52) 100%);
           backdrop-filter: blur(22px) saturate(140%);
           -webkit-backdrop-filter: blur(22px) saturate(140%);
-          border: 1px solid rgba(255, 255, 255, 0.16);
+          border: 1px solid rgba(16, 161, 219, 0.18);
           box-shadow:
-            inset 0 1px 0 rgba(255, 255, 255, 0.18),
-            inset 0 -1px 0 rgba(255, 255, 255, 0.06),
-            0 30px 70px -20px rgba(0, 0, 0, 0.55);
+            inset 0 1px 0 rgba(255, 255, 255, 0.10),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.35),
+            0 30px 70px -20px rgba(0, 0, 0, 0.65),
+            0 0 0 1px rgba(16, 161, 219, 0.08);
           overflow: hidden;
         }
         .views { display: grid; }
@@ -380,7 +382,7 @@ export default function GlassyOtpV15({ email, onVerifyCode, onResend, onContinue
         .icon svg { width: 20px; height: 20px; fill: none; stroke: #fff; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
         .dot {
           position: absolute; top: 9px; right: 9px; width: 11px; height: 11px; border-radius: 50%;
-          background: #ef4444; border: 2px solid #3b2f29;
+          background: #ef4444; border: 2px solid #0a0f1a;
           box-shadow: 0 0 8px rgba(239, 68, 68, 0.7);
           transition: transform 0.35s cubic-bezier(0.34,1.36,0.5,1), opacity 0.25s;
         }
@@ -433,11 +435,11 @@ export default function GlassyOtpV15({ email, onVerifyCode, onResend, onContinue
         .box.active .face {
           background: rgba(255, 255, 255, 0.1);
           border: 1.5px solid rgba(255, 255, 255, 0.85);
-          box-shadow: 0 0 0 3px rgba(255,255,255,0.07), 0 9px 16px -9px rgba(249,115,22,0.95), inset 0 -2px 0 rgba(249,115,22,0.55);
+          box-shadow: 0 0 0 3px rgba(255,255,255,0.07), 0 9px 16px -9px rgba(16,161,219,0.95), inset 0 -2px 0 rgba(16,161,219,0.55);
         }
         .box.active .face::after {
           content: ""; width: 2px; height: 26px; border-radius: 2px;
-          background: #fb923c; box-shadow: 0 0 8px rgba(249,115,22,0.8);
+          background: #10a1db; box-shadow: 0 0 8px rgba(16,161,219,0.8);
           animation: v15-blink 1s steps(1) infinite;
         }
         .stage.floating .face { animation: v15-bob 2.4s ease-in-out infinite; font-size: 22px; border-radius: 13px; }
