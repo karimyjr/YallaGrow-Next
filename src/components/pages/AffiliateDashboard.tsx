@@ -5,7 +5,7 @@
 // Session is an HTTP-only cookie (yg_aff_session) backed by the
 // affiliate_sessions table, TTL 7 days.
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import Link from 'next/link'
 
 interface Affiliate {
@@ -31,6 +31,10 @@ interface Referral {
 
 type LoginStep = 'email' | 'code'
 
+// 30-second resend timer, matches the "Resend in 0:30" countdown in
+// the paulcodes4 Glassy OTP V15 reference.
+const RESEND_SECONDS = 30
+
 export default function AffiliateDashboard() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -42,6 +46,8 @@ export default function AffiliateDashboard() {
   const [email, setEmail] = useState('')
   const [code, setCode] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [verified, setVerified] = useState(false)   // brief green success state before dashboard loads
+  const [resendIn, setResendIn] = useState(0)        // seconds left before user can resend
 
   const loadFromSession = useCallback(async () => {
     const r = await fetch('/api/affiliate/me-session', { credentials: 'include' })
@@ -69,8 +75,17 @@ export default function AffiliateDashboard() {
     return () => { cancelled = true }
   }, [loadFromSession])
 
-  const sendCode = async (e: React.FormEvent) => {
-    e.preventDefault()
+  // Resend countdown — ticks down to 0 once a code has been sent
+  useEffect(() => {
+    if (resendIn <= 0) return
+    const id = setInterval(() => {
+      setResendIn(s => (s <= 1 ? 0 : s - 1))
+    }, 1000)
+    return () => clearInterval(id)
+  }, [resendIn])
+
+  const sendCode = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault()
     setError(null)
     setSubmitting(true)
     try {
@@ -83,6 +98,7 @@ export default function AffiliateDashboard() {
       if (!r.ok) throw new Error(data.error || 'Could not send the code.')
       setStep('code')
       setCode('')
+      setResendIn(RESEND_SECONDS)
     } catch (err) {
       setError((err as Error).message)
     } finally {
@@ -90,8 +106,7 @@ export default function AffiliateDashboard() {
     }
   }
 
-  const verifyCode = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const verifyCode = async (codeToVerify: string) => {
     setError(null)
     setSubmitting(true)
     try {
@@ -99,18 +114,25 @@ export default function AffiliateDashboard() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ email: email.trim().toLowerCase(), code }),
+        body: JSON.stringify({ email: email.trim().toLowerCase(), code: codeToVerify }),
       })
       const data = await r.json()
       if (!r.ok) throw new Error(data.error || 'Code verification failed.')
 
-      // Cookie now set — load dashboard
+      // Brief "Verified" success state before loading the dashboard
+      setVerified(true)
+
       const payload = await loadFromSession()
       if (!payload) throw new Error('Session not established. Try again.')
+
+      // Short delay to show the green success state
+      await new Promise(resolve => setTimeout(resolve, 600))
       setAffiliate(payload.affiliate)
       setReferrals(payload.referrals)
     } catch (err) {
       setError((err as Error).message)
+      setVerified(false)
+      setCode('')
     } finally {
       setSubmitting(false)
     }
@@ -143,18 +165,17 @@ export default function AffiliateDashboard() {
     return (
       <Shell>
         <div style={{ maxWidth: '440px', margin: '80px auto', padding: '0 20px', position: 'relative', zIndex: 1 }}>
-          <div style={{ textAlign: 'center', marginBottom: '28px' }}>
-            <div style={{ fontSize: '0.62rem', fontWeight: 700, color: 'var(--sky)', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '6px' }}>Affiliate Portal</div>
-            <h1 style={{ fontFamily: 'Syne,sans-serif', fontSize: '1.7rem', fontWeight: 800, color: 'var(--white)', letterSpacing: '-0.5px', marginBottom: '6px' }}>
-              {step === 'email' ? 'Sign in to your dashboard' : 'Enter your code'}
-            </h1>
-            <p style={{ fontSize: '0.84rem', color: 'var(--text-dim)', margin: 0 }}>
-              {step === 'email'
-                ? "Enter your email. We'll send you a 4-digit code from info@yallagrow.net."
-                : <>We sent a 4-digit code to <strong style={{ color: 'var(--white)' }}>{email}</strong>. It expires in 10 minutes.</>
-              }
-            </p>
-          </div>
+          {step === 'email' && (
+            <div style={{ textAlign: 'center', marginBottom: '28px' }}>
+              <div style={{ fontSize: '0.62rem', fontWeight: 700, color: 'var(--sky)', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '6px' }}>Affiliate Portal</div>
+              <h1 style={{ fontFamily: 'Syne,sans-serif', fontSize: '1.7rem', fontWeight: 800, color: 'var(--white)', letterSpacing: '-0.5px', marginBottom: '6px' }}>
+                Sign in to your dashboard
+              </h1>
+              <p style={{ fontSize: '0.84rem', color: 'var(--text-dim)', margin: 0 }}>
+                Enter your email. We&apos;ll send you a 4-digit code from info@yallagrow.net.
+              </p>
+            </div>
+          )}
 
           {step === 'email' ? (
             // ────── STEP 1: EMAIL ──────
@@ -186,73 +207,19 @@ export default function AffiliateDashboard() {
               </p>
             </form>
           ) : (
-            // ────── STEP 2: CODE ──────
-            <form onSubmit={verifyCode} style={formCardStyle}>
-              <label style={{ ...labelStyle, textAlign: 'center' }}>4-digit code</label>
-              <input
-                type="text"
-                inputMode="numeric"
-                pattern="\d{4}"
-                maxLength={4}
-                required
-                autoFocus
-                value={code}
-                onChange={e => setCode(e.target.value.replace(/\D/g, '').slice(0, 4))}
-                placeholder="----"
-                style={{
-                  ...inputStyle,
-                  fontFamily: 'SF Mono, Menlo, Consolas, monospace',
-                  fontSize: '1.9rem',
-                  fontWeight: 700,
-                  letterSpacing: '14px',
-                  textAlign: 'center',
-                  padding: '18px 12px',
-                }}
-              />
-
-              {error && <FormError>{error}</FormError>}
-
-              <button
-                type="submit"
-                disabled={submitting || code.length !== 4}
-                className="btn-primary"
-                style={{ marginTop: '18px', width: '100%', justifyContent: 'center' }}
-              >
-                {submitting ? 'Verifying…' : 'Sign In'}
-              </button>
-
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '14px', fontSize: '0.74rem' }}>
-                <button
-                  type="button"
-                  onClick={() => { setStep('email'); setCode(''); setError(null) }}
-                  style={textLinkStyle}
-                >
-                  ← Use a different email
-                </button>
-                <button
-                  type="button"
-                  onClick={async () => {
-                    setError(null); setSubmitting(true)
-                    try {
-                      const r = await fetch('/api/affiliate/send-otp', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email: email.trim().toLowerCase() }),
-                      })
-                      const data = await r.json()
-                      if (!r.ok) throw new Error(data.error || 'Could not resend.')
-                      setCode('')
-                    } catch (err) {
-                      setError((err as Error).message)
-                    } finally { setSubmitting(false) }
-                  }}
-                  disabled={submitting}
-                  style={textLinkStyle}
-                >
-                  Resend code
-                </button>
-              </div>
-            </form>
+            // ────── STEP 2: GLASSY OTP CARD ──────
+            <GlassyOtpCard
+              email={email}
+              code={code}
+              onChange={setCode}
+              onVerify={verifyCode}
+              onResend={() => sendCode()}
+              onChangeEmail={() => { setStep('email'); setCode(''); setError(null); setVerified(false); setResendIn(0) }}
+              submitting={submitting}
+              verified={verified}
+              error={error}
+              resendIn={resendIn}
+            />
           )}
 
           <p style={{ fontSize: '0.74rem', color: 'var(--text-dim)', textAlign: 'center', marginTop: '18px' }}>
@@ -568,6 +535,340 @@ function CodeTile({ code }: { code: string }) {
       <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: '4px' }}>Share to earn</div>
     </div>
   )
+}
+
+/* ──────────────────────────────────────────────────────────────
+   GlassyOtpCard — paulcodes4 "Glassy OTP V15" style card
+   - Envelope icon header with red notification dot
+   - "Check your inbox" title + masked email subtext
+   - 4 separate digit boxes with auto-advance + backspace
+   - Verify button with Verifying / Verified states
+   - Countdown timer on Resend ("Resend in 0:28")
+   ────────────────────────────────────────────────────────────── */
+
+interface OtpCardProps {
+  email: string
+  code: string
+  onChange: (next: string) => void
+  onVerify: (code: string) => void | Promise<void>
+  onResend: () => void
+  onChangeEmail: () => void
+  submitting: boolean
+  verified: boolean
+  error: string | null
+  resendIn: number
+}
+
+function GlassyOtpCard({ email, code, onChange, onVerify, onResend, onChangeEmail, submitting, verified, error, resendIn }: OtpCardProps) {
+  const inputsRef = useRef<Array<HTMLInputElement | null>>([null, null, null, null])
+  const complete = code.length === 4
+
+  // Autosubmit when 4 digits are entered
+  useEffect(() => {
+    if (complete && !submitting && !verified && !error) {
+      onVerify(code)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [code])
+
+  // Focus first box on mount
+  useEffect(() => {
+    inputsRef.current[0]?.focus()
+  }, [])
+
+  const handleDigitChange = (idx: number, raw: string) => {
+    const digit = raw.replace(/\D/g, '').slice(-1)
+    if (!digit) return
+    const chars = code.padEnd(4, ' ').split('')
+    chars[idx] = digit
+    const next = chars.join('').replace(/ /g, '').slice(0, 4)
+    onChange(next)
+    if (idx < 3) inputsRef.current[idx + 1]?.focus()
+  }
+
+  const handleKeyDown = (idx: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Backspace') {
+      if (code[idx]) {
+        // Remove the digit at this index
+        const chars = code.split('')
+        chars[idx] = ''
+        onChange(chars.join(''))
+      } else if (idx > 0) {
+        // Move back and clear previous
+        const chars = code.split('')
+        chars[idx - 1] = ''
+        onChange(chars.join(''))
+        inputsRef.current[idx - 1]?.focus()
+      }
+      e.preventDefault()
+    } else if (e.key === 'ArrowLeft' && idx > 0) {
+      inputsRef.current[idx - 1]?.focus()
+      e.preventDefault()
+    } else if (e.key === 'ArrowRight' && idx < 3) {
+      inputsRef.current[idx + 1]?.focus()
+      e.preventDefault()
+    }
+  }
+
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 4)
+    if (!pasted) return
+    e.preventDefault()
+    onChange(pasted)
+    const nextFocus = Math.min(pasted.length, 3)
+    inputsRef.current[nextFocus]?.focus()
+  }
+
+  const canResend = resendIn === 0 && !submitting && !verified
+
+  return (
+    <div style={{
+      position: 'relative',
+      background: 'linear-gradient(145deg, rgba(40,48,65,0.55), rgba(18,24,38,0.75))',
+      border: '1px solid rgba(255,255,255,0.08)',
+      borderRadius: '24px',
+      padding: '36px 28px 28px',
+      backdropFilter: 'blur(22px) saturate(1.4)',
+      WebkitBackdropFilter: 'blur(22px) saturate(1.4)',
+      boxShadow:
+        '0 40px 90px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 0 1px rgba(255,255,255,0.03)',
+      overflow: 'hidden',
+    }}>
+      {/* Inner subtle gradient */}
+      <div aria-hidden="true" style={{
+        position: 'absolute', inset: 0, pointerEvents: 'none',
+        background: 'radial-gradient(ellipse 80% 50% at 50% 0%, rgba(16,161,219,0.10), transparent 70%)',
+      }} />
+
+      {/* ───── Envelope icon ───── */}
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '14px', position: 'relative', zIndex: 1 }}>
+        <div style={{
+          position: 'relative',
+          width: '56px', height: '56px',
+          borderRadius: '50%',
+          background: 'linear-gradient(135deg, rgba(60,70,90,0.9), rgba(30,38,54,0.95))',
+          border: '1px solid rgba(255,255,255,0.1)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          boxShadow: '0 10px 30px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1)',
+        }}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="5" width="18" height="14" rx="2"/>
+            <path d="m3 7 9 6 9-6"/>
+          </svg>
+          {/* red notification dot */}
+          {!verified && (
+            <div style={{
+              position: 'absolute',
+              top: '8px', right: '8px',
+              width: '10px', height: '10px',
+              borderRadius: '50%',
+              background: '#ef4444',
+              border: '2px solid rgba(30,38,54,0.95)',
+              boxShadow: '0 0 10px rgba(239,68,68,0.6)',
+            }} />
+          )}
+        </div>
+      </div>
+
+      {/* ───── Title + masked email ───── */}
+      <div style={{ textAlign: 'center', marginBottom: '22px', position: 'relative', zIndex: 1 }}>
+        <h2 style={{
+          fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: '1.3rem',
+          color: '#fff', letterSpacing: '-0.5px', margin: '0 0 6px',
+        }}>
+          Check your inbox
+        </h2>
+        <p style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.55)', margin: 0, lineHeight: 1.5 }}>
+          Enter the 4-digit code we sent to<br />
+          <span style={{
+            display: 'inline-block',
+            marginTop: '6px',
+            padding: '3px 10px',
+            background: 'rgba(0,0,0,0.3)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            borderRadius: '6px',
+            fontSize: '0.74rem',
+            color: 'rgba(255,255,255,0.8)',
+            fontFamily: 'SF Mono, Menlo, Consolas, monospace',
+          }}>{maskEmail(email)}</span>
+        </p>
+      </div>
+
+      {/* ───── 4 digit boxes ───── */}
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', marginBottom: '22px', position: 'relative', zIndex: 1 }}>
+        {[0, 1, 2, 3].map(i => {
+          const filled = !!code[i]
+          return (
+            <input
+              key={i}
+              ref={el => { inputsRef.current[i] = el }}
+              type="text"
+              inputMode="numeric"
+              pattern="\d{1}"
+              maxLength={1}
+              value={code[i] || ''}
+              onChange={e => handleDigitChange(i, e.target.value)}
+              onKeyDown={e => handleKeyDown(i, e)}
+              onPaste={i === 0 ? handlePaste : undefined}
+              onFocus={e => e.target.select()}
+              disabled={submitting || verified}
+              style={{
+                width: '58px',
+                height: '70px',
+                textAlign: 'center',
+                fontFamily: 'Syne, sans-serif',
+                fontSize: '1.9rem',
+                fontWeight: 700,
+                color: verified ? '#fff' : '#fff',
+                background: verified
+                  ? 'linear-gradient(180deg, rgba(34,197,94,0.25), rgba(34,197,94,0.1))'
+                  : filled
+                    ? 'linear-gradient(180deg, rgba(16,161,219,0.18), rgba(16,161,219,0.05))'
+                    : 'linear-gradient(180deg, rgba(0,0,0,0.3), rgba(0,0,0,0.5))',
+                border: verified
+                  ? '1px solid rgba(34,197,94,0.6)'
+                  : filled
+                    ? '1px solid rgba(16,161,219,0.55)'
+                    : '1px solid rgba(255,255,255,0.1)',
+                borderRadius: '14px',
+                outline: 'none',
+                transition: 'all 0.2s cubic-bezier(0.22,1,0.36,1)',
+                boxShadow: verified
+                  ? '0 0 20px rgba(34,197,94,0.3), inset 0 1px 0 rgba(255,255,255,0.1)'
+                  : filled
+                    ? '0 0 16px rgba(16,161,219,0.25), inset 0 1px 0 rgba(255,255,255,0.08)'
+                    : 'inset 0 1px 0 rgba(255,255,255,0.03)',
+                caretColor: 'var(--sky)',
+              }}
+            />
+          )
+        })}
+      </div>
+
+      {error && <div style={{ position: 'relative', zIndex: 1, marginBottom: '14px' }}><FormError>{error}</FormError></div>}
+
+      {/* ───── Verify button ───── */}
+      <button
+        type="button"
+        onClick={() => complete && onVerify(code)}
+        disabled={!complete || submitting || verified}
+        style={{
+          width: '100%',
+          padding: '14px',
+          borderRadius: '14px',
+          fontFamily: 'Inter, sans-serif',
+          fontSize: '0.9rem',
+          fontWeight: 700,
+          cursor: complete && !submitting && !verified ? 'pointer' : 'default',
+          border: 'none',
+          transition: 'all 0.3s cubic-bezier(0.22,1,0.36,1)',
+          position: 'relative',
+          zIndex: 1,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '8px',
+          ...(verified
+            ? {
+                background: 'linear-gradient(180deg, #22c55e, #16a34a)',
+                color: '#fff',
+                boxShadow: '0 10px 30px rgba(34,197,94,0.4), inset 0 1px 0 rgba(255,255,255,0.2)',
+              }
+            : submitting
+              ? {
+                  background: 'rgba(255,255,255,0.9)',
+                  color: '#0b1220',
+                  boxShadow: '0 6px 20px rgba(255,255,255,0.15)',
+                }
+              : complete
+                ? {
+                    background: 'linear-gradient(180deg, #0b1220, #040812)',
+                    color: '#fff',
+                    boxShadow: '0 10px 30px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                  }
+                : {
+                    background: 'rgba(0,0,0,0.3)',
+                    color: 'rgba(255,255,255,0.3)',
+                    border: '1px solid rgba(255,255,255,0.05)',
+                  }),
+        }}
+      >
+        {verified ? (
+          <>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            Verified
+          </>
+        ) : submitting ? 'Verifying…' : 'Verify code'}
+      </button>
+
+      {/* ───── Resend footer ───── */}
+      <div style={{
+        textAlign: 'center',
+        marginTop: '18px',
+        fontSize: '0.74rem',
+        color: 'rgba(255,255,255,0.5)',
+        position: 'relative',
+        zIndex: 1,
+      }}>
+        Didn&apos;t get a code?{' '}
+        {canResend ? (
+          <button
+            type="button"
+            onClick={() => { onResend() }}
+            style={{
+              background: 'transparent', border: 'none', color: 'var(--sky)',
+              cursor: 'pointer', fontWeight: 600, fontSize: '0.74rem',
+              fontFamily: 'Inter, sans-serif', padding: 0,
+            }}
+          >
+            Resend →
+          </button>
+        ) : (
+          <span style={{ color: 'rgba(255,255,255,0.35)' }}>
+            Resend in {formatMMSS(resendIn)}
+          </span>
+        )}
+      </div>
+
+      {/* Use different email link */}
+      <div style={{ textAlign: 'center', marginTop: '8px', position: 'relative', zIndex: 1 }}>
+        <button
+          type="button"
+          onClick={onChangeEmail}
+          disabled={submitting || verified}
+          style={{
+            background: 'transparent', border: 'none',
+            color: 'rgba(255,255,255,0.4)',
+            fontSize: '0.7rem', fontWeight: 500,
+            cursor: 'pointer', fontFamily: 'Inter, sans-serif',
+            padding: 0, textDecoration: 'none',
+          }}
+        >
+          ← Use a different email
+        </button>
+      </div>
+    </div>
+  )
+}
+
+/** Mask an email as "ka●●●i@gmail.com" */
+function maskEmail(email: string): string {
+  const [local, domain] = email.split('@')
+  if (!local || !domain) return email
+  if (local.length <= 2) return `${local[0]}●●●${local.slice(-1)}@${domain}`
+  const first = local.slice(0, 2)
+  const last = local.slice(-1)
+  return `${first}●●●●${last}@${domain}`
+}
+
+/** Format seconds as M:SS */
+function formatMMSS(s: number): string {
+  const m = Math.floor(s / 60)
+  const ss = String(s % 60).padStart(2, '0')
+  return `${m}:${ss}`
 }
 
 const formCardStyle: React.CSSProperties = {
