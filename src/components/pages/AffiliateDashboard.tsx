@@ -5,9 +5,9 @@
 // Session is an HTTP-only cookie (yg_aff_session) backed by the
 // affiliate_sessions table, TTL 7 days.
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
-import { motion, AnimatePresence } from 'framer-motion'
+import GlassyOtpV15 from '@/components/auth/GlassyOtpV15'
 
 interface Affiliate {
   id: string
@@ -32,10 +32,6 @@ interface Referral {
 
 type LoginStep = 'email' | 'code'
 
-// 30-second resend timer, matches the "Resend in 0:30" countdown in
-// the paulcodes4 Glassy OTP V15 reference.
-const RESEND_SECONDS = 30
-
 export default function AffiliateDashboard() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -45,10 +41,11 @@ export default function AffiliateDashboard() {
   // Login form state
   const [step, setStep] = useState<LoginStep>('email')
   const [email, setEmail] = useState('')
-  const [code, setCode] = useState('')
   const [submitting, setSubmitting] = useState(false)
-  const [verified, setVerified] = useState(false)   // brief green success state before dashboard loads
-  const [resendIn, setResendIn] = useState(0)        // seconds left before user can resend
+  // Preloaded payload from /me-session, fetched in the background while
+  // the Glassy V15 success animation plays. Lets the user click Continue
+  // and land on the dashboard with no extra wait.
+  const [pendingPayload, setPendingPayload] = useState<{ affiliate: Affiliate; referrals: Referral[] } | null>(null)
 
   const loadFromSession = useCallback(async () => {
     const r = await fetch('/api/affiliate/me-session', { credentials: 'include' })
@@ -76,15 +73,6 @@ export default function AffiliateDashboard() {
     return () => { cancelled = true }
   }, [loadFromSession])
 
-  // Resend countdown — ticks down to 0 once a code has been sent
-  useEffect(() => {
-    if (resendIn <= 0) return
-    const id = setInterval(() => {
-      setResendIn(s => (s <= 1 ? 0 : s - 1))
-    }, 1000)
-    return () => clearInterval(id)
-  }, [resendIn])
-
   const sendCode = async (e?: React.FormEvent) => {
     if (e) e.preventDefault()
     setError(null)
@@ -98,8 +86,7 @@ export default function AffiliateDashboard() {
       const data = await r.json()
       if (!r.ok) throw new Error(data.error || 'Could not send the code.')
       setStep('code')
-      setCode('')
-      setResendIn(RESEND_SECONDS)
+      setPendingPayload(null)
     } catch (err) {
       setError((err as Error).message)
     } finally {
@@ -107,9 +94,10 @@ export default function AffiliateDashboard() {
     }
   }
 
-  const verifyCode = async (codeToVerify: string) => {
-    setError(null)
-    setSubmitting(true)
+  // GlassyOtpV15 contract: returns { ok, error? }. On ok, we kick off the
+  // /me-session fetch in the background while the animation plays
+  // (boxes → X lines → merge → success card). User hits Continue when it's done.
+  const verifyCode = async (codeToVerify: string): Promise<{ ok: boolean; error?: string }> => {
     try {
       const r = await fetch('/api/affiliate/verify-otp', {
         method: 'POST',
@@ -118,24 +106,35 @@ export default function AffiliateDashboard() {
         body: JSON.stringify({ email: email.trim().toLowerCase(), code: codeToVerify }),
       })
       const data = await r.json()
-      if (!r.ok) throw new Error(data.error || 'Code verification failed.')
+      if (!r.ok) return { ok: false, error: data.error || 'Code verification failed.' }
 
-      // Brief "Verified" success state before loading the dashboard
-      setVerified(true)
+      // Fire off the session load so it's ready by the time the user clicks Continue.
+      loadFromSession()
+        .then(payload => {
+          if (payload) setPendingPayload(payload)
+        })
+        .catch(() => { /* retried on Continue click */ })
 
+      return { ok: true }
+    } catch (err) {
+      return { ok: false, error: (err as Error).message }
+    }
+  }
+
+  const continueToDashboard = async () => {
+    if (pendingPayload) {
+      setAffiliate(pendingPayload.affiliate)
+      setReferrals(pendingPayload.referrals)
+      return
+    }
+    // Fallback: /me-session hadn't resolved yet or failed — try once more.
+    try {
       const payload = await loadFromSession()
       if (!payload) throw new Error('Session not established. Try again.')
-
-      // Short delay to show the green success state
-      await new Promise(resolve => setTimeout(resolve, 600))
       setAffiliate(payload.affiliate)
       setReferrals(payload.referrals)
     } catch (err) {
       setError((err as Error).message)
-      setVerified(false)
-      setCode('')
-    } finally {
-      setSubmitting(false)
     }
   }
 
@@ -143,7 +142,7 @@ export default function AffiliateDashboard() {
     await fetch('/api/affiliate/signout-session', { method: 'POST', credentials: 'include' })
     setAffiliate(null)
     setReferrals([])
-    setEmail(''); setCode(''); setStep('email'); setError(null)
+    setEmail(''); setStep('email'); setError(null); setPendingPayload(null)
   }
 
   const refresh = async () => {
@@ -163,65 +162,66 @@ export default function AffiliateDashboard() {
 
   // ─────────── LOGIN FORM ───────────
   if (!affiliate) {
+    if (step === 'code') {
+      // V15 handles its own card + spacing; drop the 440px wrapper here
+      // so the card isn't squeezed and the floating-box animation has room.
+      return (
+        <Shell>
+          <GlassyOtpV15
+            email={email}
+            onVerifyCode={verifyCode}
+            onResend={async () => { await sendCode() }}
+            onContinue={continueToDashboard}
+            onChangeEmail={() => { setStep('email'); setError(null); setPendingPayload(null) }}
+            canContinue={pendingPayload !== null}
+          />
+          <p style={{ textAlign: 'center', fontSize: '0.72rem', color: 'var(--text-dim)', margin: '0 0 48px', position: 'relative', zIndex: 1 }}>
+            Not an affiliate yet? <Link href="/affiliate" style={{ color: 'var(--sky)', textDecoration: 'none' }}>Apply to join →</Link>
+          </p>
+        </Shell>
+      )
+    }
+
     return (
       <Shell>
         <div style={{ maxWidth: '440px', margin: '80px auto', padding: '0 20px', position: 'relative', zIndex: 1 }}>
-          {step === 'email' && (
-            <div style={{ textAlign: 'center', marginBottom: '28px' }}>
-              <div style={{ fontSize: '0.62rem', fontWeight: 700, color: 'var(--sky)', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '6px' }}>Affiliate Portal</div>
-              <h1 style={{ fontFamily: 'Syne,sans-serif', fontSize: '1.7rem', fontWeight: 800, color: 'var(--white)', letterSpacing: '-0.5px', marginBottom: '6px' }}>
-                Sign in to your dashboard
-              </h1>
-              <p style={{ fontSize: '0.84rem', color: 'var(--text-dim)', margin: 0 }}>
-                Enter your email. We&apos;ll send you a 4-digit code from info@yallagrow.net.
-              </p>
-            </div>
-          )}
+          <div style={{ textAlign: 'center', marginBottom: '28px' }}>
+            <div style={{ fontSize: '0.62rem', fontWeight: 700, color: 'var(--sky)', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '6px' }}>Affiliate Portal</div>
+            <h1 style={{ fontFamily: 'Syne,sans-serif', fontSize: '1.7rem', fontWeight: 800, color: 'var(--white)', letterSpacing: '-0.5px', marginBottom: '6px' }}>
+              Sign in to your dashboard
+            </h1>
+            <p style={{ fontSize: '0.84rem', color: 'var(--text-dim)', margin: 0 }}>
+              Enter your email. We&apos;ll send you a 4-digit code from info@yallagrow.net.
+            </p>
+          </div>
 
-          {step === 'email' ? (
-            // ────── STEP 1: EMAIL ──────
-            <form onSubmit={sendCode} style={formCardStyle}>
-              <label style={labelStyle}>Email address</label>
-              <input
-                type="email"
-                required
-                autoFocus
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                style={inputStyle}
-              />
-
-              {error && <FormError>{error}</FormError>}
-
-              <button
-                type="submit"
-                disabled={submitting || !email.trim()}
-                className="btn-primary"
-                style={{ marginTop: '18px', width: '100%', justifyContent: 'center' }}
-              >
-                {submitting ? 'Sending code…' : 'Send Code'}
-              </button>
-
-              <p style={{ fontSize: '0.68rem', color: 'var(--text-dim)', textAlign: 'center', marginTop: '14px', margin: '14px 0 0' }}>
-                Must be the email you applied with.
-              </p>
-            </form>
-          ) : (
-            // ────── STEP 2: GLASSY OTP CARD ──────
-            <GlassyOtpCard
-              email={email}
-              code={code}
-              onChange={setCode}
-              onVerify={verifyCode}
-              onResend={() => sendCode()}
-              onChangeEmail={() => { setStep('email'); setCode(''); setError(null); setVerified(false); setResendIn(0) }}
-              submitting={submitting}
-              verified={verified}
-              error={error}
-              resendIn={resendIn}
+          <form onSubmit={sendCode} style={formCardStyle}>
+            <label style={labelStyle}>Email address</label>
+            <input
+              type="email"
+              required
+              autoFocus
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              style={inputStyle}
             />
-          )}
+
+            {error && <FormError>{error}</FormError>}
+
+            <button
+              type="submit"
+              disabled={submitting || !email.trim()}
+              className="btn-primary"
+              style={{ marginTop: '18px', width: '100%', justifyContent: 'center' }}
+            >
+              {submitting ? 'Sending code…' : 'Send Code'}
+            </button>
+
+            <p style={{ fontSize: '0.68rem', color: 'var(--text-dim)', textAlign: 'center', marginTop: '14px', margin: '14px 0 0' }}>
+              Must be the email you applied with.
+            </p>
+          </form>
 
           <p style={{ fontSize: '0.74rem', color: 'var(--text-dim)', textAlign: 'center', marginTop: '18px' }}>
             Not an affiliate yet? <Link href="/affiliate" style={{ color: 'var(--sky)', textDecoration: 'none' }}>Apply to join →</Link>
@@ -538,435 +538,10 @@ function CodeTile({ code }: { code: string }) {
   )
 }
 
-/* ──────────────────────────────────────────────────────────────
-   GlassyOtpCard — paulcodes4 "Glassy OTP V15" style card
-   - Envelope icon header with red notification dot
-   - "Check your inbox" title + masked email subtext
-   - 4 separate digit boxes with auto-advance + backspace
-   - Verify button with Verifying / Verified states
-   - Countdown timer on Resend ("Resend in 0:28")
-   ────────────────────────────────────────────────────────────── */
+/* OTP step is now handled by GlassyOtpV15 (src/components/auth/GlassyOtpV15.tsx) —
+   direct port of paulcodes4 Glassy OTP V15 with floating-box animation,
+   X-line morph, merge tile, and success card. */
 
-interface OtpCardProps {
-  email: string
-  code: string
-  onChange: (next: string) => void
-  onVerify: (code: string) => void | Promise<void>
-  onResend: () => void
-  onChangeEmail: () => void
-  submitting: boolean
-  verified: boolean
-  error: string | null
-  resendIn: number
-}
-
-function GlassyOtpCard({ email, code, onChange, onVerify, onResend, onChangeEmail, submitting, verified, error, resendIn }: OtpCardProps) {
-  const inputsRef = useRef<Array<HTMLInputElement | null>>([null, null, null, null])
-  const complete = code.length === 4
-
-  // Autosubmit when 4 digits are entered
-  useEffect(() => {
-    if (complete && !submitting && !verified && !error) {
-      onVerify(code)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [code])
-
-  // Focus first box on mount
-  useEffect(() => {
-    inputsRef.current[0]?.focus()
-  }, [])
-
-  const handleDigitChange = (idx: number, raw: string) => {
-    const digit = raw.replace(/\D/g, '').slice(-1)
-    if (!digit) return
-    const chars = code.padEnd(4, ' ').split('')
-    chars[idx] = digit
-    const next = chars.join('').replace(/ /g, '').slice(0, 4)
-    onChange(next)
-    if (idx < 3) inputsRef.current[idx + 1]?.focus()
-  }
-
-  const handleKeyDown = (idx: number, e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Backspace') {
-      if (code[idx]) {
-        const chars = code.split('')
-        chars[idx] = ''
-        onChange(chars.join(''))
-      } else if (idx > 0) {
-        const chars = code.split('')
-        chars[idx - 1] = ''
-        onChange(chars.join(''))
-        inputsRef.current[idx - 1]?.focus()
-      }
-      e.preventDefault()
-    } else if (e.key === 'ArrowLeft' && idx > 0) {
-      inputsRef.current[idx - 1]?.focus()
-      e.preventDefault()
-    } else if (e.key === 'ArrowRight' && idx < 3) {
-      inputsRef.current[idx + 1]?.focus()
-      e.preventDefault()
-    }
-  }
-
-  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
-    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 4)
-    if (!pasted) return
-    e.preventDefault()
-    onChange(pasted)
-    const nextFocus = Math.min(pasted.length, 3)
-    inputsRef.current[nextFocus]?.focus()
-  }
-
-  const canResend = resendIn === 0 && !submitting && !verified
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20, filter: 'blur(14px)' }}
-      animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-      transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-      style={{
-        position: 'relative',
-        // Deep navy base — layered gradient with sky accent, not a flat glass panel
-        background:
-          'radial-gradient(ellipse 120% 80% at 50% -10%, rgba(16,161,219,0.08), transparent 50%),' +
-          'linear-gradient(180deg, #141a28 0%, #0a0f1a 100%)',
-        border: '1px solid rgba(255,255,255,0.06)',
-        borderRadius: '28px',
-        padding: '44px 36px 32px',
-        boxShadow: [
-          '0 1px 0 rgba(255,255,255,0.08) inset',
-          '0 -1px 0 rgba(0,0,0,0.4) inset',
-          '0 50px 100px -20px rgba(0,0,0,0.7)',
-          '0 30px 60px -30px rgba(0,0,0,0.5)',
-          '0 0 0 1px rgba(16,161,219,0.08)',
-        ].join(', '),
-        overflow: 'hidden',
-      }}
-    >
-      {/* Grain texture — kills the flat-vector feel */}
-      <div aria-hidden="true" style={{
-        position: 'absolute', inset: 0, pointerEvents: 'none',
-        opacity: 0.4, mixBlendMode: 'overlay',
-        backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='200' height='200' filter='url(%23n)' opacity='0.5'/></svg>")`,
-      }} />
-
-      {/* Sky light leak from top-left */}
-      <div aria-hidden="true" style={{
-        position: 'absolute', top: '-40%', left: '-20%', width: '80%', height: '80%',
-        background: 'radial-gradient(circle, rgba(16,161,219,0.14) 0%, transparent 60%)',
-        filter: 'blur(40px)', pointerEvents: 'none',
-      }} />
-
-      {/* ───── Envelope icon ───── */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.85 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.15, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-        style={{ display: 'flex', justifyContent: 'center', marginBottom: '18px', position: 'relative', zIndex: 1 }}
-      >
-        <div style={{
-          position: 'relative',
-          width: '60px', height: '60px',
-          borderRadius: '50%',
-          background: 'radial-gradient(circle at 30% 30%, rgba(80,88,108,1), rgba(28,34,48,1) 70%)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          boxShadow: [
-            '0 1px 0 rgba(255,255,255,0.12) inset',
-            '0 -1px 0 rgba(0,0,0,0.4) inset',
-            '0 12px 28px rgba(0,0,0,0.5)',
-          ].join(', '),
-        }}>
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeOpacity="0.9" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="3" y="5" width="18" height="14" rx="2.5"/>
-            <path d="m3 7 9 6 9-6"/>
-          </svg>
-          {!verified && (
-            <motion.div
-              animate={{ scale: [1, 1.15, 1] }}
-              transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-              style={{
-                position: 'absolute', top: '6px', right: '6px',
-                width: '12px', height: '12px', borderRadius: '50%',
-                background: 'radial-gradient(circle at 30% 30%, #ff6b6b, #c0392b)',
-                border: '2px solid rgba(28,34,48,1)',
-                boxShadow: '0 0 12px rgba(239,68,68,0.6)',
-              }}
-            />
-          )}
-        </div>
-      </motion.div>
-
-      {/* ───── Title + masked email ───── */}
-      <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.25, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-        style={{ textAlign: 'center', marginBottom: '28px', position: 'relative', zIndex: 1 }}
-      >
-        <h2 style={{
-          fontFamily: 'Syne, sans-serif',
-          fontWeight: 800,
-          fontSize: '1.7rem',
-          color: 'var(--white)',
-          letterSpacing: '-0.8px',
-          margin: '0 0 8px',
-          lineHeight: 1.05,
-        }}>
-          Check your inbox
-        </h2>
-        <p style={{ fontSize: '0.8rem', color: 'var(--text-dim)', margin: 0, lineHeight: 1.6, fontWeight: 400 }}>
-          A 4-digit code was sent to
-        </p>
-        <div style={{
-          display: 'inline-block',
-          marginTop: '10px',
-          padding: '5px 12px',
-          background: 'rgba(0,0,0,0.3)',
-          border: '1px solid rgba(16,161,219,0.2)',
-          borderRadius: '8px',
-          fontSize: '0.78rem',
-          color: 'var(--white)',
-          fontFamily: '"SF Mono", Menlo, Consolas, monospace',
-          letterSpacing: '0.2px',
-        }}>{maskEmail(email)}</div>
-      </motion.div>
-
-      {/* ───── 4 digit boxes ───── */}
-      <div style={{ display: 'flex', justifyContent: 'center', gap: '14px', marginBottom: '28px', position: 'relative', zIndex: 1 }}>
-        {[0, 1, 2, 3].map(i => {
-          const filled = !!code[i]
-          const greenPulseDelay = verified ? i * 0.08 : 0   // staggered cascade
-          return (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 10, scale: 0.9 }}
-              animate={{
-                opacity: 1,
-                y: 0,
-                scale: verified ? [1, 1.08, 1] : 1,
-              }}
-              transition={{
-                delay: verified ? greenPulseDelay : 0.35 + i * 0.07,
-                duration: verified ? 0.5 : 0.6,
-                ease: [0.22, 1, 0.36, 1],
-              }}
-              style={{ position: 'relative' }}
-            >
-              <input
-                ref={el => { inputsRef.current[i] = el }}
-                type="text"
-                inputMode="numeric"
-                pattern="\d{1}"
-                maxLength={1}
-                value={code[i] || ''}
-                onChange={e => handleDigitChange(i, e.target.value)}
-                onKeyDown={e => handleKeyDown(i, e)}
-                onPaste={i === 0 ? handlePaste : undefined}
-                onFocus={e => e.target.select()}
-                disabled={submitting || verified}
-                style={{
-                  width: '62px', height: '76px',
-                  textAlign: 'center',
-                  fontFamily: 'Syne, sans-serif',
-                  fontSize: '2rem',
-                  fontWeight: 800,
-                  color: verified ? '#c7f4d4' : 'var(--white)',
-                  background: verified
-                    ? 'radial-gradient(circle at 50% 30%, rgba(34,197,94,0.25), rgba(16,66,34,0.5))'
-                    : filled
-                      ? 'radial-gradient(circle at 50% 30%, rgba(16,161,219,0.18), rgba(10,14,22,0.9))'
-                      : 'radial-gradient(circle at 50% 30%, rgba(40,46,60,0.9), rgba(10,14,22,1))',
-                  border: verified
-                    ? '1px solid rgba(34,197,94,0.5)'
-                    : filled
-                      ? '1px solid rgba(16,161,219,0.45)'
-                      : '1px solid rgba(255,255,255,0.05)',
-                  borderRadius: '16px',
-                  outline: 'none',
-                  boxShadow: verified
-                    ? [
-                        '0 0 24px rgba(34,197,94,0.35)',
-                        '0 1px 0 rgba(255,255,255,0.08) inset',
-                        '0 -1px 0 rgba(0,0,0,0.4) inset',
-                      ].join(', ')
-                    : filled
-                      ? [
-                          '0 0 20px rgba(16,161,219,0.25)',
-                          '0 1px 0 rgba(255,255,255,0.08) inset',
-                          '0 -8px 16px rgba(0,0,0,0.3) inset',
-                          '0 1px 0 rgba(0,0,0,0.5) inset',
-                        ].join(', ')
-                      : [
-                          '0 1px 0 rgba(255,255,255,0.04) inset',
-                          '0 -8px 16px rgba(0,0,0,0.4) inset',
-                          '0 1px 0 rgba(0,0,0,0.6) inset',
-                        ].join(', '),
-                  transition: 'all 0.35s cubic-bezier(0.22,1,0.36,1)',
-                  caretColor: 'var(--sky)',
-                }}
-              />
-            </motion.div>
-          )
-        })}
-      </div>
-
-      {error && (
-        <motion.div
-          initial={{ opacity: 0, y: -4 }}
-          animate={{ opacity: 1, y: 0 }}
-          style={{ position: 'relative', zIndex: 1, marginBottom: '14px' }}
-        >
-          <FormError>{error}</FormError>
-        </motion.div>
-      )}
-
-      {/* ───── Verify button — morphs between states ───── */}
-      <motion.button
-        type="button"
-        onClick={() => complete && onVerify(code)}
-        disabled={!complete || submitting || verified}
-        initial={false}
-        animate={{
-          background: verified
-            ? 'linear-gradient(180deg, #22c55e 0%, #15803d 100%)'
-            : submitting
-              ? 'linear-gradient(180deg, #ffffff 0%, #e6edf3 100%)'
-              : complete
-                ? 'linear-gradient(180deg, #10a1db 0%, #0b6ea0 100%)'
-                : 'linear-gradient(180deg, rgba(30,36,50,0.8) 0%, rgba(14,18,28,0.9) 100%)',
-          color: verified ? '#fff' : submitting ? '#0a0f1a' : complete ? '#fff' : 'rgba(255,255,255,0.3)',
-        }}
-        transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-        style={{
-          width: '100%',
-          padding: '15px',
-          borderRadius: '14px',
-          fontFamily: 'Syne, sans-serif',
-          fontSize: '0.95rem',
-          fontWeight: 700,
-          letterSpacing: '-0.2px',
-          cursor: complete && !submitting && !verified ? 'pointer' : 'default',
-          border: 'none',
-          position: 'relative',
-          zIndex: 1,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          gap: '10px',
-          boxShadow: verified
-            ? '0 14px 36px rgba(34,197,94,0.35), 0 1px 0 rgba(255,255,255,0.2) inset, 0 -1px 0 rgba(0,0,0,0.3) inset'
-            : complete
-              ? '0 14px 36px rgba(16,161,219,0.35), 0 1px 0 rgba(255,255,255,0.2) inset, 0 -1px 0 rgba(0,0,0,0.25) inset'
-              : '0 1px 0 rgba(255,255,255,0.03) inset, 0 -1px 0 rgba(0,0,0,0.4) inset',
-        }}
-      >
-        <AnimatePresence mode="wait">
-          {verified ? (
-            <motion.span
-              key="verified"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              transition={{ duration: 0.3 }}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '10px' }}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="20 6 9 17 4 12"/>
-              </svg>
-              Verified
-            </motion.span>
-          ) : submitting ? (
-            <motion.span
-              key="verifying"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-            >Verifying…</motion.span>
-          ) : (
-            <motion.span
-              key="verify"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-            >Verify code</motion.span>
-          )}
-        </AnimatePresence>
-      </motion.button>
-
-      {/* ───── Resend footer ───── */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.5, duration: 0.6 }}
-        style={{
-          textAlign: 'center',
-          marginTop: '22px',
-          fontSize: '0.76rem',
-          color: 'var(--text-dim)',
-          position: 'relative', zIndex: 1,
-          fontFamily: 'Inter, sans-serif',
-        }}
-      >
-        Didn&apos;t get a code?{' '}
-        {canResend ? (
-          <button
-            type="button"
-            onClick={() => onResend()}
-            style={{
-              background: 'transparent', border: 'none',
-              color: 'var(--sky)',
-              cursor: 'pointer', fontWeight: 600, fontSize: '0.76rem',
-              fontFamily: 'Inter, sans-serif', padding: 0,
-              textDecoration: 'underline', textUnderlineOffset: '3px',
-            }}
-          >
-            Resend
-          </button>
-        ) : (
-          <span style={{ color: 'var(--text-dim)' }}>
-            Resend in {formatMMSS(resendIn)}
-          </span>
-        )}
-      </motion.div>
-
-      {/* Use different email */}
-      <div style={{ textAlign: 'center', marginTop: '8px', position: 'relative', zIndex: 1 }}>
-        <button
-          type="button"
-          onClick={onChangeEmail}
-          disabled={submitting || verified}
-          style={{
-            background: 'transparent', border: 'none',
-            color: 'var(--text-dim)',
-            fontSize: '0.72rem', fontWeight: 400,
-            cursor: 'pointer', fontFamily: 'Inter, sans-serif',
-            padding: 0,
-          }}
-        >
-          Use a different email
-        </button>
-      </div>
-    </motion.div>
-  )
-}
-
-/** Mask an email as "ka●●●i@gmail.com" */
-function maskEmail(email: string): string {
-  const [local, domain] = email.split('@')
-  if (!local || !domain) return email
-  if (local.length <= 2) return `${local[0]}●●●${local.slice(-1)}@${domain}`
-  const first = local.slice(0, 2)
-  const last = local.slice(-1)
-  return `${first}●●●●${last}@${domain}`
-}
-
-/** Format seconds as M:SS */
-function formatMMSS(s: number): string {
-  const m = Math.floor(s / 60)
-  const ss = String(s % 60).padStart(2, '0')
-  return `${m}:${ss}`
-}
 
 const formCardStyle: React.CSSProperties = {
   background: 'linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01))',
@@ -976,18 +551,6 @@ const formCardStyle: React.CSSProperties = {
   backdropFilter: 'blur(14px) saturate(1.3)',
   WebkitBackdropFilter: 'blur(14px) saturate(1.3)',
   boxShadow: '0 20px 60px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05), 0 0 0 1px rgba(16,161,219,0.08)',
-}
-
-const textLinkStyle: React.CSSProperties = {
-  fontSize: '0.74rem',
-  fontWeight: 600,
-  background: 'transparent',
-  border: 'none',
-  color: 'var(--sky)',
-  cursor: 'pointer',
-  textDecoration: 'none',
-  padding: 0,
-  fontFamily: 'Inter, sans-serif',
 }
 
 function FormError({ children }: { children: React.ReactNode }) {
