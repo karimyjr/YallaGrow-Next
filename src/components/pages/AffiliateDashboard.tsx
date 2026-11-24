@@ -7,6 +7,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import Link from 'next/link'
+import { motion, AnimatePresence } from 'framer-motion'
 
 interface Affiliate {
   id: string
@@ -589,12 +590,10 @@ function GlassyOtpCard({ email, code, onChange, onVerify, onResend, onChangeEmai
   const handleKeyDown = (idx: number, e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Backspace') {
       if (code[idx]) {
-        // Remove the digit at this index
         const chars = code.split('')
         chars[idx] = ''
         onChange(chars.join(''))
       } else if (idx > 0) {
-        // Move back and clear previous
         const chars = code.split('')
         chars[idx - 1] = ''
         onChange(chars.join(''))
@@ -622,218 +621,318 @@ function GlassyOtpCard({ email, code, onChange, onVerify, onResend, onChangeEmai
   const canResend = resendIn === 0 && !submitting && !verified
 
   return (
-    <div style={{
-      position: 'relative',
-      background: 'linear-gradient(145deg, rgba(40,48,65,0.55), rgba(18,24,38,0.75))',
-      border: '1px solid rgba(255,255,255,0.08)',
-      borderRadius: '24px',
-      padding: '36px 28px 28px',
-      backdropFilter: 'blur(22px) saturate(1.4)',
-      WebkitBackdropFilter: 'blur(22px) saturate(1.4)',
-      boxShadow:
-        '0 40px 90px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 0 1px rgba(255,255,255,0.03)',
-      overflow: 'hidden',
-    }}>
-      {/* Inner subtle gradient */}
+    <motion.div
+      initial={{ opacity: 0, y: 20, filter: 'blur(14px)' }}
+      animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+      transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+      style={{
+        position: 'relative',
+        // Deep warm navy base with layered gradient — not a flat glass panel
+        background:
+          'radial-gradient(ellipse 120% 80% at 50% -10%, rgba(199,170,120,0.09), transparent 50%),' +
+          'linear-gradient(180deg, #141a28 0%, #0a0f1a 100%)',
+        border: '1px solid rgba(255,255,255,0.06)',
+        borderRadius: '28px',
+        padding: '44px 36px 32px',
+        // Layered shadows: outer soft drop, inner highlight on top edge, inner low-shadow
+        boxShadow: [
+          '0 1px 0 rgba(255,255,255,0.08) inset',          // top highlight edge (light source)
+          '0 -1px 0 rgba(0,0,0,0.4) inset',                // bottom shadow edge
+          '0 50px 100px -20px rgba(0,0,0,0.7)',            // soft drop
+          '0 30px 60px -30px rgba(0,0,0,0.5)',             // tighter drop
+          '0 0 0 1px rgba(199,170,120,0.08)',              // warm hairline
+        ].join(', '),
+        overflow: 'hidden',
+      }}
+    >
+      {/* Grain texture — kills the flat-vector feel */}
       <div aria-hidden="true" style={{
         position: 'absolute', inset: 0, pointerEvents: 'none',
-        background: 'radial-gradient(ellipse 80% 50% at 50% 0%, rgba(16,161,219,0.10), transparent 70%)',
+        opacity: 0.4, mixBlendMode: 'overlay',
+        backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='200' height='200' filter='url(%23n)' opacity='0.5'/></svg>")`,
+      }} />
+
+      {/* Warm light leak from top-left */}
+      <div aria-hidden="true" style={{
+        position: 'absolute', top: '-40%', left: '-20%', width: '80%', height: '80%',
+        background: 'radial-gradient(circle, rgba(199,170,120,0.12) 0%, transparent 60%)',
+        filter: 'blur(40px)', pointerEvents: 'none',
       }} />
 
       {/* ───── Envelope icon ───── */}
-      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '14px', position: 'relative', zIndex: 1 }}>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.85 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.15, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        style={{ display: 'flex', justifyContent: 'center', marginBottom: '18px', position: 'relative', zIndex: 1 }}
+      >
         <div style={{
           position: 'relative',
-          width: '56px', height: '56px',
+          width: '60px', height: '60px',
           borderRadius: '50%',
-          background: 'linear-gradient(135deg, rgba(60,70,90,0.9), rgba(30,38,54,0.95))',
-          border: '1px solid rgba(255,255,255,0.1)',
+          background: 'radial-gradient(circle at 30% 30%, rgba(80,88,108,1), rgba(28,34,48,1) 70%)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          boxShadow: '0 10px 30px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1)',
+          boxShadow: [
+            '0 1px 0 rgba(255,255,255,0.12) inset',
+            '0 -1px 0 rgba(0,0,0,0.4) inset',
+            '0 12px 28px rgba(0,0,0,0.5)',
+          ].join(', '),
         }}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="3" y="5" width="18" height="14" rx="2"/>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeOpacity="0.9" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="5" width="18" height="14" rx="2.5"/>
             <path d="m3 7 9 6 9-6"/>
           </svg>
-          {/* red notification dot */}
           {!verified && (
-            <div style={{
-              position: 'absolute',
-              top: '8px', right: '8px',
-              width: '10px', height: '10px',
-              borderRadius: '50%',
-              background: '#ef4444',
-              border: '2px solid rgba(30,38,54,0.95)',
-              boxShadow: '0 0 10px rgba(239,68,68,0.6)',
-            }} />
+            <motion.div
+              animate={{ scale: [1, 1.15, 1] }}
+              transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+              style={{
+                position: 'absolute', top: '6px', right: '6px',
+                width: '12px', height: '12px', borderRadius: '50%',
+                background: 'radial-gradient(circle at 30% 30%, #ff6b6b, #c0392b)',
+                border: '2px solid rgba(28,34,48,1)',
+                boxShadow: '0 0 12px rgba(239,68,68,0.6)',
+              }}
+            />
           )}
         </div>
-      </div>
+      </motion.div>
 
       {/* ───── Title + masked email ───── */}
-      <div style={{ textAlign: 'center', marginBottom: '22px', position: 'relative', zIndex: 1 }}>
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.25, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        style={{ textAlign: 'center', marginBottom: '28px', position: 'relative', zIndex: 1 }}
+      >
         <h2 style={{
-          fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: '1.3rem',
-          color: '#fff', letterSpacing: '-0.5px', margin: '0 0 6px',
+          fontFamily: '"Instrument Serif", serif',
+          fontWeight: 400,
+          fontSize: '2.2rem',
+          color: '#f5efe3',
+          letterSpacing: '-0.5px',
+          margin: '0 0 8px',
+          lineHeight: 1,
         }}>
           Check your inbox
         </h2>
-        <p style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.55)', margin: 0, lineHeight: 1.5 }}>
-          Enter the 4-digit code we sent to<br />
-          <span style={{
-            display: 'inline-block',
-            marginTop: '6px',
-            padding: '3px 10px',
-            background: 'rgba(0,0,0,0.3)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            borderRadius: '6px',
-            fontSize: '0.74rem',
-            color: 'rgba(255,255,255,0.8)',
-            fontFamily: 'SF Mono, Menlo, Consolas, monospace',
-          }}>{maskEmail(email)}</span>
+        <p style={{ fontSize: '0.8rem', color: 'rgba(245,239,227,0.55)', margin: 0, lineHeight: 1.6, fontWeight: 300 }}>
+          A 4-digit code was sent to
         </p>
-      </div>
+        <div style={{
+          display: 'inline-block',
+          marginTop: '10px',
+          padding: '5px 12px',
+          background: 'rgba(0,0,0,0.3)',
+          border: '1px solid rgba(199,170,120,0.15)',
+          borderRadius: '8px',
+          fontSize: '0.78rem',
+          color: 'rgba(245,239,227,0.85)',
+          fontFamily: '"SF Mono", Menlo, Consolas, monospace',
+          letterSpacing: '0.2px',
+        }}>{maskEmail(email)}</div>
+      </motion.div>
 
       {/* ───── 4 digit boxes ───── */}
-      <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', marginBottom: '22px', position: 'relative', zIndex: 1 }}>
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '14px', marginBottom: '28px', position: 'relative', zIndex: 1 }}>
         {[0, 1, 2, 3].map(i => {
           const filled = !!code[i]
+          const greenPulseDelay = verified ? i * 0.08 : 0   // staggered cascade
           return (
-            <input
+            <motion.div
               key={i}
-              ref={el => { inputsRef.current[i] = el }}
-              type="text"
-              inputMode="numeric"
-              pattern="\d{1}"
-              maxLength={1}
-              value={code[i] || ''}
-              onChange={e => handleDigitChange(i, e.target.value)}
-              onKeyDown={e => handleKeyDown(i, e)}
-              onPaste={i === 0 ? handlePaste : undefined}
-              onFocus={e => e.target.select()}
-              disabled={submitting || verified}
-              style={{
-                width: '58px',
-                height: '70px',
-                textAlign: 'center',
-                fontFamily: 'Syne, sans-serif',
-                fontSize: '1.9rem',
-                fontWeight: 700,
-                color: verified ? '#fff' : '#fff',
-                background: verified
-                  ? 'linear-gradient(180deg, rgba(34,197,94,0.25), rgba(34,197,94,0.1))'
-                  : filled
-                    ? 'linear-gradient(180deg, rgba(16,161,219,0.18), rgba(16,161,219,0.05))'
-                    : 'linear-gradient(180deg, rgba(0,0,0,0.3), rgba(0,0,0,0.5))',
-                border: verified
-                  ? '1px solid rgba(34,197,94,0.6)'
-                  : filled
-                    ? '1px solid rgba(16,161,219,0.55)'
-                    : '1px solid rgba(255,255,255,0.1)',
-                borderRadius: '14px',
-                outline: 'none',
-                transition: 'all 0.2s cubic-bezier(0.22,1,0.36,1)',
-                boxShadow: verified
-                  ? '0 0 20px rgba(34,197,94,0.3), inset 0 1px 0 rgba(255,255,255,0.1)'
-                  : filled
-                    ? '0 0 16px rgba(16,161,219,0.25), inset 0 1px 0 rgba(255,255,255,0.08)'
-                    : 'inset 0 1px 0 rgba(255,255,255,0.03)',
-                caretColor: 'var(--sky)',
+              initial={{ opacity: 0, y: 10, scale: 0.9 }}
+              animate={{
+                opacity: 1,
+                y: 0,
+                scale: verified ? [1, 1.08, 1] : 1,
               }}
-            />
+              transition={{
+                delay: verified ? greenPulseDelay : 0.35 + i * 0.07,
+                duration: verified ? 0.5 : 0.6,
+                ease: [0.22, 1, 0.36, 1],
+              }}
+              style={{ position: 'relative' }}
+            >
+              <input
+                ref={el => { inputsRef.current[i] = el }}
+                type="text"
+                inputMode="numeric"
+                pattern="\d{1}"
+                maxLength={1}
+                value={code[i] || ''}
+                onChange={e => handleDigitChange(i, e.target.value)}
+                onKeyDown={e => handleKeyDown(i, e)}
+                onPaste={i === 0 ? handlePaste : undefined}
+                onFocus={e => e.target.select()}
+                disabled={submitting || verified}
+                style={{
+                  width: '62px', height: '76px',
+                  textAlign: 'center',
+                  fontFamily: '"Instrument Serif", serif',
+                  fontSize: '2.4rem',
+                  fontWeight: 400,
+                  color: verified ? '#c7f4d4' : '#f5efe3',
+                  // Real bevel: darker base, inner shadow top, highlight bottom
+                  background: verified
+                    ? 'radial-gradient(circle at 50% 30%, rgba(34,197,94,0.25), rgba(16,66,34,0.5))'
+                    : filled
+                      ? 'radial-gradient(circle at 50% 30%, rgba(199,170,120,0.1), rgba(10,14,22,0.9))'
+                      : 'radial-gradient(circle at 50% 30%, rgba(40,46,60,0.9), rgba(10,14,22,1))',
+                  border: verified
+                    ? '1px solid rgba(34,197,94,0.5)'
+                    : filled
+                      ? '1px solid rgba(199,170,120,0.35)'
+                      : '1px solid rgba(255,255,255,0.05)',
+                  borderRadius: '16px',
+                  outline: 'none',
+                  boxShadow: verified
+                    ? [
+                        '0 0 24px rgba(34,197,94,0.35)',
+                        '0 1px 0 rgba(255,255,255,0.08) inset',
+                        '0 -1px 0 rgba(0,0,0,0.4) inset',
+                      ].join(', ')
+                    : filled
+                      ? [
+                          '0 0 20px rgba(199,170,120,0.15)',
+                          '0 1px 0 rgba(255,255,255,0.08) inset',
+                          '0 -8px 16px rgba(0,0,0,0.3) inset',
+                          '0 1px 0 rgba(0,0,0,0.5) inset',
+                        ].join(', ')
+                      : [
+                          '0 1px 0 rgba(255,255,255,0.04) inset',
+                          '0 -8px 16px rgba(0,0,0,0.4) inset',
+                          '0 1px 0 rgba(0,0,0,0.6) inset',
+                        ].join(', '),
+                  transition: 'all 0.35s cubic-bezier(0.22,1,0.36,1)',
+                  caretColor: '#c7aa78',
+                }}
+              />
+            </motion.div>
           )
         })}
       </div>
 
-      {error && <div style={{ position: 'relative', zIndex: 1, marginBottom: '14px' }}><FormError>{error}</FormError></div>}
+      {error && (
+        <motion.div
+          initial={{ opacity: 0, y: -4 }}
+          animate={{ opacity: 1, y: 0 }}
+          style={{ position: 'relative', zIndex: 1, marginBottom: '14px' }}
+        >
+          <FormError>{error}</FormError>
+        </motion.div>
+      )}
 
-      {/* ───── Verify button ───── */}
-      <button
+      {/* ───── Verify button — morphs between states ───── */}
+      <motion.button
         type="button"
         onClick={() => complete && onVerify(code)}
         disabled={!complete || submitting || verified}
+        initial={false}
+        animate={{
+          background: verified
+            ? 'linear-gradient(180deg, #22c55e 0%, #15803d 100%)'
+            : submitting
+              ? 'linear-gradient(180deg, #f5efe3 0%, #e8dec4 100%)'
+              : complete
+                ? 'linear-gradient(180deg, #c7aa78 0%, #a3875a 100%)'
+                : 'linear-gradient(180deg, rgba(30,36,50,0.8) 0%, rgba(14,18,28,0.9) 100%)',
+          color: verified ? '#fff' : submitting ? '#0a0f1a' : complete ? '#0a0f1a' : 'rgba(245,239,227,0.3)',
+        }}
+        transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
         style={{
           width: '100%',
-          padding: '14px',
-          borderRadius: '14px',
-          fontFamily: 'Inter, sans-serif',
-          fontSize: '0.9rem',
-          fontWeight: 700,
+          padding: '16px',
+          borderRadius: '16px',
+          fontFamily: '"Instrument Serif", serif',
+          fontSize: '1.15rem',
+          fontWeight: 400,
+          letterSpacing: '0.3px',
           cursor: complete && !submitting && !verified ? 'pointer' : 'default',
           border: 'none',
-          transition: 'all 0.3s cubic-bezier(0.22,1,0.36,1)',
           position: 'relative',
           zIndex: 1,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '8px',
-          ...(verified
-            ? {
-                background: 'linear-gradient(180deg, #22c55e, #16a34a)',
-                color: '#fff',
-                boxShadow: '0 10px 30px rgba(34,197,94,0.4), inset 0 1px 0 rgba(255,255,255,0.2)',
-              }
-            : submitting
-              ? {
-                  background: 'rgba(255,255,255,0.9)',
-                  color: '#0b1220',
-                  boxShadow: '0 6px 20px rgba(255,255,255,0.15)',
-                }
-              : complete
-                ? {
-                    background: 'linear-gradient(180deg, #0b1220, #040812)',
-                    color: '#fff',
-                    boxShadow: '0 10px 30px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08)',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                  }
-                : {
-                    background: 'rgba(0,0,0,0.3)',
-                    color: 'rgba(255,255,255,0.3)',
-                    border: '1px solid rgba(255,255,255,0.05)',
-                  }),
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          gap: '10px',
+          boxShadow: verified
+            ? '0 14px 36px rgba(34,197,94,0.35), 0 1px 0 rgba(255,255,255,0.2) inset, 0 -1px 0 rgba(0,0,0,0.3) inset'
+            : complete
+              ? '0 14px 36px rgba(199,170,120,0.25), 0 1px 0 rgba(255,255,255,0.3) inset, 0 -1px 0 rgba(0,0,0,0.25) inset'
+              : '0 1px 0 rgba(255,255,255,0.03) inset, 0 -1px 0 rgba(0,0,0,0.4) inset',
         }}
       >
-        {verified ? (
-          <>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="20 6 9 17 4 12"/>
-            </svg>
-            Verified
-          </>
-        ) : submitting ? 'Verifying…' : 'Verify code'}
-      </button>
+        <AnimatePresence mode="wait">
+          {verified ? (
+            <motion.span
+              key="verified"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              transition={{ duration: 0.3 }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '10px' }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              Verified
+            </motion.span>
+          ) : submitting ? (
+            <motion.span
+              key="verifying"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >Verifying…</motion.span>
+          ) : (
+            <motion.span
+              key="verify"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >Verify code</motion.span>
+          )}
+        </AnimatePresence>
+      </motion.button>
 
       {/* ───── Resend footer ───── */}
-      <div style={{
-        textAlign: 'center',
-        marginTop: '18px',
-        fontSize: '0.74rem',
-        color: 'rgba(255,255,255,0.5)',
-        position: 'relative',
-        zIndex: 1,
-      }}>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5, duration: 0.6 }}
+        style={{
+          textAlign: 'center',
+          marginTop: '22px',
+          fontSize: '0.76rem',
+          color: 'rgba(245,239,227,0.5)',
+          position: 'relative', zIndex: 1,
+          fontFamily: 'Inter, sans-serif',
+        }}
+      >
         Didn&apos;t get a code?{' '}
         {canResend ? (
           <button
             type="button"
-            onClick={() => { onResend() }}
+            onClick={() => onResend()}
             style={{
-              background: 'transparent', border: 'none', color: 'var(--sky)',
-              cursor: 'pointer', fontWeight: 600, fontSize: '0.74rem',
+              background: 'transparent', border: 'none',
+              color: '#c7aa78',
+              cursor: 'pointer', fontWeight: 600, fontSize: '0.76rem',
               fontFamily: 'Inter, sans-serif', padding: 0,
+              textDecoration: 'underline', textUnderlineOffset: '3px',
             }}
           >
-            Resend →
+            Resend
           </button>
         ) : (
-          <span style={{ color: 'rgba(255,255,255,0.35)' }}>
+          <span style={{ color: 'rgba(245,239,227,0.35)' }}>
             Resend in {formatMMSS(resendIn)}
           </span>
         )}
-      </div>
+      </motion.div>
 
-      {/* Use different email link */}
+      {/* Use different email */}
       <div style={{ textAlign: 'center', marginTop: '8px', position: 'relative', zIndex: 1 }}>
         <button
           type="button"
@@ -841,16 +940,16 @@ function GlassyOtpCard({ email, code, onChange, onVerify, onResend, onChangeEmai
           disabled={submitting || verified}
           style={{
             background: 'transparent', border: 'none',
-            color: 'rgba(255,255,255,0.4)',
-            fontSize: '0.7rem', fontWeight: 500,
+            color: 'rgba(245,239,227,0.35)',
+            fontSize: '0.72rem', fontWeight: 400,
             cursor: 'pointer', fontFamily: 'Inter, sans-serif',
-            padding: 0, textDecoration: 'none',
+            padding: 0,
           }}
         >
-          ← Use a different email
+          Use a different email
         </button>
       </div>
-    </div>
+    </motion.div>
   )
 }
 
