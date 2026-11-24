@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { rateLimit, getClientIp, makeKey } from '@/lib/rate-limit'
+import { esc, normalizeEmail, isValidEmail } from '@/lib/sanitize'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -22,15 +23,22 @@ export async function POST(req: NextRequest) {
     )
   }
   try {
-    const { name, email, subject, message } = await req.json()
+    const raw = await req.json()
+    const name = String(raw.name || '').trim()
+    const email = normalizeEmail(raw.email)
+    const subject = raw.subject ? String(raw.subject).trim() : null
+    const message = String(raw.message || '').trim()
 
     if (!name || !email || !message) {
       return NextResponse.json({ error: 'Name, email, and message required' }, { status: 400 })
     }
+    if (!isValidEmail(email)) {
+      return NextResponse.json({ error: 'A valid email is required.' }, { status: 400 })
+    }
 
     const { data: saved, error } = await supabase.from('contact_submissions').insert({
       name, email,
-      subject: subject || null,
+      subject,
       message,
     }).select().single()
 
@@ -48,8 +56,11 @@ export async function POST(req: NextRequest) {
             from: FROM_EMAIL,
             to: TO_EMAIL,
             reply_to: email,
+            // Subject header is a plain-text field; email clients do not
+            // render HTML in it, so we leave it unescaped here (but still
+            // trimmed above). Body gets esc()'d in buildContactEmail.
             subject: `Contact Form: ${subject || 'New message'} — ${name}`,
-            html: buildContactEmail({ name, email, subject, message }, saved.id),
+            html: buildContactEmail({ name, email, subject: subject || undefined, message }, saved.id),
           }),
         })
       } catch (err) {
@@ -72,6 +83,15 @@ interface ContactEmailData {
 }
 
 function buildContactEmail(data: ContactEmailData, id: string): string {
+  // Every user-supplied value is escaped before interpolation so a name
+  // like `<a href="phish">...` can't inject a working link into the
+  // admin inbox. `esc()` handles & < > " ' — keeps mailto: links intact
+  // because we only interpolate inside attributes we control.
+  const nameH = esc(data.name)
+  const emailH = esc(data.email)
+  const subjectH = esc(data.subject)
+  const messageH = esc(data.message)
+  const idH = esc(id)
   return `
 <!DOCTYPE html>
 <html>
@@ -87,21 +107,21 @@ function buildContactEmail(data: ContactEmailData, id: string): string {
 
     <div style="background:linear-gradient(135deg,rgba(1,32,76,0.4),rgba(16,161,219,0.06));border:1px solid rgba(16,161,219,0.2);border-radius:16px;padding:28px;margin-bottom:16px;">
       <table style="width:100%;color:rgba(249,253,254,0.75);font-size:0.88rem;margin-bottom:20px;">
-        <tr><td style="padding:6px 0;color:rgba(249,253,254,0.5);width:120px;">From:</td><td><strong style="color:#ffffff;">${data.name}</strong></td></tr>
-        <tr><td style="padding:6px 0;color:rgba(249,253,254,0.5);">Email:</td><td><a href="mailto:${data.email}" style="color:#10a1db;text-decoration:none;">${data.email}</a></td></tr>
-        ${data.subject ? `<tr><td style="padding:6px 0;color:rgba(249,253,254,0.5);">Subject:</td><td>${data.subject}</td></tr>` : ''}
+        <tr><td style="padding:6px 0;color:rgba(249,253,254,0.5);width:120px;">From:</td><td><strong style="color:#ffffff;">${nameH}</strong></td></tr>
+        <tr><td style="padding:6px 0;color:rgba(249,253,254,0.5);">Email:</td><td><a href="mailto:${emailH}" style="color:#10a1db;text-decoration:none;">${emailH}</a></td></tr>
+        ${data.subject ? `<tr><td style="padding:6px 0;color:rgba(249,253,254,0.5);">Subject:</td><td>${subjectH}</td></tr>` : ''}
       </table>
 
       <div style="color:#ffffff;font-size:0.95rem;font-weight:600;margin-bottom:12px;">Message</div>
-      <div style="background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:14px 16px;color:rgba(249,253,254,0.85);font-size:0.9rem;line-height:1.7;white-space:pre-wrap;">${data.message}</div>
+      <div style="background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:14px 16px;color:rgba(249,253,254,0.85);font-size:0.9rem;line-height:1.7;white-space:pre-wrap;">${messageH}</div>
     </div>
 
     <div style="text-align:center;">
-      <a href="mailto:${data.email}" style="display:inline-block;background:#10a1db;color:#080f1a;padding:12px 24px;border-radius:10px;font-size:0.85rem;font-weight:700;text-decoration:none;margin-right:8px;">Reply →</a>
+      <a href="mailto:${emailH}" style="display:inline-block;background:#10a1db;color:#080f1a;padding:12px 24px;border-radius:10px;font-size:0.85rem;font-weight:700;text-decoration:none;margin-right:8px;">Reply →</a>
       <a href="https://yallagrow.net/admin" style="display:inline-block;background:transparent;color:rgba(249,253,254,0.7);padding:12px 24px;border-radius:10px;font-size:0.85rem;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.15);">View in Admin</a>
     </div>
 
-    <div style="text-align:center;margin-top:20px;color:rgba(249,253,254,0.3);font-size:0.7rem;">Submission ID: ${id}</div>
+    <div style="text-align:center;margin-top:20px;color:rgba(249,253,254,0.3);font-size:0.7rem;">Submission ID: ${idH}</div>
   </div>
 </body>
 </html>`.trim()

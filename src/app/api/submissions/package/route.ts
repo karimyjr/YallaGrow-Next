@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { rateLimit, getClientIp, makeKey } from '@/lib/rate-limit'
+import { esc, normalizeEmail, isValidEmail } from '@/lib/sanitize'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -22,33 +23,44 @@ export async function POST(req: NextRequest) {
     )
   }
   try {
-    const body = await req.json()
-    const {
-      name, email, whatsapp,
-      staticPosts, carousels, reels,
-      marketingType, metaBudget, tiktokBudget,
-      websiteTier, websiteBudget, consultancyUrl,
-      addons, estimatedMonthly,
-    } = body
+    const raw = await req.json()
+    const name = String(raw.name || '').trim()
+    const email = normalizeEmail(raw.email)
+    const whatsapp = raw.whatsapp ? String(raw.whatsapp).trim() : null
+    // Keep numeric fields as numbers (|| 0 handles undefined/strings).
+    const staticPosts = Number(raw.staticPosts) || 0
+    const carousels = Number(raw.carousels) || 0
+    const reels = Number(raw.reels) || 0
+    const marketingType = raw.marketingType ? String(raw.marketingType).trim() : null
+    const metaBudget = Number(raw.metaBudget) || 0
+    const tiktokBudget = Number(raw.tiktokBudget) || 0
+    const websiteTier = raw.websiteTier ? String(raw.websiteTier).trim() : null
+    const websiteBudget = Number(raw.websiteBudget) || 0
+    const consultancyUrl = normalizeHttpUrl(raw.consultancyUrl)
+    const addons = Array.isArray(raw.addons) ? raw.addons.map((a: unknown) => String(a).trim()).filter(Boolean) : []
+    const estimatedMonthly = Number(raw.estimatedMonthly) || 0
 
     if (!name || !email) {
       return NextResponse.json({ error: 'Name and email required' }, { status: 400 })
     }
+    if (!isValidEmail(email)) {
+      return NextResponse.json({ error: 'A valid email is required.' }, { status: 400 })
+    }
 
     // Save to Supabase
     const { data: saved, error } = await supabase.from('package_submissions').insert({
-      name, email, whatsapp: whatsapp || null,
-      static_posts: staticPosts || 0,
-      carousels: carousels || 0,
-      reels: reels || 0,
-      marketing_type: marketingType || null,
-      meta_budget: metaBudget || 0,
-      tiktok_budget: tiktokBudget || 0,
-      website_tier: websiteTier || null,
-      website_budget: websiteBudget || 0,
-      consultancy_url: consultancyUrl || null,
-      addons: addons || [],
-      estimated_monthly: estimatedMonthly || 0,
+      name, email, whatsapp,
+      static_posts: staticPosts,
+      carousels: carousels,
+      reels: reels,
+      marketing_type: marketingType,
+      meta_budget: metaBudget,
+      tiktok_budget: tiktokBudget,
+      website_tier: websiteTier,
+      website_budget: websiteBudget,
+      consultancy_url: consultancyUrl,
+      addons,
+      estimated_monthly: estimatedMonthly,
     }).select().single()
 
     if (error) {
@@ -70,7 +82,18 @@ export async function POST(req: NextRequest) {
             to: TO_EMAIL,
             reply_to: email,
             subject: `New Package Request from ${name} — $${estimatedMonthly}/mo`,
-            html: buildPackageEmail(body, saved.id),
+            html: buildPackageEmail({
+              name, email,
+              whatsapp: whatsapp || undefined,
+              staticPosts, carousels, reels,
+              marketingType: marketingType || undefined,
+              metaBudget, tiktokBudget,
+              websiteTier: websiteTier || undefined,
+              websiteBudget,
+              consultancyUrl: consultancyUrl || undefined,
+              addons,
+              estimatedMonthly,
+            }, saved.id),
           }),
         })
       } catch (err) {
@@ -102,7 +125,31 @@ interface PackageEmailData {
   estimatedMonthly?: number
 }
 
+// Only let http(s) URLs through the consultancy_url field.
+function normalizeHttpUrl(v: unknown): string | null {
+  if (!v) return null
+  const s = String(v).trim()
+  if (!s) return null
+  try {
+    const u = new URL(s)
+    if (u.protocol !== 'http:' && u.protocol !== 'https:') return null
+    return u.toString()
+  } catch {
+    return null
+  }
+}
+
 function buildPackageEmail(data: PackageEmailData, id: string): string {
+  // Every user-supplied value escaped before interpolation.
+  const nameH = esc(data.name)
+  const emailH = esc(data.email)
+  const whatsappH = esc(data.whatsapp)
+  const whatsappDigits = data.whatsapp ? esc(data.whatsapp.replace(/\D/g, '')) : ''
+  const marketingTypeH = esc(data.marketingType)
+  const websiteTierH = esc(data.websiteTier)
+  const consultancyUrlH = esc(data.consultancyUrl)
+  const addonsH = data.addons?.map(esc).join(', ') || ''
+  const idH = esc(id)
   return `
 <!DOCTYPE html>
 <html>
@@ -124,9 +171,9 @@ function buildPackageEmail(data: PackageEmailData, id: string): string {
 
       <div style="color:#ffffff;font-size:0.95rem;font-weight:600;margin-bottom:12px;">Contact Info</div>
       <table style="width:100%;color:rgba(249,253,254,0.75);font-size:0.88rem;margin-bottom:20px;">
-        <tr><td style="padding:6px 0;color:rgba(249,253,254,0.5);width:120px;">Name:</td><td><strong style="color:#ffffff;">${data.name}</strong></td></tr>
-        <tr><td style="padding:6px 0;color:rgba(249,253,254,0.5);">Email:</td><td><a href="mailto:${data.email}" style="color:#10a1db;text-decoration:none;">${data.email}</a></td></tr>
-        ${data.whatsapp ? `<tr><td style="padding:6px 0;color:rgba(249,253,254,0.5);">WhatsApp:</td><td><a href="https://wa.me/${data.whatsapp.replace(/[^\d]/g, '')}" style="color:#10a1db;text-decoration:none;">${data.whatsapp}</a></td></tr>` : ''}
+        <tr><td style="padding:6px 0;color:rgba(249,253,254,0.5);width:120px;">Name:</td><td><strong style="color:#ffffff;">${nameH}</strong></td></tr>
+        <tr><td style="padding:6px 0;color:rgba(249,253,254,0.5);">Email:</td><td><a href="mailto:${emailH}" style="color:#10a1db;text-decoration:none;">${emailH}</a></td></tr>
+        ${data.whatsapp ? `<tr><td style="padding:6px 0;color:rgba(249,253,254,0.5);">WhatsApp:</td><td><a href="https://wa.me/${whatsappDigits}" style="color:#10a1db;text-decoration:none;">${whatsappH}</a></td></tr>` : ''}
       </table>
 
       <div style="color:#ffffff;font-size:0.95rem;font-weight:600;margin-bottom:12px;">Package Details</div>
@@ -134,12 +181,12 @@ function buildPackageEmail(data: PackageEmailData, id: string): string {
         ${data.staticPosts ? `<tr><td style="padding:4px 0;color:rgba(249,253,254,0.5);">Static posts:</td><td>${data.staticPosts}/mo</td></tr>` : ''}
         ${data.carousels ? `<tr><td style="padding:4px 0;color:rgba(249,253,254,0.5);">Carousels:</td><td>${data.carousels}/mo</td></tr>` : ''}
         ${data.reels ? `<tr><td style="padding:4px 0;color:rgba(249,253,254,0.5);">Reels:</td><td>${data.reels}/mo</td></tr>` : ''}
-        ${data.marketingType ? `<tr><td style="padding:4px 0;color:rgba(249,253,254,0.5);">Marketing:</td><td>${data.marketingType}</td></tr>` : ''}
+        ${data.marketingType ? `<tr><td style="padding:4px 0;color:rgba(249,253,254,0.5);">Marketing:</td><td>${marketingTypeH}</td></tr>` : ''}
         ${data.metaBudget ? `<tr><td style="padding:4px 0;color:rgba(249,253,254,0.5);">Meta budget:</td><td>$${data.metaBudget}/mo</td></tr>` : ''}
         ${data.tiktokBudget ? `<tr><td style="padding:4px 0;color:rgba(249,253,254,0.5);">TikTok budget:</td><td>$${data.tiktokBudget}/mo</td></tr>` : ''}
-        ${data.websiteTier && data.websiteTier !== 'none' ? `<tr><td style="padding:4px 0;color:rgba(249,253,254,0.5);">Website:</td><td>${data.websiteTier}${data.websiteBudget ? ` ($${data.websiteBudget})` : ''}</td></tr>` : ''}
-        ${data.consultancyUrl ? `<tr><td style="padding:4px 0;color:rgba(249,253,254,0.5);">Site to audit:</td><td><a href="${data.consultancyUrl}" style="color:#10a1db;text-decoration:none;">${data.consultancyUrl}</a></td></tr>` : ''}
-        ${data.addons && data.addons.length > 0 ? `<tr><td style="padding:4px 0;color:rgba(249,253,254,0.5);">Add-ons:</td><td>${data.addons.join(', ')}</td></tr>` : ''}
+        ${data.websiteTier && data.websiteTier !== 'none' ? `<tr><td style="padding:4px 0;color:rgba(249,253,254,0.5);">Website:</td><td>${websiteTierH}${data.websiteBudget ? ` ($${data.websiteBudget})` : ''}</td></tr>` : ''}
+        ${data.consultancyUrl ? `<tr><td style="padding:4px 0;color:rgba(249,253,254,0.5);">Site to audit:</td><td><a href="${consultancyUrlH}" style="color:#10a1db;text-decoration:none;">${consultancyUrlH}</a></td></tr>` : ''}
+        ${data.addons && data.addons.length > 0 ? `<tr><td style="padding:4px 0;color:rgba(249,253,254,0.5);">Add-ons:</td><td>${addonsH}</td></tr>` : ''}
       </table>
     </div>
 
@@ -148,7 +195,7 @@ function buildPackageEmail(data: PackageEmailData, id: string): string {
     </div>
 
     <div style="text-align:center;margin-top:20px;color:rgba(249,253,254,0.3);font-size:0.7rem;">
-      Submission ID: ${id}
+      Submission ID: ${idH}
     </div>
   </div>
 </body>
