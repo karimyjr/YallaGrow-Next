@@ -14,16 +14,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const isLoginRoute = pathname === '/admin/login'
 
   useEffect(() => {
-    if (isLoginRoute) {
-      setChecking(false)
-      return
-    }
+    // This is a legitimate "read sessionStorage on mount" auth gate — not a
+    // sync between React and some external store. React 19's strict lint
+    // flags any setState in an effect, but refactoring to useSyncExternalStore
+    // for a one-shot auth check would just add noise. Explicit disable.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (isLoginRoute) { setChecking(false); return }
     const session = sessionStorage.getItem('yg_admin')
-    if (session === 'true') {
-      setAuthed(true)
-    } else {
-      router.push('/admin/login')
-    }
+    if (session === 'true') setAuthed(true)
+    else router.push('/admin/login')
     setChecking(false)
   }, [router, isLoginRoute])
 
@@ -37,6 +36,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (checking) return null
   if (!authed) return null
+
+  // The sidebar on /admin carries the brand, nav, and sign-out, so the
+  // legacy top bar would be redundant there. Keep it only on direct hits
+  // to sub-routes (/admin/overview, /admin/submissions, etc.) that don't
+  // mount the sidebar themselves. Most people go through /admin.
+  const hideTopBar = pathname === '/admin'
 
   return (
     <div style={{
@@ -85,7 +90,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         }} />
       </div>
 
-      {/* Glass top bar */}
+      {/* Legacy glass top bar — kept for direct hits to sub-routes (/admin/overview,
+          /admin/submissions, etc.) that don't mount the sidebar themselves. The
+          main /admin entry renders the sidebar, which carries its own brand +
+          sign-out, so the top bar is hidden there. */}
+      {!hideTopBar && (
       <div style={{
         padding: '14px 4%',
         background: 'linear-gradient(180deg, rgba(6,12,20,0.75), rgba(6,12,20,0.55))',
@@ -143,6 +152,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           }}>Sign Out</button>
         </div>
       </div>
+      )}
 
       {/* Content */}
       <div style={{ flex: 1, position: 'relative', zIndex: 1 }}>

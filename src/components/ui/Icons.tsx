@@ -7,7 +7,7 @@
 
 import React from 'react'
 
-type IconName =
+export type IconName =
   // Services
   | 'target' | 'phone' | 'dollar' | 'palette' | 'film' | 'pen'
   | 'globe' | 'bar-chart' | 'brain' | 'rocket' | 'briefcase' | 'bolt'

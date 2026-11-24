@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { useRouter } from 'next/navigation'
 import AdminOverviewPage from './overview/page'
 import AdminBlogPage from './blog/page'
 import AdminPackagesPage from './packages/page'
@@ -9,9 +9,12 @@ import AdminAffiliatesPage from './affiliates/page'
 import AdminMaintenancePage from './maintenance/page'
 import AdminNewsletterPage from './newsletter/page'
 import AdminSubmissionsPage from './submissions/page'
-import { Icon } from '@/components/ui/Icons'
+import GlassSidebar, {
+  GLASS_SIDEBAR_WIDTH_EXPANDED,
+  type NavGroup,
+} from '@/components/ui/GlassSidebar'
+import type { IconName } from '@/components/ui/Icons'
 
-type IconName = 'bar-chart' | 'edit' | 'package' | 'dollar' | 'handshake' | 'mail' | 'wrench' | 'clipboard'
 const TABS: { id: string; icon: IconName; label: string; component: React.ComponentType }[] = [
   { id: 'overview', icon: 'bar-chart', label: 'Overview', component: AdminOverviewPage },
   { id: 'submissions', icon: 'clipboard', label: 'Submissions', component: AdminSubmissionsPage },
@@ -23,107 +26,82 @@ const TABS: { id: string; icon: IconName; label: string; component: React.Compon
   { id: 'maintenance', icon: 'wrench', label: 'Maintenance', component: AdminMaintenancePage },
 ]
 
+// Two visual groups in the sidebar: the main admin surfaces, then the
+// content-management set. The reference ("Aurora Climate") used labeled
+// groups — mirrors them without inventing fake categories.
+const GROUPS: NavGroup[] = [
+  {
+    label: null,
+    items: [
+      { id: 'overview',    icon: 'bar-chart', label: 'Overview' },
+      { id: 'submissions', icon: 'clipboard', label: 'Submissions' },
+      { id: 'affiliates',  icon: 'handshake', label: 'Affiliates' },
+      { id: 'newsletter',  icon: 'mail',      label: 'Newsletter' },
+    ],
+  },
+  {
+    label: 'Content',
+    items: [
+      { id: 'blog',        icon: 'edit',    label: 'Blog' },
+      { id: 'packages',    icon: 'package', label: 'Packages' },
+      { id: 'pricing',     icon: 'dollar',  label: 'Pricing' },
+      { id: 'maintenance', icon: 'wrench',  label: 'Maintenance' },
+    ],
+  },
+]
+
 export default function AdminPage() {
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState('overview')
-  const [hoveredTab, setHoveredTab] = useState<string | null>(null)
   const ActiveComponent = TABS.find(t => t.id === activeTab)?.component || AdminOverviewPage
 
-  // Liquid pill tracks hover first, falls back to active tab.
-  const targetTab = hoveredTab ?? activeTab
+  // Same sign-out that the layout top bar runs — duplicated here so the
+  // sidebar can own it and the top bar stays hidden on /admin.
+  const signOut = () => {
+    sessionStorage.removeItem('yg_admin')
+    router.push('/admin/login')
+  }
 
+  // Content gets left padding equal to the maximum (expanded) sidebar width
+  // so the main area never reflows when the sidebar collapses — only the
+  // sidebar's own width transitions. On <640px the sidebar is a drawer and
+  // takes no layout room, so the padding drops to a small gutter.
   return (
     <div>
-      {/* Glassy pill tab nav */}
-      <div style={{
-        padding: '20px 24px 0',
-        display: 'flex',
-        justifyContent: 'center',
-      }}>
-        <div
-          onMouseLeave={() => setHoveredTab(null)}
-          style={{
-            display: 'inline-flex',
-            gap: '2px',
-            padding: '5px',
-            background: 'linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01))',
-            border: '1px solid rgba(255,255,255,0.08)',
-            borderRadius: '14px',
-            backdropFilter: 'blur(18px) saturate(1.3)',
-            WebkitBackdropFilter: 'blur(18px) saturate(1.3)',
-            boxShadow: '0 10px 40px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)',
-            overflowX: 'auto',
-            maxWidth: '100%',
-          }}
-          className="admin-tabs-strip"
-        >
-          {TABS.map(tab => {
-            const isTarget = tab.id === targetTab
-            const isActive = tab.id === activeTab
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                onMouseEnter={() => setHoveredTab(tab.id)}
-                style={{
-                  position: 'relative',
-                  background: 'transparent',
-                  border: 'none',
-                  padding: '9px 14px',
-                  cursor: 'pointer',
-                  color: isActive ? 'var(--white)' : 'var(--text-muted)',
-                  fontSize: '0.78rem',
-                  fontWeight: 600,
-                  fontFamily: 'Inter, sans-serif',
-                  borderRadius: '10px',
-                  whiteSpace: 'nowrap',
-                  transition: 'color 0.2s',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '7px',
-                  zIndex: 1,
-                }}
-              >
-                {isTarget && (
-                  <motion.div
-                    layoutId="admin-tab-pill"
-                    aria-hidden="true"
-                    style={{
-                      position: 'absolute',
-                      inset: 0,
-                      background: isActive
-                        ? 'linear-gradient(180deg, rgba(16,161,219,0.22), rgba(16,161,219,0.08))'
-                        : 'linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))',
-                      border: isActive
-                        ? '1px solid rgba(16,161,219,0.32)'
-                        : '1px solid rgba(255,255,255,0.08)',
-                      borderRadius: '10px',
-                      boxShadow: isActive
-                        ? '0 6px 24px rgba(16,161,219,0.2), inset 0 1px 0 rgba(255,255,255,0.08)'
-                        : '0 2px 10px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.04)',
-                      zIndex: -1,
-                      pointerEvents: 'none',
-                    }}
-                    transition={{ type: 'spring', stiffness: 380, damping: 32, mass: 0.6 }}
-                  />
-                )}
-                <span style={{ color: isActive ? 'var(--sky)' : 'inherit', display: 'inline-flex', alignItems: 'center' }}>
-                  <Icon name={tab.icon} size={13} />
-                </span>
-                {tab.label}
-              </button>
-            )
-          })}
-        </div>
-      </div>
+      <GlassSidebar
+        badge="Admin"
+        groups={GROUPS}
+        activeId={activeTab}
+        onSelect={setActiveTab}
+        user={{ name: 'Karim', email: 'info@yallagrow.net', initials: 'K' }}
+        onSignOut={signOut}
+      />
 
-      {/* Active Tab Content */}
-      <div style={{ padding: '12px 0' }}>
+      <div
+        className="admin-content"
+        style={{
+          // Read the sidebar's current width from the CSS var it sets on
+          // <html>. Falls back to expanded if the var hasn't been set yet
+          // (first paint pre-hydration). Transition keeps the content
+          // gutter in sync with the sidebar's own width animation.
+          paddingLeft: `calc(var(--yg-sidebar-width, ${GLASS_SIDEBAR_WIDTH_EXPANDED}px) + 24px)`,
+          transition: 'padding-left 0.38s cubic-bezier(0.22, 1, 0.36, 1)',
+        }}
+      >
         <ActiveComponent />
       </div>
 
       <style>{`
-        .admin-tabs-strip::-webkit-scrollbar { display: none; }
-        .admin-tabs-strip { scrollbar-width: none; }
+        /* On mobile the sidebar is a drawer, so the content doesn't need
+           to leave room for it. Hamburger lives at top:14px/left:14px so
+           we reserve 64px of top padding. */
+        @media (max-width: 640px) {
+          .admin-content {
+            padding-left: 16px !important;
+            padding-right: 16px !important;
+            padding-top: 64px;
+          }
+        }
       `}</style>
     </div>
   )
